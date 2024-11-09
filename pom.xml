@@ -14,6 +14,7 @@
     </parent>
 
     <properties>
+        <exec.mainClass>com.jcondotta.BankAccountApplication</exec.mainClass>
         <packaging>jar</packaging>
         <jdk.version>17</jdk.version>
         <release.version>17</release.version>
@@ -21,10 +22,6 @@
         <micronaut.runtime>lambda</micronaut.runtime>
         <skipUnitTests>false</skipUnitTests>
 
-        <sonar.projectKey>jcondotta_bank-account-management</sonar.projectKey>
-        <sonar.organization>jcondotta</sonar.organization>
-        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-        <sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
 <!--        <exec.mainClass>io.micronaut.function.aws.runtime.MicronautLambdaRuntime</exec.mainClass>-->
 <!--        <micronaut.aot.enabled>false</micronaut.aot.enabled>-->
 <!--        <micronaut.aot.packageName>com.jcondotta.aot.generated</micronaut.aot.packageName>-->
@@ -58,7 +55,7 @@
         <dependency>
             <groupId>io.micronaut</groupId>
             <artifactId>micronaut-jackson-databind</artifactId>
-            <version>${micronaut.version}</version>
+            <version>4.6.5</version>
         </dependency>
         <dependency>
             <groupId>io.micronaut.aws</groupId>
@@ -215,21 +212,6 @@
                 </executions>
             </plugin>
 
-
-
-
-
-<!--            <plugin>-->
-<!--                <groupId>io.micronaut.maven</groupId>-->
-<!--                <artifactId>micronaut-maven-plugin</artifactId>-->
-<!--                <configuration>-->
-<!--                    <configFile>aot-${packaging}.properties</configFile>-->
-<!--                </configuration>-->
-<!--            </plugin>-->
-<!--            <plugin>-->
-<!--                <groupId>org.apache.maven.plugins</groupId>-->
-<!--                <artifactId>maven-enforcer-plugin</artifactId>-->
-<!--            </plugin>-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -256,44 +238,17 @@
                                 </exclusion>
                             </exclusions>
                         </path>
-<!--                        <path>-->
-<!--                            <groupId>io.micronaut</groupId>-->
-<!--                            <artifactId>micronaut-http-validation</artifactId>-->
-<!--                            <version>${micronaut.core.version}</version>-->
-<!--                        </path>-->
-<!--                        <path>-->
-<!--                            <groupId>io.micronaut.openapi</groupId>-->
-<!--                            <artifactId>micronaut-openapi</artifactId>-->
-<!--                            <version>${micronaut.openapi.version}</version>-->
-<!--                            <exclusions>-->
-<!--                                <exclusion>-->
-<!--                                    <groupId>io.micronaut</groupId>-->
-<!--                                    <artifactId>micronaut-inject</artifactId>-->
-<!--                                </exclusion>-->
-<!--                            </exclusions>-->
-<!--                        </path>-->
-<!--                        <path>-->
-<!--                            <groupId>io.micronaut.serde</groupId>-->
-<!--                            <artifactId>micronaut-serde-processor</artifactId>-->
-<!--                            <version>${micronaut.serialization.version}</version>-->
-<!--                            <exclusions>-->
-<!--                                <exclusion>-->
-<!--                                    <groupId>io.micronaut</groupId>-->
-<!--                                    <artifactId>micronaut-inject</artifactId>-->
-<!--                                </exclusion>-->
-<!--                            </exclusions>-->
-<!--                        </path>-->
-<!--                        <path>-->
-<!--                            <groupId>io.micronaut.validation</groupId>-->
-<!--                            <artifactId>micronaut-validation-processor</artifactId>-->
-<!--                            <version>${micronaut.validation.version}</version>-->
-<!--                            <exclusions>-->
-<!--                                <exclusion>-->
-<!--                                    <groupId>io.micronaut</groupId>-->
-<!--                                    <artifactId>micronaut-inject</artifactId>-->
-<!--                                </exclusion>-->
-<!--                            </exclusions>-->
-<!--                        </path>-->
+                        <path>
+                            <groupId>io.micronaut.openapi</groupId>
+                            <artifactId>micronaut-openapi</artifactId>
+                            <version>${micronaut.openapi.version}</version>
+                            <exclusions>
+                                <exclusion>
+                                    <groupId>io.micronaut</groupId>
+                                    <artifactId>micronaut-inject</artifactId>
+                                </exclusion>
+                            </exclusions>
+                        </path>
                     </annotationProcessorPaths>
                     <compilerArgs>
                         <arg>-Amicronaut.processing.group=com.jcondotta</arg>

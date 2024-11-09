@@ -1,0 +1,11 @@
+micronaut:
+
+aws:
+  access-key-id: 'test'
+  secret-key: 'test'
+  region: 'us-east-1'
+  dynamodb:
+    endpoint: 'http://localhost:4566'
+    tables:
+      bank-accounts:
+        table-name: 'bank-accounts-localstack'

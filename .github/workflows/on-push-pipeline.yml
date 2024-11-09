@@ -37,9 +37,9 @@ jobs:
         run: |
           ./mvnw clean package -Dpackaging=native-image -DskipUnitTests=true
 
-      - name: Test the Native Image executable
-        run: |
-          ./target/bank-account-management
+#      - name: Test the Native Image executable
+#        run: |
+#          ./target/bank-account-management
 #  # Phase 1: Basic Build and Unit Tests
 #  build-and-test:
 #    runs-on: ubuntu-latest

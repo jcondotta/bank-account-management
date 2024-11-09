@@ -35,7 +35,7 @@ jobs:
 
       - name: Build project using GraalVM Native Image
         run: |
-          ./mvnw clean package -Pnative
+          ./mvnw clean package -Dpackaging=native-image -DskipUnitTests=true
 
       - name: Test the Native Image executable
         run: |

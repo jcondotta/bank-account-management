@@ -20,6 +20,11 @@
         <micronaut.version>4.6.3</micronaut.version>
         <micronaut.runtime>lambda</micronaut.runtime>
         <skipUnitTests>false</skipUnitTests>
+
+        <sonar.projectKey>jcondotta_bank-account-management</sonar.projectKey>
+        <sonar.organization>jcondotta</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
 <!--        <exec.mainClass>io.micronaut.function.aws.runtime.MicronautLambdaRuntime</exec.mainClass>-->
 <!--        <micronaut.aot.enabled>false</micronaut.aot.enabled>-->
 <!--        <micronaut.aot.packageName>com.jcondotta.aot.generated</micronaut.aot.packageName>-->

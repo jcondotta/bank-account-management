@@ -1,0 +1,13 @@
+micronaut:
+  server:
+    port: 8190
+
+aws:
+  access-key-id: 'test'
+  secret-key: 'test'
+  region: 'us-east-1'
+  dynamodb:
+    endpoint: ${AWS_DYNAMODB_ENDPOINT}
+    tables:
+      bank-accounts:
+        table-name: 'bank-account'

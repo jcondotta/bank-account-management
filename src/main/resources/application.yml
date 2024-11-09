@@ -1,0 +1,22 @@
+micronaut:
+  server:
+    port: 8090
+  openapi:
+    filename: bank-accounts-swagger-spec
+  router:
+    static-resources:
+      swagger:
+        paths: classpath:META-INF/swagger
+        mapping: /swagger/**
+      swagger-ui:
+        paths: classpath:META-INF/swagger/views/swagger-ui
+        mapping: /swagger-ui/**
+
+aws:
+  access-key-id: ${AWS_ACCESS_KEY_ID}
+  secret-key: ${AWS_SECRET_ACCESS_KEY}
+  region: ${AWS_DEFAULT_REGION}
+  dynamodb:
+    tables:
+      bank-accounts:
+        table-name: ${AWS_DYNAMODB_BANK_ACCOUNTS_TABLE_NAME}

@@ -39,7 +39,7 @@ jobs:
 
       - name: Test the Native Image executable
         run: |
-          ./target/bank-account-recipients
+          ./target/bank-account-management
 #  # Phase 1: Basic Build and Unit Tests
 #  build-and-test:
 #    runs-on: ubuntu-latest

@@ -65,16 +65,14 @@ public class CreateBankAccountController {
 
         BankAccountDTO bankAccountDTO = createBankAccountService.create(createBankAccountRequest);
 
-        LOGGER.info("Bank account created with ID: {}", bankAccountDTO.getBankAccountId());
-
         if (bankAccountDTO instanceof ExistentBankAccountDTO) {
             LOGGER.info("[BankAccountId={}] Returning existing bank account", bankAccountDTO.getBankAccountId());
 
             return HttpResponse.ok(bankAccountDTO);
         }
         else {
+            LOGGER.info("Bank account created with ID: {}", bankAccountDTO.getBankAccountId());
             return HttpResponse.created(bankAccountDTO, BankAccountURIBuilder.bankAccountURI(bankAccountDTO.getBankAccountId()));
         }
-
     }
 }

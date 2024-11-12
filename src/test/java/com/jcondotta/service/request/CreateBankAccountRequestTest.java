@@ -27,6 +27,7 @@ class CreateBankAccountRequestTest {
         var addBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
 
         var constraintViolations = VALIDATOR.validate(addBankAccountRequest);
+
         assertThat(constraintViolations).isEmpty();
         assertThat(addBankAccountRequest.accountHolder()).isEqualTo(accountHolderRequest);
     }

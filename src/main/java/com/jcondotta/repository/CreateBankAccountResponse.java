@@ -9,6 +9,7 @@ public record CreateBankAccountResponse(BankAccountDTO bankAccountDTO, boolean i
     }
 
     public static class Builder {
+
         private final BankAccountDTO bankAccountDTO;
         private boolean isIdempotent = false;
 

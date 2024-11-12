@@ -9,7 +9,6 @@ import com.jcondotta.helper.TestAccountHolderRequest;
 import com.jcondotta.repository.CreateBankAccountRepository;
 import com.jcondotta.repository.CreateBankAccountResponse;
 import com.jcondotta.service.bank_account.CreateBankAccountService;
-import com.jcondotta.service.dto.BankAccountDTO;
 import com.jcondotta.service.request.AccountHolderRequest;
 import com.jcondotta.service.request.CreateBankAccountRequest;
 import jakarta.validation.ConstraintViolationException;
@@ -46,9 +45,6 @@ class CreateBankAccountServiceTest {
     @Mock
     private CreateBankAccountResponse addBankAccountResponse;
 
-    @Mock
-    private BankAccountDTO bankAccountDTO;
-
     private CreateBankAccountService createBankAccountService;
 
     @BeforeEach
@@ -61,14 +57,11 @@ class CreateBankAccountServiceTest {
         var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, DATE_OF_BIRTH_JEFFERSON, PASSPORT_NUMBER_JEFFERSON);
         var addBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
 
-        when(createBankAccountRepository.create(any())).thenReturn(addBankAccountResponse);
-        when(addBankAccountResponse.isIdempotent()).thenReturn(false);
-        when(addBankAccountResponse.bankAccountDTO()).thenReturn(bankAccountDTO);
+        when(createBankAccountRepository.create(any(), any())).thenReturn(addBankAccountResponse);
 
-        var bankAccountDTO = createBankAccountService.create(addBankAccountRequest);
-        assertThat(bankAccountDTO).isExactlyInstanceOf(BankAccountDTO.class);
+        createBankAccountService.create(addBankAccountRequest);
 
-        verify(createBankAccountRepository).create(any());
+        verify(createBankAccountRepository).create(any(), any());
         verifyNoMoreInteractions(createBankAccountRepository);
     }
 

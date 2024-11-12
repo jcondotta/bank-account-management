@@ -1,6 +1,7 @@
 package com.jcondotta.service.bank_account;
 
 import com.jcondotta.domain.AccountHolder;
+import com.jcondotta.domain.AccountHolderType;
 import com.jcondotta.domain.BankAccount;
 import com.jcondotta.repository.CreateBankAccountRepository;
 import com.jcondotta.service.dto.BankAccountDTO;
@@ -12,6 +13,7 @@ import jakarta.validation.Validator;
 import net.datafaker.Faker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
@@ -35,48 +37,49 @@ public class CreateBankAccountService {
     }
 
     public BankAccountDTO create(CreateBankAccountRequest createBankAccountRequest) {
-        LOGGER.info("Attempting to create a new bank account.");
+        LOGGER.debug("Starting the creation process for a new bank account and its primary account holder.");
 
-        validateRequest(createBankAccountRequest);
+        try {
+            var constraintViolations = validator.validate(createBankAccountRequest);
+            if (!constraintViolations.isEmpty()) {
+                LOGGER.warn("Validation errors: {}", constraintViolations.stream()
+                        .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
+                        .collect(Collectors.joining(", ")));
 
-        var createBankAccountResponse = createBankAccountRepository.create(() -> buildBankAccount(createBankAccountRequest));
-        var bankAccountDTO = createBankAccountResponse.bankAccountDTO();
+                throw new ConstraintViolationException(constraintViolations);
+            }
 
-        if (createBankAccountResponse.isIdempotent()) {
-            LOGGER.debug("[BankAccountId={}] Idempotent request processed; bank account already exists", bankAccountDTO.getBankAccountId());
+            var bankAccount = buildBankAccount();
+            var accountHolder = buildPrimaryAccountHolder(bankAccount.getBankAccountId(), createBankAccountRequest);
+
+            MDC.put("bankAccountId", bankAccount.getBankAccountId().toString());
+            MDC.put("accountHolderId", accountHolder.getAccountHolderId().toString());
+            MDC.put("accountHolderName", accountHolder.getAccountHolderName());
+
+            var createBankAccountResponse = createBankAccountRepository.create(bankAccount, accountHolder);
+
+            var bankAccountDTO = createBankAccountResponse.bankAccountDTO();
+
+            return bankAccountDTO;
         }
-        else {
-            LOGGER.info("[BankAccountId={}] Bank account successfully created", bankAccountDTO.getBankAccountId());
-            // Uncomment to publish message if needed
-            // topicHandler.publishMessage(new BankAccountDTO(addBankAccountResponse.bankAccount()));
+        finally {
+            MDC.clear();
         }
-
-        return bankAccountDTO;
     }
 
-    private void validateRequest(CreateBankAccountRequest createBankAccountRequest) {
-        var constraintViolations = validator.validate(createBankAccountRequest);
-        if (!constraintViolations.isEmpty()) {
-            LOGGER.warn("Validation errors: {}", constraintViolations.stream()
-                            .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
-                            .collect(Collectors.joining(", "))
-            );
-            throw new ConstraintViolationException(constraintViolations);
-        }
-    }
-
-    private BankAccount buildBankAccount(CreateBankAccountRequest createBankAccountRequest) {
-        var accountHolder = new AccountHolder(
+    private AccountHolder buildPrimaryAccountHolder(UUID bankAccountId, CreateBankAccountRequest createBankAccountRequest) {
+        return new AccountHolder(
+                bankAccountId,
                 UUID.randomUUID(),
                 createBankAccountRequest.accountHolder().accountHolderName(),
                 createBankAccountRequest.accountHolder().passportNumber(),
-                createBankAccountRequest.accountHolder().dateOfBirth()
+                createBankAccountRequest.accountHolder().dateOfBirth(),
+                AccountHolderType.PRIMARY
         );
+    }
 
-        return new BankAccount(
-                UUID.randomUUID(),
-                accountHolder,
-                new Faker().finance().iban(),
-                LocalDateTime.now(currentInstant));
+    private BankAccount buildBankAccount() {
+        var generatedIban = new Faker().finance().iban();
+        return new BankAccount(UUID.randomUUID(), generatedIban, LocalDateTime.now(currentInstant));
     }
 }

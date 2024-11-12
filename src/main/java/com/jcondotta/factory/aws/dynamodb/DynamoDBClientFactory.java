@@ -22,7 +22,7 @@ public class DynamoDBClientFactory {
 
     @Singleton
     @Replaces(DynamoDbClient.class)
-    @Requires(property = "aws.dynamodb.endpoint", pattern = "^$")
+    @Requires(missingProperty = "aws.dynamodb.endpoint")
     public DynamoDbClient dynamoDbClient(Region region){
         var environmentVariableCredentialsProvider = EnvironmentVariableCredentialsProvider.create();
         var awsCredentials = environmentVariableCredentialsProvider.resolveCredentials();
@@ -37,7 +37,7 @@ public class DynamoDBClientFactory {
 
     @Singleton
     @Replaces(DynamoDbClient.class)
-    @Requires(property = "aws.dynamodb.endpoint", pattern = "(.|\\s)*\\S(.|\\s)*")
+    @Requires(property = "aws.dynamodb.endpoint")
     public DynamoDbClient dynamoDbClientEndpointOverridden(AwsCredentials awsCredentials, Region region, @Value("${aws.dynamodb.endpoint}") String dynamoDbEndpoint){
         LOGGER.info("Building DynamoDbClient with params: awsCredentials: {}, region: {} and endpoint: {}", awsCredentials, region, dynamoDbEndpoint);
 

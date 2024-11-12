@@ -13,16 +13,16 @@ env:
 
 jobs:
   graalvm-build:
-    name: GraalVM 17 Build
+    name: GraalVM 21 Build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup GraalVM 17
+      - name: Setup GraalVM 21
         uses: graalvm/setup-graalvm@v1
         with:
-          java-version: '17'
+          java-version: '21'
           distribution: 'graalvm'
           components: 'native-image'
 
@@ -35,7 +35,7 @@ jobs:
 
       - name: Build project using GraalVM Native Image
         run: |
-          ./mvnw clean package -Dpackaging=native-image -DskipUnitTests=true
+          ./mvnw clean package -Dpackaging=docker-native -DskipUnitTests=true
 
 #      - name: Test the Native Image executable
 #        run: |

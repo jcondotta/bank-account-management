@@ -9,6 +9,7 @@ on:
       - main
 
 env:
+  GRAALVM_ARCH: aarch64
   LOCALSTACK_VERSION: "3.7.0"
 
 jobs:
@@ -25,6 +26,7 @@ jobs:
           java-version: '21'
           distribution: 'graalvm'
           components: 'native-image'
+          architecture: ${{ env.GRAALVM_ARCH }}
 
       - name: Verify GraalVM setup
         run: |

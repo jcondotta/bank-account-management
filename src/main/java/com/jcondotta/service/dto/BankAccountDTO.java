@@ -1,7 +1,7 @@
 package com.jcondotta.service.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.jcondotta.domain.AccountHolder;
 import com.jcondotta.domain.BankAccount;
 import io.micronaut.serde.annotation.Serdeable;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -9,6 +9,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
@@ -24,9 +25,9 @@ public class BankAccountDTO {
     private UUID bankAccountId;
 
     @NotNull
-    @Schema(description = "Main account holder associated with this bank account.",
+    @Schema(description = "Account holders associated with this bank account.",
             requiredMode = RequiredMode.REQUIRED)
-    private AccountHolderDTO accountHolder;
+    private List<AccountHolderDTO> accountHolders;
 
     @NotBlank
     @Schema(description = "International Bank Account Number (IBAN) for the bank account.",
@@ -42,30 +43,25 @@ public class BankAccountDTO {
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
     private LocalDateTime dateOfOpening;
 
-    public BankAccountDTO(
-            @JsonProperty("bankAccountId") UUID bankAccountId,
-            @JsonProperty("accountHolder") AccountHolderDTO accountHolder,
-            @JsonProperty("iban") String iban,
-            @JsonProperty("dateOfOpening") LocalDateTime dateOfOpening) {
+    public BankAccountDTO() {}
+
+    public BankAccountDTO(UUID bankAccountId, List<AccountHolderDTO> accountHolders, String iban, LocalDateTime dateOfOpening) {
         this.bankAccountId = bankAccountId;
-        this.accountHolder = accountHolder;
+        this.accountHolders = accountHolders;
         this.iban = iban;
         this.dateOfOpening = dateOfOpening;
     }
 
-    public BankAccountDTO(BankAccount bankAccount) {
-        this(bankAccount.getBankAccountId(),
-            new AccountHolderDTO(bankAccount.getAccountHolderName(), bankAccount.getDateOfBirth(), bankAccount.getPassportNumber()),
-            bankAccount.getIban(),
-            bankAccount.getDateOfOpening());
+    public BankAccountDTO(BankAccount bankAccount, AccountHolder accountHolder) {
+        this(bankAccount.getBankAccountId(), List.of(new AccountHolderDTO(accountHolder)), bankAccount.getIban(), bankAccount.getDateOfOpening());
     }
 
     public UUID getBankAccountId() {
         return bankAccountId;
     }
 
-    public AccountHolderDTO getAccountHolder() {
-        return accountHolder;
+    public List<AccountHolderDTO> getAccountHolders() {
+        return accountHolders;
     }
 
     public String getIban() {

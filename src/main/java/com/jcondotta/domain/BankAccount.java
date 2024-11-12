@@ -1,11 +1,8 @@
 package com.jcondotta.domain;
 
 import io.micronaut.serde.annotation.Serdeable;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbAttribute;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -13,28 +10,57 @@ import java.util.UUID;
 @DynamoDbBean
 public class BankAccount {
 
+    public static final String PARTITION_KEY_TEMPLATE = "BANK_ACCOUNT#%s";
+    public static final String SORT_KEY_TEMPLATE = "BANK_ACCOUNT#%s";
+    public static final String ENTITY_TYPE = "BankAccount";
+
+    private String pk;
+    private String sk;
+    private String entityType;
     private UUID bankAccountId;
-
-    private String accountHolderName;
-    private String passportNumber;
-    private LocalDate dateOfBirth;
-
     private String iban;
     private LocalDateTime dateOfOpening;
 
-
     public BankAccount() {}
 
-    public BankAccount(UUID bankAccountId, AccountHolder accountHolder, String iban, LocalDateTime dateOfOpening) {
+    public BankAccount(UUID bankAccountId, String iban, LocalDateTime dateOfOpening) {
+        this.pk = PARTITION_KEY_TEMPLATE.formatted(bankAccountId);
+        this.sk = SORT_KEY_TEMPLATE.formatted(bankAccountId);
+        this.entityType = ENTITY_TYPE;
         this.bankAccountId = bankAccountId;
-        this.accountHolderName = accountHolder.getAccountHolderName();
-        this.dateOfBirth = accountHolder.getDateOfBirth();
-        this.passportNumber = accountHolder.getPassportNumber();
         this.iban = iban;
         this.dateOfOpening = dateOfOpening;
     }
 
     @DynamoDbPartitionKey
+    @DynamoDbAttribute("PK")
+    public String getPk() {
+        return pk;
+    }
+
+    public void setPk(String pk) {
+        this.pk = pk;
+    }
+
+    @DynamoDbSortKey
+    @DynamoDbAttribute("SK")
+    public String getSk() {
+        return sk;
+    }
+
+    public void setSk(String sk) {
+        this.sk = sk;
+    }
+
+    @DynamoDbAttribute("entityType")
+    public String getEntityType() {
+        return entityType;
+    }
+
+    public void setEntityType(String entityType) {
+        this.entityType = entityType;
+    }
+
     @DynamoDbAttribute("bankAccountId")
     public UUID getBankAccountId() {
         return bankAccountId;
@@ -42,33 +68,6 @@ public class BankAccount {
 
     public void setBankAccountId(UUID bankAccountId) {
         this.bankAccountId = bankAccountId;
-    }
-
-    @DynamoDbAttribute("accountHolderName")
-    public String getAccountHolderName() {
-        return accountHolderName;
-    }
-
-    public void setAccountHolderName(String accountHolderName) {
-        this.accountHolderName = accountHolderName;
-    }
-
-    @DynamoDbAttribute("dateOfBirth")
-    public LocalDate getDateOfBirth() {
-        return dateOfBirth;
-    }
-
-    public void setDateOfBirth(LocalDate dateOfBirth) {
-        this.dateOfBirth = dateOfBirth;
-    }
-
-    @DynamoDbAttribute("passportNumber")
-    public String getPassportNumber() {
-        return passportNumber;
-    }
-
-    public void setPassportNumber(String passportNumber) {
-        this.passportNumber = passportNumber;
     }
 
     @DynamoDbAttribute("iban")

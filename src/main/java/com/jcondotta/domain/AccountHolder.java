@@ -1,8 +1,7 @@
 package com.jcondotta.domain;
 
 import io.micronaut.serde.annotation.Serdeable;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbAttribute;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.*;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -11,18 +10,61 @@ import java.util.UUID;
 @DynamoDbBean
 public class AccountHolder {
 
+    public static final String PARTITION_KEY_TEMPLATE = "BANK_ACCOUNT#%s";
+    public static final String SORT_KEY_TEMPLATE = "ACCOUNT_HOLDER#%s";
+    public static final String ENTITY_TYPE = "BankAccount";
+
+    private String pk;
+    private String sk;
+    private String entityType;
     private UUID accountHolderId;
+    private UUID bankAccountId;
     private String accountHolderName;
     private String passportNumber;
     private LocalDate dateOfBirth;
+    private AccountHolderType accountHolderType;
 
     public AccountHolder() {}
 
-    public AccountHolder(UUID accountHolderId, String accountHolderName, String passportNumber, LocalDate dateOfBirth) {
+    public AccountHolder(UUID bankAccountId, UUID accountHolderId, String accountHolderName, String passportNumber, LocalDate dateOfBirth, AccountHolderType accountHolderType) {
+        this.pk = PARTITION_KEY_TEMPLATE.formatted(bankAccountId);
+        this.sk = SORT_KEY_TEMPLATE.formatted(accountHolderId);
+        this.entityType = ENTITY_TYPE;
+        this.bankAccountId = bankAccountId;
         this.accountHolderId = accountHolderId;
         this.accountHolderName = accountHolderName;
         this.passportNumber = passportNumber;
         this.dateOfBirth = dateOfBirth;
+        this.accountHolderType = accountHolderType;
+    }
+
+    @DynamoDbPartitionKey
+    @DynamoDbAttribute("PK")
+    public String getPk() {
+        return pk;
+    }
+
+    public void setPk(String pk) {
+        this.pk = pk;
+    }
+
+    @DynamoDbSortKey
+    @DynamoDbAttribute("SK")
+    public String getSk() {
+        return sk;
+    }
+
+    public void setSk(String sk) {
+        this.sk = sk;
+    }
+
+    @DynamoDbAttribute("entityType")
+    public String getEntityType() {
+        return entityType;
+    }
+
+    public void setEntityType(String entityType) {
+        this.entityType = entityType;
     }
 
     @DynamoDbAttribute("accountHolderId")
@@ -32,6 +74,15 @@ public class AccountHolder {
 
     public void setAccountHolderId(UUID accountHolderId) {
         this.accountHolderId = accountHolderId;
+    }
+
+    @DynamoDbAttribute("bankAccountId")
+    public UUID getBankAccountId() {
+        return bankAccountId;
+    }
+
+    public void setBankAccountId(UUID bankAccountId) {
+        this.bankAccountId = bankAccountId;
     }
 
     @DynamoDbAttribute("accountHolderName")
@@ -59,5 +110,14 @@ public class AccountHolder {
 
     public void setDateOfBirth(LocalDate dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
+    }
+
+    @DynamoDbAttribute("accountHolderType")
+    public AccountHolderType getAccountHolderType() {
+        return accountHolderType;
+    }
+
+    public void setAccountHolderType(AccountHolderType accountHolderType) {
+        this.accountHolderType = accountHolderType;
     }
 }

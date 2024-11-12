@@ -9,5 +9,5 @@ aws:
   dynamodb:
     endpoint: ${AWS_DYNAMODB_ENDPOINT}
     tables:
-      bank-accounts:
-        table-name: 'bank-account'
+      banking-entities:
+        table-name: 'bank-entities-test'

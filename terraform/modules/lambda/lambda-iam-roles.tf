@@ -41,12 +41,19 @@ resource "aws_iam_role_policy" "lambda_policy" {
             "dynamodb:PutItem",
             "dynamodb:DeleteItem",
             "dynamodb:GetItem",
-            "dynamodb:Query",
-            "dynamodb:TransactWriteItems"
+            "dynamodb:Query"
           ],
           "Effect" : "Allow",
           "Resource" : var.dynamodb_banking_entities_table_arn
         },
+        {
+          Action   = [
+            "sns:ListTopics",      # Temporary permission to allow listing topics if needed
+            "sns:Publish"
+          ],
+          Effect   = "Allow",
+          Resource = "arn:aws:sns:us-east-1:470315484552:*" # Change to specific topic ARN if possible to reduce scope
+        }
       ]
     }
   )

@@ -20,3 +20,7 @@ aws:
     tables:
       banking-entities:
         table-name: ${AWS_DYNAMODB_BANKING_ENTITIES_TABLE_NAME}
+  sns:
+    topics:
+      bank-account-created:
+        topic-name: ${AWS_SNS_BANK_ACCOUNT_CREATED_TOPIC_NAME}

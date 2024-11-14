@@ -1,9 +1,13 @@
 package com.jcondotta.web.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.jcondotta.argument_provider.BlankValuesArgumentProvider;
 import com.jcondotta.argument_provider.InvalidPassportNumberArgumentProvider;
+import com.jcondotta.configuration.BankAccountCreatedSNSTopicConfig;
+import com.jcondotta.configuration.BankAccountCreatedSQSQueueConfig;
 import com.jcondotta.container.LocalStackTestContainer;
-import com.jcondotta.domain.BankingEntity;
+import com.jcondotta.event.SNSTopicArnFinder;
 import com.jcondotta.helper.TestAccountHolderRequest;
 import com.jcondotta.service.dto.AccountHolderDTO;
 import com.jcondotta.service.dto.BankAccountDTO;
@@ -24,14 +28,18 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
-import software.amazon.awssdk.enhanced.dynamodb.Key;
+import software.amazon.awssdk.services.sns.SnsClient;
+import software.amazon.awssdk.services.sns.model.SubscribeResponse;
+import software.amazon.awssdk.services.sqs.SqsClient;
+import software.amazon.awssdk.services.sqs.model.GetQueueAttributesRequest;
+import software.amazon.awssdk.services.sqs.model.QueueAttributeName;
 
 import java.io.IOException;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import static io.restassured.RestAssured.given;
@@ -59,7 +67,20 @@ class CreateBankAccountControllerIT implements LocalStackTestContainer {
     RequestSpecification requestSpecification;
 
     @Inject
-    DynamoDbTable<BankingEntity> bankingEntityDynamoDbTable;
+    SnsClient snsClient;
+
+    @Inject
+    BankAccountCreatedSNSTopicConfig bankAccountCreatedSNSTopicConfig;
+
+    @Inject
+    SNSTopicArnFinder snsTopicArnFinder;
+
+    @Inject
+    SqsClient sqsClient;
+
+    @Inject
+    BankAccountCreatedSQSQueueConfig bankAccountCreatedSQSQueueConfig;
+    String bankAccountCreatedSQSQueueURL;
 
     @Inject
     @Named("exceptionMessageSource")
@@ -74,10 +95,27 @@ class CreateBankAccountControllerIT implements LocalStackTestContainer {
         this.requestSpecification = requestSpecification
                 .basePath(BankAccountURIBuilder.BASE_PATH_API_V1_MAPPING)
                 .contentType(ContentType.JSON);
+
+        this.bankAccountCreatedSQSQueueURL = sqsClient.getQueueUrl(builder -> builder
+                .queueName(bankAccountCreatedSQSQueueConfig.queueName()))
+                .queueUrl();
+
+        String queueArn = sqsClient.getQueueAttributes(GetQueueAttributesRequest.builder()
+                        .queueUrl(bankAccountCreatedSQSQueueURL)
+                        .attributeNames(QueueAttributeName.QUEUE_ARN)
+                        .build())
+                .attributes()
+                .get(QueueAttributeName.QUEUE_ARN);
+
+        Optional<SubscribeResponse> sqs = snsTopicArnFinder.findTopicARN(bankAccountCreatedSNSTopicConfig.topicName())
+                .map(topicARN -> snsClient.subscribe(builder -> builder
+                        .topicArn(topicARN)
+                        .protocol("sqs")
+                        .endpoint(queueArn)));
     }
 
     @Test
-    void shouldReturn201Created_whenRequestIsValid() throws IOException {
+    void shouldReturn201CreatedWithValidLocationHeader_whenRequestIsValid() throws IOException {
         var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, DATE_OF_BIRTH_JEFFERSON, PASSPORT_NUMBER_JEFFERSON);
         var addBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
 
@@ -91,16 +129,47 @@ class CreateBankAccountControllerIT implements LocalStackTestContainer {
                 .extract()
                     .response();
 
-        var bankAccountDTO = response.as(BankAccountDTO.class);
+        var createdBankAccountDTO = response.as(BankAccountDTO.class);
 
-        var expectedLocation = BankAccountURIBuilder.bankAccountURI(bankAccountDTO.getBankAccountId());
+        var expectedLocation = BankAccountURIBuilder.bankAccountURI(createdBankAccountDTO.getBankAccountId());
         assertThat(response.header("location")).isEqualTo(expectedLocation.getRawPath());
 
+        var fetchedBankAccountDTO = given()
+            .spec(requestSpecification.basePath(expectedLocation.getRawPath()))
+        .when()
+            .get()
+        .then()
+            .statusCode(HttpStatus.OK.getCode())
+                .extract()
+                    .response()
+                        .as(BankAccountDTO.class);
+
+        assertThat(createdBankAccountDTO)
+                .usingRecursiveComparison()
+                .isEqualTo(fetchedBankAccountDTO);
+    }
+
+    @Test
+    void shouldReturn201CreatedWithValidBody_whenRequestIsValid() throws IOException {
+        var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, DATE_OF_BIRTH_JEFFERSON, PASSPORT_NUMBER_JEFFERSON);
+        var addBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
+
+        var createdBankAccountDTO = given()
+            .spec(requestSpecification)
+                .body(jsonMapper.writeValueAsString(addBankAccountRequest))
+        .when()
+            .post()
+        .then()
+            .statusCode(HttpStatus.CREATED.getCode())
+                .extract()
+                    .response()
+                        .as(BankAccountDTO.class);
+
         assertAll(
-                () -> assertThat(bankAccountDTO.getBankAccountId()).isNotNull(),
-                () -> assertThat(bankAccountDTO.getIban()).isNotBlank(),
-                () -> assertThat(bankAccountDTO.getDateOfOpening()).isEqualTo(LocalDateTime.now(testClockUTC)),
-                () -> assertThat(bankAccountDTO.getAccountHolders())
+                () -> assertThat(createdBankAccountDTO.getBankAccountId()).isNotNull(),
+                () -> assertThat(createdBankAccountDTO.getIban()).isNotBlank(),
+                () -> assertThat(createdBankAccountDTO.getDateOfOpening()).isEqualTo(LocalDateTime.now(testClockUTC)),
+                () -> assertThat(createdBankAccountDTO.getAccountHolders())
                         .hasSize(1)
                         .extracting(AccountHolderDTO::getAccountHolderName, AccountHolderDTO::getDateOfBirth, AccountHolderDTO::getPassportNumber)
                         .containsExactly(
@@ -108,19 +177,60 @@ class CreateBankAccountControllerIT implements LocalStackTestContainer {
                         )
         );
 
-        var bankAccount = bankingEntityDynamoDbTable.getItem(Key.builder()
-                .partitionValue(BankingEntity.BANK_ACCOUNT_PK_TEMPLATE.formatted(bankAccountDTO.getBankAccountId().toString()))
-                .sortValue(BankingEntity.BANK_ACCOUNT_SK_TEMPLATE.formatted(bankAccountDTO.getBankAccountId().toString()))
-                .build());
+        var fetchedBankAccountDTO = given()
+            .spec(requestSpecification.basePath(BankAccountURIBuilder.BANK_ACCOUNT_API_V1_MAPPING))
+                .pathParam("bank-account-id", createdBankAccountDTO.getBankAccountId())
+        .when()
+            .get()
+        .then()
+            .statusCode(HttpStatus.OK.getCode())
+                .extract()
+                    .response()
+                        .as(BankAccountDTO.class);
 
-        var accountHolder = bankingEntityDynamoDbTable.getItem(Key.builder()
-                .partitionValue(BankingEntity.ACCOUNT_HOLDER_PK_TEMPLATE.formatted(bankAccountDTO.getBankAccountId().toString()))
-                .sortValue(BankingEntity.ACCOUNT_HOLDER_SK_TEMPLATE.formatted(bankAccountDTO.getAccountHolders().get(0).getAccountHolderId().toString()))
-                .build());
-
-        assertThat(bankAccountDTO)
+        assertThat(createdBankAccountDTO)
                 .usingRecursiveComparison()
-                .isEqualTo(new BankAccountDTO(bankAccount, accountHolder));
+                .isEqualTo(fetchedBankAccountDTO);
+    }
+
+    @Test
+    void shouldReturn201CreatedWithBody2_whenRequestIsValid() throws IOException {
+        var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, DATE_OF_BIRTH_JEFFERSON, PASSPORT_NUMBER_JEFFERSON);
+        var addBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
+
+        var bankAccountDTO = given()
+            .spec(requestSpecification)
+                .body(jsonMapper.writeValueAsString(addBankAccountRequest))
+        .when()
+            .post()
+        .then()
+            .statusCode(HttpStatus.CREATED.getCode())
+                .extract()
+                    .response()
+                        .as(BankAccountDTO.class);
+
+        var messages = sqsClient.receiveMessage(builder ->
+                builder.queueUrl(bankAccountCreatedSQSQueueURL)
+                        .waitTimeSeconds(3)
+                        .maxNumberOfMessages(1)
+                        .build())
+                .messages();
+
+        //TODO find a better way to assert this..
+        assertThat(messages).hasSize(1)
+                .first()
+                .satisfies(message -> {
+                    ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+                    var envelopeNode = objectMapper.readTree(message.body());
+                    var actualMessage = envelopeNode.get("Message").asText();
+                    var sqsBankAccountDTO = objectMapper.readValue(actualMessage, BankAccountDTO.class);
+
+                    assertThat(actualMessage).isEqualTo(jsonMapper.writeValueAsString(bankAccountDTO));
+
+                    assertThat(bankAccountDTO)
+                        .usingRecursiveComparison()
+                        .isEqualTo(sqsBankAccountDTO);
+                });
     }
 
     @Test

@@ -7,3 +7,7 @@ aws:
     tables:
       banking-entities:
         table-name: 'banking-entities-localstack'
+  sns:
+    topics:
+      bank-account-created:
+        topic-name: 'bank-account-created-localstack'

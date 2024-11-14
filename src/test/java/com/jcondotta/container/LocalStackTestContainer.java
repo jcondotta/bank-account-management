@@ -20,7 +20,7 @@ public interface LocalStackTestContainer extends TestPropertyProvider {
     DockerImageName LOCALSTACK_IMAGE = DockerImageName.parse(LOCAL_STACK_IMAGE_NAME);
 
     LocalStackContainer LOCALSTACK_CONTAINER = new LocalStackContainer(LOCALSTACK_IMAGE)
-            .withServices(Service.DYNAMODB)
+            .withServices(Service.DYNAMODB, Service.SNS, Service.SQS)
             .withLogConsumer(outputFrame -> LOGGER.debug(outputFrame.getUtf8StringWithoutLineEnding()));
 
     @Override
@@ -44,7 +44,9 @@ public interface LocalStackTestContainer extends TestPropertyProvider {
                 Map.entry("AWS_ACCESS_KEY_ID", LOCALSTACK_CONTAINER.getAccessKey()),
                 Map.entry("AWS_SECRET_ACCESS_KEY", LOCALSTACK_CONTAINER.getSecretKey()),
                 Map.entry("AWS_DEFAULT_REGION", LOCALSTACK_CONTAINER.getRegion()),
-                Map.entry("AWS_DYNAMODB_ENDPOINT", LOCALSTACK_CONTAINER.getEndpointOverride(Service.DYNAMODB).toString())
+                Map.entry("AWS_DYNAMODB_ENDPOINT", LOCALSTACK_CONTAINER.getEndpointOverride(Service.DYNAMODB).toString()),
+                Map.entry("AWS_SNS_ENDPOINT", LOCALSTACK_CONTAINER.getEndpointOverride(Service.SNS).toString()),
+                Map.entry("AWS_SQS_ENDPOINT", LOCALSTACK_CONTAINER.getEndpointOverride(Service.SQS).toString())
         );
     }
 
@@ -55,6 +57,8 @@ public interface LocalStackTestContainer extends TestPropertyProvider {
                 String.format("  Secret Key       : %s%n", LOCALSTACK_CONTAINER.getSecretKey()) +
                 String.format("  Region           : %s%n", LOCALSTACK_CONTAINER.getRegion()) +
                 String.format("  DynamoDB Endpoint: %s%n", LOCALSTACK_CONTAINER.getEndpointOverride(Service.DYNAMODB)) +
+                String.format("  SNS Endpoint: %s%n", LOCALSTACK_CONTAINER.getEndpointOverride(Service.SNS)) +
+                String.format("  SQS Endpoint: %s%n", LOCALSTACK_CONTAINER.getEndpointOverride(Service.SQS)) +
                 "===========================================================\n");
     }
 }

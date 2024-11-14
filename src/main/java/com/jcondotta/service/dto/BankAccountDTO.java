@@ -60,6 +60,10 @@ public class BankAccountDTO {
         this(bankAccount.getBankAccountId(), List.of(new AccountHolderDTO(accountHolder)), bankAccount.getIban(), bankAccount.getDateOfOpening());
     }
 
+    public BankAccountDTO(BankingEntity bankAccount, List<BankingEntity> accountHolders) {
+        this(bankAccount.getBankAccountId(), accountHolders.stream().map(accountHolder -> new AccountHolderDTO(accountHolder)).toList(), bankAccount.getIban(), bankAccount.getDateOfOpening());
+    }
+
     public UUID getBankAccountId() {
         return bankAccountId;
     }

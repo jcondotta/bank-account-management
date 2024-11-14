@@ -2,6 +2,7 @@ package com.jcondotta.service.bank_account;
 
 import com.jcondotta.domain.AccountHolderType;
 import com.jcondotta.domain.BankingEntity;
+import com.jcondotta.event.BankAccountCreatedSNSTopicPublisher;
 import com.jcondotta.repository.CreateBankAccountRepository;
 import com.jcondotta.service.dto.BankAccountDTO;
 import com.jcondotta.service.request.CreateBankAccountRequest;
@@ -24,12 +25,15 @@ public class CreateBankAccountService {
     private static final Logger LOGGER = LoggerFactory.getLogger(CreateBankAccountService.class);
 
     private final CreateBankAccountRepository createBankAccountRepository;
+    private final BankAccountCreatedSNSTopicPublisher snsTopicPublisher;
     private final Clock currentInstant;
     private final Validator validator;
 
     @Inject
-    public CreateBankAccountService(CreateBankAccountRepository createBankAccountRepository, Clock currentClock, Validator validator) {
+    public CreateBankAccountService(CreateBankAccountRepository createBankAccountRepository, BankAccountCreatedSNSTopicPublisher snsTopicPublisher,
+                                    Clock currentClock, Validator validator) {
         this.createBankAccountRepository = createBankAccountRepository;
+        this.snsTopicPublisher = snsTopicPublisher;
         this.currentInstant = currentClock;
         this.validator = validator;
     }
@@ -50,6 +54,10 @@ public class CreateBankAccountService {
         var accountHolder = buildPrimaryAccountHolder(bankAccount.getBankAccountId(), createBankAccountRequest);
 
         var createBankAccountResponse = createBankAccountRepository.create(bankAccount, accountHolder);
+        var bankAccountDTO = createBankAccountResponse.bankAccountDTO();
+
+        snsTopicPublisher.publishMessage(bankAccountDTO);
+
         return createBankAccountResponse.bankAccountDTO();
     }
 

@@ -28,6 +28,16 @@ variable "dynamodb_banking_entities_table_name" {
   type        = string
 }
 
+variable "sns_bank_account_created_topic_name" {
+  description = "The name of the SNS bank account created topic the Lambda will interact with"
+  type        = string
+}
+
+variable "sns_bank_account_created_topic_arn" {
+  description = "The ARN of the SNS bank account created topic the Lambda will interact with"
+  type        = string
+}
+
 variable "lambda_function_name" {
   description = "The name of the recipients Lambda function"
   type        = string

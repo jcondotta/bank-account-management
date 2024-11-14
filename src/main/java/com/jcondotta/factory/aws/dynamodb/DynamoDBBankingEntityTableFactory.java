@@ -1,6 +1,6 @@
 package com.jcondotta.factory.aws.dynamodb;
 
-import com.jcondotta.configuration.BankingEntitiesTable;
+import com.jcondotta.configuration.BankingEntitiesDynamoDBTableConfig;
 import com.jcondotta.domain.AccountHolderType;
 import com.jcondotta.domain.BankingEntity;
 import com.jcondotta.domain.EntityType;
@@ -19,7 +19,7 @@ import java.util.UUID;
 public class DynamoDBBankingEntityTableFactory {
 
     @Singleton
-    public DynamoDbTable<BankingEntity> bankingEntityTable(DynamoDbEnhancedClient dynamoDbEnhancedClient, BankingEntitiesTable bankingEntitiesTable) {
+    public DynamoDbTable<BankingEntity> bankingEntityTable(DynamoDbEnhancedClient dynamoDbEnhancedClient, BankingEntitiesDynamoDBTableConfig bankingEntitiesDynamoDBTableConfig) {
         StaticTableSchema<BankingEntity> bankingEntitySchema = StaticTableSchema.builder(BankingEntity.class)
                 .newItemSupplier(BankingEntity::new)
                 .addAttribute(String.class, a -> a.name("partitionKey")
@@ -64,6 +64,6 @@ public class DynamoDBBankingEntityTableFactory {
                 .build())
             .build();
 
-        return dynamoDbEnhancedClient.table(bankingEntitiesTable.tableName(), bankingEntitySchema);
+        return dynamoDbEnhancedClient.table(bankingEntitiesDynamoDBTableConfig.tableName(), bankingEntitySchema);
     }
 }

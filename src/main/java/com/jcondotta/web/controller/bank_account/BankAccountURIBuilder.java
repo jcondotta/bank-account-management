@@ -10,10 +10,10 @@ import java.util.UUID;
 public interface BankAccountURIBuilder {
 
     String BASE_PATH_API_V1_MAPPING = "/api/v1/bank-accounts";
-    String BANK_ACCOUNTS_API_V1_MAPPING = BASE_PATH_API_V1_MAPPING + "/bank-accounts-id/{bank-accounts-id}";
+    String BANK_ACCOUNT_API_V1_MAPPING = BASE_PATH_API_V1_MAPPING + "/bank-account-id/{bank-account-id}";
 
     static URI bankAccountURI(@NotNull UUID bankAccountId) {
-        return UriBuilder.of(BANK_ACCOUNTS_API_V1_MAPPING)
-                .expand(Map.of("bank-accounts-id", bankAccountId.toString()));
+        return UriBuilder.of(BANK_ACCOUNT_API_V1_MAPPING)
+                .expand(Map.of("bank-account-id", bankAccountId.toString()));
     }
 }

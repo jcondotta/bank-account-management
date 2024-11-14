@@ -2,6 +2,10 @@ micronaut:
   server:
     port: 8190
 
+  jms:
+    sqs:
+      enabled: true
+
 aws:
   access-key-id: 'test'
   secret-key: 'test'
@@ -11,3 +15,14 @@ aws:
     tables:
       banking-entities:
         table-name: 'bank-entities-test'
+  sns:
+    endpoint: ${AWS_SNS_ENDPOINT}
+    topics:
+      bank-account-created:
+        topic-name: 'bank-account-created-test'
+  sqs:
+    endpoint: ${AWS_SQS_ENDPOINT}
+    queues:
+      bank-account-created:
+        queue-name: 'bank-account-created-test'
+

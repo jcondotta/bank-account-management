@@ -50,9 +50,7 @@ public class CreateBankAccountService {
         var accountHolder = buildPrimaryAccountHolder(bankAccount.getBankAccountId(), createBankAccountRequest);
 
         var createBankAccountResponse = createBankAccountRepository.create(bankAccount, accountHolder);
-        var bankAccountDTO = createBankAccountResponse.bankAccountDTO();
-
-        return bankAccountDTO;
+        return createBankAccountResponse.bankAccountDTO();
     }
 
     private BankingEntity buildPrimaryAccountHolder(UUID bankAccountId, CreateBankAccountRequest createBankAccountRequest) {

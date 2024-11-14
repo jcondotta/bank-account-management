@@ -47,7 +47,7 @@ public class BankAccountDTO {
 
     public BankAccountDTO(
             @JsonProperty("bankAccountId") UUID bankAccountId,
-            @JsonProperty("accountHolderS") List<AccountHolderDTO> accountHolders,
+            @JsonProperty("accountHolders") List<AccountHolderDTO> accountHolders,
             @JsonProperty("iban") String iban,
             @JsonProperty("dateOfOpening") LocalDateTime dateOfOpening) {
         this.bankAccountId = bankAccountId;

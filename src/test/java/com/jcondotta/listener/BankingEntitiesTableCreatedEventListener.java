@@ -1,6 +1,6 @@
 package com.jcondotta.listener;
 
-import com.jcondotta.domain.BankAccount;
+import com.jcondotta.domain.BankingEntity;
 import io.micronaut.context.event.BeanCreatedEvent;
 import io.micronaut.context.event.BeanCreatedEventListener;
 import io.micronaut.core.annotation.NonNull;
@@ -11,12 +11,12 @@ import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.services.dynamodb.model.ResourceNotFoundException;
 
 @Singleton
-public class DynamoDBTableBankAccountEventListener implements BeanCreatedEventListener<DynamoDbTable<BankAccount>> {
+public class BankingEntitiesTableCreatedEventListener implements BeanCreatedEventListener<DynamoDbTable<BankingEntity>> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DynamoDBTableBankAccountEventListener.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(BankingEntitiesTableCreatedEventListener.class);
 
     @Override
-    public DynamoDbTable<BankAccount> onCreated(@NonNull BeanCreatedEvent<DynamoDbTable<BankAccount>> event) {
+    public DynamoDbTable<BankingEntity> onCreated(@NonNull BeanCreatedEvent<DynamoDbTable<BankingEntity>> event) {
         var dynamoDBTable = event.getBean();
 
         try {

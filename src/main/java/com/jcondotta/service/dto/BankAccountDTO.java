@@ -1,8 +1,8 @@
 package com.jcondotta.service.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.jcondotta.domain.AccountHolder;
-import com.jcondotta.domain.BankAccount;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.jcondotta.domain.BankingEntity;
 import io.micronaut.serde.annotation.Serdeable;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -45,14 +45,18 @@ public class BankAccountDTO {
 
     public BankAccountDTO() {}
 
-    public BankAccountDTO(UUID bankAccountId, List<AccountHolderDTO> accountHolders, String iban, LocalDateTime dateOfOpening) {
+    public BankAccountDTO(
+            @JsonProperty("bankAccountId") UUID bankAccountId,
+            @JsonProperty("accountHolderS") List<AccountHolderDTO> accountHolders,
+            @JsonProperty("iban") String iban,
+            @JsonProperty("dateOfOpening") LocalDateTime dateOfOpening) {
         this.bankAccountId = bankAccountId;
         this.accountHolders = accountHolders;
         this.iban = iban;
         this.dateOfOpening = dateOfOpening;
     }
 
-    public BankAccountDTO(BankAccount bankAccount, AccountHolder accountHolder) {
+    public BankAccountDTO(BankingEntity bankAccount, BankingEntity accountHolder) {
         this(bankAccount.getBankAccountId(), List.of(new AccountHolderDTO(accountHolder)), bankAccount.getIban(), bankAccount.getDateOfOpening());
     }
 

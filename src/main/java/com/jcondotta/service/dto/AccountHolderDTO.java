@@ -2,9 +2,8 @@ package com.jcondotta.service.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.jcondotta.domain.AccountHolder;
 import com.jcondotta.domain.AccountHolderType;
-import com.jcondotta.domain.BankAccount;
+import com.jcondotta.domain.BankingEntity;
 import io.micronaut.serde.annotation.Serdeable;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -36,7 +35,6 @@ public class AccountHolderDTO {
     )
     private UUID bankAccountId;
 
-    @NotNull
     @NotBlank
     @Schema(
             description = "Name of the account holder associated with this bank account.",
@@ -86,7 +84,7 @@ public class AccountHolderDTO {
         this.accountHolderType = accountHolderType;
     }
 
-    public AccountHolderDTO(AccountHolder accountHolder) {
+    public AccountHolderDTO(BankingEntity accountHolder) {
         this(
                 accountHolder.getBankAccountId(),
                 accountHolder.getAccountHolderId(),
@@ -97,56 +95,44 @@ public class AccountHolderDTO {
         );
     }
 
-    @JsonProperty("accountHolderId")
     public UUID getAccountHolderId() {
         return accountHolderId;
     }
-
     public void setAccountHolderId(UUID accountHolderId) {
         this.accountHolderId = accountHolderId;
     }
 
-    @JsonProperty("bankAccountId")
     public UUID getBankAccountId() {
         return bankAccountId;
     }
-
     public void setBankAccountId(UUID bankAccountId) {
         this.bankAccountId = bankAccountId;
     }
 
-    @JsonProperty("accountHolderName")
     public String getAccountHolderName() {
         return accountHolderName;
     }
-
     public void setAccountHolderName(String accountHolderName) {
         this.accountHolderName = accountHolderName;
     }
 
-    @JsonProperty("dateOfBirth")
     public LocalDate getDateOfBirth() {
         return dateOfBirth;
     }
-
     public void setDateOfBirth(LocalDate dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
     }
 
-    @JsonProperty("passportNumber")
     public String getPassportNumber() {
         return passportNumber;
     }
-
     public void setPassportNumber(String passportNumber) {
         this.passportNumber = passportNumber;
     }
 
-    @JsonProperty("accountHolderType")
     public AccountHolderType getAccountHolderType() {
         return accountHolderType;
     }
-
     public void setAccountHolderType(AccountHolderType accountHolderType) {
         this.accountHolderType = accountHolderType;
     }

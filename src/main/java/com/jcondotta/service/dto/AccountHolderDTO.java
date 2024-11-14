@@ -1,7 +1,6 @@
 package com.jcondotta.service.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.jcondotta.domain.AccountHolderType;
 import com.jcondotta.domain.BankingEntity;
 import io.micronaut.serde.annotation.Serdeable;

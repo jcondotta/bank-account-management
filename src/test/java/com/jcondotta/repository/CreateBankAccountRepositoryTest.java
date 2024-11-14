@@ -5,8 +5,6 @@ import com.jcondotta.factory.TestAccountHolderFactory;
 import com.jcondotta.factory.TestBankAccountFactory;
 import com.jcondotta.helper.TestAccountHolderRequest;
 import com.jcondotta.service.dto.BankAccountDTO;
-import jakarta.validation.ConstraintViolationException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;

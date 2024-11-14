@@ -2,10 +2,8 @@ package com.jcondotta.web.lambda;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jcondotta.container.LocalStackTestContainer;
-import com.jcondotta.domain.BankAccount;
+import com.jcondotta.domain.BankingEntity;
 import com.jcondotta.helper.TestAccountHolderRequest;
 import com.jcondotta.service.request.AccountHolderRequest;
 import com.jcondotta.service.request.CreateBankAccountRequest;
@@ -19,6 +17,7 @@ import io.micronaut.http.HttpMethod;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.MediaType;
 import io.micronaut.json.JsonMapper;
+import io.micronaut.json.tree.JsonNode;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
@@ -84,7 +83,7 @@ class CreateBankAccountLambdaIT implements LocalStackTestContainer {
                 .as("Verify the response has the correct status code")
                 .isEqualTo(HttpStatus.CREATED.getCode());
 
-        var bankAccount = jsonMapper.readValue(response.getBody(), BankAccount.class);
+        var bankAccount = jsonMapper.readValue(response.getBody(), BankingEntity.class);
         assertAll(
                 () -> assertThat(bankAccount.getBankAccountId()).isNotNull()
         );
@@ -101,13 +100,16 @@ class CreateBankAccountLambdaIT implements LocalStackTestContainer {
                 .as("Verify the response has the correct status code")
                 .isEqualTo(HttpStatus.BAD_REQUEST.getCode());
 
-        var responseBodyJSON = new ObjectMapper().readValue(response.getBody(), JsonNode.class);
-        var errorMessage = responseBodyJSON.at("/_embedded/errors/0/message").asText();
+        var responseBodyJSON = jsonMapper.readValue(response.getBody(), JsonNode.class);
+        var errorMessage = responseBodyJSON.get("_embedded").get("errors")
+                .get(0).get("message")
+                .coerceStringValue();
 
+        var expectedMessageKey = "bankAccount.accountHolder.notNull";
         assertThat(errorMessage)
                 .as("Verify the error message in the response body")
-                .isEqualTo(messageSource.getMessage("bankAccount.accountHolder.notNull", Locale.getDefault())
-                        .orElseThrow());
+                .isEqualTo(messageSource.getMessage(expectedMessageKey, Locale.getDefault())
+                        .orElseThrow(() -> new IllegalArgumentException("Message not found for key: " + expectedMessageKey)));
     }
 }
 

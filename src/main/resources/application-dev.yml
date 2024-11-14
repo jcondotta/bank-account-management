@@ -6,4 +6,4 @@ aws:
     endpoint: 'http://localhost:4566'
     tables:
       banking-entities:
-        table-name: 'bank-entities-localstack'
+        table-name: 'banking-entities-localstack'

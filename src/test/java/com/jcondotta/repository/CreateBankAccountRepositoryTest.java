@@ -1,14 +1,15 @@
 package com.jcondotta.repository;
 
-import com.jcondotta.domain.AccountHolder;
-import com.jcondotta.domain.BankAccount;
-import com.jcondotta.factory.AccountHolderTestFactory;
-import com.jcondotta.factory.BankAccountTestFactory;
+import com.jcondotta.domain.BankingEntity;
+import com.jcondotta.factory.TestAccountHolderFactory;
+import com.jcondotta.factory.TestBankAccountFactory;
 import com.jcondotta.helper.TestAccountHolderRequest;
 import com.jcondotta.service.dto.BankAccountDTO;
+import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -16,7 +17,10 @@ import software.amazon.awssdk.enhanced.dynamodb.*;
 import software.amazon.awssdk.enhanced.dynamodb.model.TransactWriteItemsEnhancedRequest;
 import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
 
+import java.util.UUID;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -31,69 +35,94 @@ class CreateBankAccountRepositoryTest {
     private DynamoDbEnhancedClient dynamoDbEnhancedClient;
 
     @Mock
-    private DynamoDbTable<BankAccount> bankAccountDynamoDBTable;
+    private DynamoDbTable<BankingEntity> bankingEntityDynamoDbTable;
 
     @Mock
-    private DynamoDbTable<AccountHolder> accountHolderDynamoDBTable;
+    private TableSchema<BankingEntity> bankingEntityTableSchema;
 
     @Mock
-    private TableSchema<BankAccount> bankAccountSchema;
+    private TableMetadata tableMetadata;
 
-    @Mock
-    private TableSchema<AccountHolder> accountHolderSchema;
+    @Test
+    void shouldSaveBankAccount_whenRecipientIsValid() {
+        when(bankingEntityDynamoDbTable.tableSchema()).thenReturn(bankingEntityTableSchema);
+        when(bankingEntityTableSchema.itemType()).thenReturn(EnhancedType.of(BankingEntity.class));
+        when(bankingEntityTableSchema.tableMetadata()).thenReturn(tableMetadata);
 
-    @Mock
-    private TableMetadata bankAccountTableMetadata;
+        var bankAccount = TestBankAccountFactory.create();
+        var jeffersonAccountHolder = TestAccountHolderFactory.createPrimaryAccountHolder(
+                TestAccountHolderRequest.JEFFERSON,
+                bankAccount.getBankAccountId()
+        );
 
-    @Mock
-    private TableMetadata accountHolderTableMetadata;
+        var createBankAccountResponse = createBankAccountRepository.create(bankAccount, jeffersonAccountHolder);
 
-    @BeforeEach
-    public void beforeEach(){
-//        when(bankAccountDynamoDBTable.tableSchema()).thenReturn(bankAccountSchema);
-//        when(bankAccountSchema.itemType()).thenReturn(EnhancedType.of(BankAccount.class));
-//        when(bankAccountSchema.tableMetadata()).thenReturn(bankAccountTableMetadata);
+        var argumentCaptor = ArgumentCaptor.forClass(TransactWriteItemsEnhancedRequest.class);
+        verify(dynamoDbEnhancedClient).transactWriteItems(argumentCaptor.capture());
 
-//        when(accountHolderDynamoDBTable.tableSchema()).thenReturn(accountHolderSchema);
-//        when(accountHolderSchema.itemType()).thenReturn(EnhancedType.of(AccountHolder.class));
-//        when(accountHolderSchema.tableMetadata()).thenReturn(accountHolderTableMetadata);
+        var argumentCaptorValue = argumentCaptor.getValue();
+        assertThat(argumentCaptorValue).isNotNull();
+
+        var transactWriteItems = argumentCaptorValue.transactWriteItems();
+        assertThat(transactWriteItems).hasSize(2);
+
+        assertAll(
+                () -> assertThat(transactWriteItems.get(0).put()).isNotNull(),
+                () -> assertThat(transactWriteItems.get(1).put()).isNotNull()
+        );
+
+        var expectedBankAccountDTO = new BankAccountDTO(bankAccount, jeffersonAccountHolder);
+        assertThat(createBankAccountResponse.bankAccountDTO())
+                .usingRecursiveComparison()
+                .isEqualTo(expectedBankAccountDTO);
+
+        verifyNoMoreInteractions(dynamoDbEnhancedClient);
     }
 
-//    @Test
-//    void shouldSaveBankAccount_whenRecipientIsValid() {
-//        var bankAccount = BankAccountTestFactory.create();
-//        var jeffersonAccountHolder = AccountHolderTestFactory.createPrimaryAccountHolder(
-//                bankAccount.getBankAccountId(),
-//                TestAccountHolderRequest.JEFFERSON
-//        );
-//
-//        var createBankAccountResponse = createBankAccountRepository.create(bankAccount, jeffersonAccountHolder);
-//
-//        var expectedBankAccountDTO = new BankAccountDTO(bankAccount, jeffersonAccountHolder);
-//        assertThat(createBankAccountResponse.bankAccountDTO())
-//                .usingRecursiveComparison()
-//                .isEqualTo(expectedBankAccountDTO);
-//
-//        verify(dynamoDbEnhancedClient).transactWriteItems(any(TransactWriteItemsEnhancedRequest.class));
-//        verifyNoMoreInteractions(dynamoDbEnhancedClient);
-//    }
-//
-//    @Test
-//    void shouldThrowException_whenDynamoDBThrowsException() {
-//        var bankAccount = BankAccountTestFactory.create();
-//        var jeffersonAccountHolder = AccountHolderTestFactory.createPrimaryAccountHolder(
-//                bankAccount.getBankAccountId(),
-//                TestAccountHolderRequest.JEFFERSON
-//        );
-//
-//        var exceptionMessage = "Intentional dynamoDB exception message";
-//        doThrow(DynamoDbException.builder().message(exceptionMessage).build())
-//                .when(dynamoDbEnhancedClient).transactWriteItems(any(TransactWriteItemsEnhancedRequest.class));
-//
-//        var dynamoDBException = assertThrows(DynamoDbException.class, () -> createBankAccountRepository.create(bankAccount, jeffersonAccountHolder));
-//        assertThat(dynamoDBException).hasMessage(exceptionMessage);
-//
-//        verify(dynamoDbEnhancedClient, times(1)).transactWriteItems(any(TransactWriteItemsEnhancedRequest.class));
-//        verifyNoMoreInteractions(dynamoDbEnhancedClient);
-//    }
+    @Test
+    void shouldThrowException_whenDynamoDBTransactionFails() {
+        when(bankingEntityDynamoDbTable.tableSchema()).thenReturn(bankingEntityTableSchema);
+        when(bankingEntityTableSchema.itemType()).thenReturn(EnhancedType.of(BankingEntity.class));
+        when(bankingEntityTableSchema.tableMetadata()).thenReturn(tableMetadata);
+
+        var bankAccount = TestBankAccountFactory.create();
+        var jeffersonAccountHolder = TestAccountHolderFactory.createPrimaryAccountHolder(
+                TestAccountHolderRequest.JEFFERSON,
+                bankAccount.getBankAccountId()
+        );
+        var exceptionMessage = "DynamoDB Transaction Failed";
+
+        doThrow(DynamoDbException.builder().message(exceptionMessage).build())
+                .when(dynamoDbEnhancedClient).transactWriteItems(any(TransactWriteItemsEnhancedRequest.class));
+
+        var exception = assertThrows(DynamoDbException.class, () ->
+                createBankAccountRepository.create(bankAccount, jeffersonAccountHolder)
+        );
+
+        assertThat(exception.getMessage()).isEqualTo(exceptionMessage);
+        verify(dynamoDbEnhancedClient).transactWriteItems(any(TransactWriteItemsEnhancedRequest.class));
+        verifyNoMoreInteractions(dynamoDbEnhancedClient);
+    }
+
+    @Test
+    void shouldThrowNullPointerException_whenBankAccountIsNull() {
+        var jeffersonAccountHolder = TestAccountHolderFactory.createPrimaryAccountHolder(
+                TestAccountHolderRequest.JEFFERSON, UUID.randomUUID()
+        );
+
+        var exception = assertThrows(NullPointerException.class, () -> createBankAccountRepository.create(null, jeffersonAccountHolder));
+        assertThat(exception.getMessage()).isEqualTo("bankAccount.notNull");
+
+        verifyNoInteractions(dynamoDbEnhancedClient);
+    }
+
+    @Test
+    void shouldThrowNullPointerException_whenAccountHolderIsNull() {
+        var bankAccount = TestBankAccountFactory.create();
+
+        var exception = assertThrows(NullPointerException.class, () -> createBankAccountRepository.create(bankAccount, null));
+        assertThat(exception.getMessage()).isEqualTo("accountHolder.notNull");
+
+        verifyNoInteractions(dynamoDbEnhancedClient);
+    }
 }

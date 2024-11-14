@@ -3,8 +3,7 @@ package com.jcondotta.web.controller;
 import com.jcondotta.argument_provider.BlankValuesArgumentProvider;
 import com.jcondotta.argument_provider.InvalidPassportNumberArgumentProvider;
 import com.jcondotta.container.LocalStackTestContainer;
-import com.jcondotta.domain.AccountHolder;
-import com.jcondotta.domain.BankAccount;
+import com.jcondotta.domain.BankingEntity;
 import com.jcondotta.helper.TestAccountHolderRequest;
 import com.jcondotta.service.dto.AccountHolderDTO;
 import com.jcondotta.service.dto.BankAccountDTO;
@@ -60,10 +59,7 @@ class CreateBankAccountControllerIT implements LocalStackTestContainer {
     RequestSpecification requestSpecification;
 
     @Inject
-    DynamoDbTable<BankAccount> dynamoDbBankAccountTable;
-
-    @Inject
-    DynamoDbTable<AccountHolder> dynamoDbAccountHolderTable;
+    DynamoDbTable<BankingEntity> bankingEntityDynamoDbTable;
 
     @Inject
     @Named("exceptionMessageSource")
@@ -112,14 +108,14 @@ class CreateBankAccountControllerIT implements LocalStackTestContainer {
                         )
         );
 
-        var bankAccount = dynamoDbBankAccountTable.getItem(Key.builder()
-                .partitionValue(BankAccount.PARTITION_KEY_TEMPLATE.formatted(bankAccountDTO.getBankAccountId().toString()))
-                .sortValue(BankAccount.SORT_KEY_TEMPLATE.formatted(bankAccountDTO.getBankAccountId().toString()))
+        var bankAccount = bankingEntityDynamoDbTable.getItem(Key.builder()
+                .partitionValue(BankingEntity.BANK_ACCOUNT_PK_TEMPLATE.formatted(bankAccountDTO.getBankAccountId().toString()))
+                .sortValue(BankingEntity.BANK_ACCOUNT_SK_TEMPLATE.formatted(bankAccountDTO.getBankAccountId().toString()))
                 .build());
 
-        var accountHolder = dynamoDbAccountHolderTable.getItem(Key.builder()
-                .partitionValue(AccountHolder.PARTITION_KEY_TEMPLATE.formatted(bankAccountDTO.getBankAccountId().toString()))
-                .sortValue(AccountHolder.SORT_KEY_TEMPLATE.formatted(bankAccountDTO.getAccountHolders().get(0).getAccountHolderId().toString()))
+        var accountHolder = bankingEntityDynamoDbTable.getItem(Key.builder()
+                .partitionValue(BankingEntity.ACCOUNT_HOLDER_PK_TEMPLATE.formatted(bankAccountDTO.getBankAccountId().toString()))
+                .sortValue(BankingEntity.ACCOUNT_HOLDER_SK_TEMPLATE.formatted(bankAccountDTO.getAccountHolders().get(0).getAccountHolderId().toString()))
                 .build());
 
         assertThat(bankAccountDTO)

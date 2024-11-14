@@ -7,12 +7,10 @@ import com.jcondotta.service.request.CreateBankAccountRequest;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.MediaType;
-import io.micronaut.http.annotation.Body;
-import io.micronaut.http.annotation.Controller;
-import io.micronaut.http.annotation.Post;
-import io.micronaut.http.annotation.Status;
+import io.micronaut.http.annotation.*;
 import io.micronaut.validation.Validated;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -21,6 +19,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Locale;
 
 @Validated
 @Controller(BankAccountURIBuilder.BASE_PATH_API_V1_MAPPING)
@@ -35,10 +35,10 @@ public class CreateBankAccountController {
         this.createBankAccountService = createBankAccountService;
     }
 
-    @Operation(summary = "Add a new bank account",
+    @Operation(summary = "Create a new bank account",
             description = "Creates a new bank account with the provided account holder information.",
             requestBody = @RequestBody(
-                    description = "Bank account details",
+                    description = "Primary account holder details",
                     required = true,
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON,
@@ -47,31 +47,39 @@ public class CreateBankAccountController {
             )
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Bank account successfully created.",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = BankAccountDTO.class))
-//                    headers = @Header(name = "Location",
-//                            description = "Relative URI for retrieving all recipients for the bank account",
-//                            schema = @Schema(type = "string", format = "uri", example = "/api/v1/recipients/bank-account-id/{bankAccountId}"))
+            @ApiResponse(
+                    responseCode = "201",
+                    description = "Bank account successfully created.",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = BankAccountDTO.class)),
+                    headers = {
+                            @Header(name = "Location", description = "URI of the newly created bank account",
+                                    schema = @Schema(
+                                            type = "string",
+                                            format = "uri",
+                                            example = "/api/v1/bank-accounts/01920bff-1338-7efd-ade6-e9128debe5d4"))
+                    }
             ),
-            @ApiResponse(responseCode = "200", description = "Bank account already exists, returning the existing data.",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ExistentBankAccountDTO.class))),
-//            @ApiResponse(responseCode = "400", description = "Invalid bank account ID, recipient name, or IBAN. Ensure that all required fields are valid."),
-            @ApiResponse(responseCode = "500", description = "Internal server error. This may occur due to system issues, failed database connections, or unexpected runtime exceptions.")
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Bank account already exists, returning the existing data.",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ExistentBankAccountDTO.class))
+            ),
+            @ApiResponse(responseCode = "400", description = "Invalid request data. Check the provided bank account details."),
+            @ApiResponse(responseCode = "500", description = "Internal server error. Unable to process the request at this time.")
     })
-    @Status(HttpStatus.CREATED)
     @Post(consumes = MediaType.APPLICATION_JSON, produces = MediaType.APPLICATION_JSON)
+    @Status(HttpStatus.CREATED)
     public HttpResponse<BankAccountDTO> createBankAccount(@Body CreateBankAccountRequest createBankAccountRequest) {
         LOGGER.info("Received request to create bank account for the account holder: {}", createBankAccountRequest.accountHolder());
 
         BankAccountDTO bankAccountDTO = createBankAccountService.create(createBankAccountRequest);
 
         if (bankAccountDTO instanceof ExistentBankAccountDTO) {
-            LOGGER.info("[BankAccountId={}] Returning existing bank account", bankAccountDTO.getBankAccountId());
-
+            LOGGER.info("Bank account already exists for ID: {}", bankAccountDTO.getBankAccountId());
             return HttpResponse.ok(bankAccountDTO);
         }
         else {
-            LOGGER.info("Bank account created with ID: {}", bankAccountDTO.getBankAccountId());
+            LOGGER.info("Bank account created successfully with ID: {}", bankAccountDTO.getBankAccountId());
             return HttpResponse.created(bankAccountDTO, BankAccountURIBuilder.bankAccountURI(bankAccountDTO.getBankAccountId()));
         }
     }

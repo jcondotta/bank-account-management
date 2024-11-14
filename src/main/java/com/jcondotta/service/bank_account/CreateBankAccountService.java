@@ -1,8 +1,7 @@
 package com.jcondotta.service.bank_account;
 
-import com.jcondotta.domain.AccountHolder;
 import com.jcondotta.domain.AccountHolderType;
-import com.jcondotta.domain.BankAccount;
+import com.jcondotta.domain.BankingEntity;
 import com.jcondotta.repository.CreateBankAccountRepository;
 import com.jcondotta.service.dto.BankAccountDTO;
 import com.jcondotta.service.request.CreateBankAccountRequest;
@@ -13,7 +12,6 @@ import jakarta.validation.Validator;
 import net.datafaker.Faker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
@@ -39,47 +37,37 @@ public class CreateBankAccountService {
     public BankAccountDTO create(CreateBankAccountRequest createBankAccountRequest) {
         LOGGER.debug("Starting the creation process for a new bank account and its primary account holder.");
 
-        try {
-            var constraintViolations = validator.validate(createBankAccountRequest);
-            if (!constraintViolations.isEmpty()) {
-                LOGGER.warn("Validation errors: {}", constraintViolations.stream()
-                        .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
-                        .collect(Collectors.joining(", ")));
+        var constraintViolations = validator.validate(createBankAccountRequest);
+        if (!constraintViolations.isEmpty()) {
+            LOGGER.warn("Validation errors: {}", constraintViolations.stream()
+                    .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
+                    .collect(Collectors.joining(", ")));
 
-                throw new ConstraintViolationException(constraintViolations);
-            }
-
-            var bankAccount = buildBankAccount();
-            var accountHolder = buildPrimaryAccountHolder(bankAccount.getBankAccountId(), createBankAccountRequest);
-
-            MDC.put("bankAccountId", bankAccount.getBankAccountId().toString());
-            MDC.put("accountHolderId", accountHolder.getAccountHolderId().toString());
-            MDC.put("accountHolderName", accountHolder.getAccountHolderName());
-
-            var createBankAccountResponse = createBankAccountRepository.create(bankAccount, accountHolder);
-
-            var bankAccountDTO = createBankAccountResponse.bankAccountDTO();
-
-            return bankAccountDTO;
+            throw new ConstraintViolationException(constraintViolations);
         }
-        finally {
-            MDC.clear();
-        }
+
+        var bankAccount = buildBankAccount();
+        var accountHolder = buildPrimaryAccountHolder(bankAccount.getBankAccountId(), createBankAccountRequest);
+
+        var createBankAccountResponse = createBankAccountRepository.create(bankAccount, accountHolder);
+        var bankAccountDTO = createBankAccountResponse.bankAccountDTO();
+
+        return bankAccountDTO;
     }
 
-    private AccountHolder buildPrimaryAccountHolder(UUID bankAccountId, CreateBankAccountRequest createBankAccountRequest) {
-        return new AccountHolder(
-                bankAccountId,
+    private BankingEntity buildPrimaryAccountHolder(UUID bankAccountId, CreateBankAccountRequest createBankAccountRequest) {
+        return BankingEntity.buildAccountHolder(
                 UUID.randomUUID(),
                 createBankAccountRequest.accountHolder().accountHolderName(),
                 createBankAccountRequest.accountHolder().passportNumber(),
                 createBankAccountRequest.accountHolder().dateOfBirth(),
-                AccountHolderType.PRIMARY
+                AccountHolderType.PRIMARY,
+                bankAccountId
         );
     }
 
-    private BankAccount buildBankAccount() {
+    private BankingEntity buildBankAccount() {
         var generatedIban = new Faker().finance().iban();
-        return new BankAccount(UUID.randomUUID(), generatedIban, LocalDateTime.now(currentInstant));
+        return BankingEntity.buildBankAccount(UUID.randomUUID(), generatedIban, LocalDateTime.now(currentInstant));
     }
 }

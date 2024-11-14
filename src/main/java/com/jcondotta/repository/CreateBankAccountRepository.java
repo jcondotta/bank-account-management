@@ -1,7 +1,6 @@
 package com.jcondotta.repository;
 
-import com.jcondotta.domain.AccountHolder;
-import com.jcondotta.domain.BankAccount;
+import com.jcondotta.domain.BankingEntity;
 import com.jcondotta.service.dto.BankAccountDTO;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -11,7 +10,8 @@ import org.slf4j.MDC;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.model.TransactWriteItemsEnhancedRequest;
-import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
+
+import java.util.Objects;
 
 @Singleton
 public class CreateBankAccountRepository {
@@ -19,19 +19,18 @@ public class CreateBankAccountRepository {
     private static final Logger LOGGER = LoggerFactory.getLogger(CreateBankAccountRepository.class);
 
     private final DynamoDbEnhancedClient dynamoDbEnhancedClient;
-    private final DynamoDbTable<BankAccount> bankAccountTable;
-    private final DynamoDbTable<AccountHolder> accountHolderTable;
+    private final DynamoDbTable<BankingEntity> bankingEntityDynamoDbTable;
 
     @Inject
-    public CreateBankAccountRepository(DynamoDbEnhancedClient dynamoDbEnhancedClient,
-                                       DynamoDbTable<BankAccount> bankAccountTable,
-                                       DynamoDbTable<AccountHolder> accountHolderTable) {
+    public CreateBankAccountRepository(DynamoDbEnhancedClient dynamoDbEnhancedClient, DynamoDbTable<BankingEntity> bankingEntityDynamoDbTable){
         this.dynamoDbEnhancedClient = dynamoDbEnhancedClient;
-        this.bankAccountTable = bankAccountTable;
-        this.accountHolderTable = accountHolderTable;
+        this.bankingEntityDynamoDbTable = bankingEntityDynamoDbTable;
     }
 
-    public CreateBankAccountResponse create(BankAccount bankAccount, AccountHolder accountHolder) {
+    public CreateBankAccountResponse create(BankingEntity bankAccount, BankingEntity accountHolder) {
+        Objects.requireNonNull(bankAccount, "bankAccount.notNull");
+        Objects.requireNonNull(accountHolder, "accountHolder.notNull");
+
         try {
             MDC.put("bankAccountId", bankAccount.getBankAccountId().toString());
             MDC.put("accountHolderId", accountHolder.getAccountHolderId().toString());
@@ -39,14 +38,11 @@ public class CreateBankAccountRepository {
 
             LOGGER.debug("Initiating transaction to create bank account and account holder.");
 
-
-//            bankAccountTable.putItem(bankAccount);
-//            accountHolderTable.putItem(accountHolder);
             var transactWriteRequest = TransactWriteItemsEnhancedRequest.builder()
-                    .addPutItem(bankAccountTable, bankAccount)
-                    .addPutItem(accountHolderTable, accountHolder)
+                    .addPutItem(bankingEntityDynamoDbTable, bankAccount)
+                    .addPutItem(bankingEntityDynamoDbTable, accountHolder)
                     .build();
-//
+
             dynamoDbEnhancedClient.transactWriteItems(transactWriteRequest);
 
             LOGGER.info("Successfully saved bank account and primary account holder to DB.");
@@ -54,10 +50,6 @@ public class CreateBankAccountRepository {
             return CreateBankAccountResponse.builder(new BankAccountDTO(bankAccount, accountHolder))
                     .isIdempotent(false)
                     .build();
-        }
-        catch (DynamoDbException e) {
-            LOGGER.error("Error creating bank account and account holder: {}", e.getMessage(), e);
-            throw e;
         }
         finally {
             MDC.clear();

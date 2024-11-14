@@ -3,7 +3,9 @@ package com.jcondotta.service;
 
 import com.jcondotta.argument_provider.BlankValuesArgumentProvider;
 import com.jcondotta.argument_provider.InvalidPassportNumberArgumentProvider;
-import com.jcondotta.factory.ClockTestFactory;
+import com.jcondotta.factory.TestAccountHolderFactory;
+import com.jcondotta.factory.TestBankAccountFactory;
+import com.jcondotta.factory.TestClockFactory;
 import com.jcondotta.factory.ValidatorTestFactory;
 import com.jcondotta.helper.TestAccountHolderRequest;
 import com.jcondotta.repository.CreateBankAccountRepository;
@@ -18,11 +20,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import software.amazon.awssdk.enhanced.dynamodb.model.TransactWriteItemsEnhancedRequest;
+import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
 
 import java.time.Clock;
 import java.time.LocalDate;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -36,7 +43,7 @@ class CreateBankAccountServiceTest {
     private static final String PASSPORT_NUMBER_JEFFERSON = TestAccountHolderRequest.JEFFERSON.getPassportNumber();
     private static final LocalDate DATE_OF_BIRTH_JEFFERSON = TestAccountHolderRequest.JEFFERSON.getDateOfBirth();
 
-    private static final Clock TEST_CLOCK_FIXED_INSTANT = ClockTestFactory.testClockFixedInstant;
+    private static final Clock TEST_CLOCK_FIXED_INSTANT = TestClockFactory.testClockFixedInstant;
     private static final Validator VALIDATOR = ValidatorTestFactory.getValidator();
 
     @Mock
@@ -155,5 +162,48 @@ class CreateBankAccountServiceTest {
         assertThat(exception.getConstraintViolations()).hasSize(1);
 
         verifyNoInteractions(createBankAccountRepository);
+    }
+
+    @Test
+    void shouldThrowDynamoDBException_whenRepositoryTransactionFails() {
+        var bankAccount = TestBankAccountFactory.create();
+        var jeffersonAccountHolder = TestAccountHolderFactory.createPrimaryAccountHolder(
+                TestAccountHolderRequest.JEFFERSON,
+                bankAccount.getBankAccountId()
+        );
+        var exceptionMessage = "DynamoDB Transaction Failed";
+
+        doThrow(DynamoDbException.builder().message(exceptionMessage).build())
+                .when(createBankAccountRepository).create(bankAccount, jeffersonAccountHolder);
+
+        var exception = assertThrows(DynamoDbException.class, () ->
+                createBankAccountRepository.create(bankAccount, jeffersonAccountHolder)
+        );
+
+        assertThat(exception.getMessage()).isEqualTo(exceptionMessage);
+        verify(createBankAccountRepository).create(bankAccount, jeffersonAccountHolder);
+        verifyNoMoreInteractions(createBankAccountRepository);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"bankAccount.notNull", "accountHolder.notNull"})
+    void shouldThrowNullPointerException_whenRepositoryThrowsNullPointerException(String exceptionMessage) {
+        var bankAccount = TestBankAccountFactory.create();
+        var jeffersonAccountHolder = TestAccountHolderFactory.createPrimaryAccountHolder(
+                TestAccountHolderRequest.JEFFERSON,
+                bankAccount.getBankAccountId()
+        );
+
+        doThrow(new NullPointerException(exceptionMessage))
+                .when(createBankAccountRepository).create(any(), any());
+
+        var exception = assertThrows(NullPointerException.class, () ->
+                createBankAccountRepository.create(bankAccount, jeffersonAccountHolder)
+        );
+
+        assertThat(exception.getMessage()).isEqualTo(exceptionMessage);
+
+        verify(createBankAccountRepository).create(bankAccount, jeffersonAccountHolder);
+        verifyNoMoreInteractions(createBankAccountRepository);
     }
 }

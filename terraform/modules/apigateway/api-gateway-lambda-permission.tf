@@ -6,5 +6,5 @@ resource "aws_lambda_permission" "allow_apigateway_invoke" {
   principal     = "apigateway.amazonaws.com"
 
   # Updated source_arn to specify the exact path and method
-  source_arn = "${aws_api_gateway_rest_api.this.execution_arn}/POST/api/v1/bank-accounts"
+  source_arn = "${aws_api_gateway_rest_api.this.execution_arn}/*/POST/api/v1/bank-accounts"
 }

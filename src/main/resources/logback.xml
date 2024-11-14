@@ -1,27 +1,14 @@
-<!--<configuration>-->
-
-<!--    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">-->
-<!--        <encoder class="net.logstash.logback.encoder.LogstashEncoder">-->
-<!--            &lt;!&ndash; Optionally, add custom fields &ndash;&gt;-->
-<!--            <customFields>{"application":"BankAccountManagement"}</customFields>-->
-<!--        </encoder>-->
-<!--    </appender>-->
-
-<!--    <root level="INFO">-->
-<!--        <appender-ref ref="CONSOLE" />-->
-<!--    </root>-->
-<!--</configuration>-->
 <configuration>
 
-    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-        <!-- encoders are assigned the type
-             ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
-        <encoder>
-            <pattern>%cyan(%d{HH:mm:ss.SSS}) %white([%thread]) %highlight(%-5level) %magenta(%logger{36}) - %msg%n</pattern>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>
+                {"timestamp":"%date{ISO8601}","level":"%level","thread":"%thread","logger":"%logger","message":"%msg","bankAccountId":"%X{bankAccountId}","accountHolderId":"%X{accountHolderId}","accountHolderName":"%X{accountHolderName}"}%n
+            </pattern>
         </encoder>
     </appender>
 
-    <root level="info">
-        <appender-ref ref="STDOUT" />
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
     </root>
 </configuration>

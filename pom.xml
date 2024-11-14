@@ -82,12 +82,6 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>net.logstash.logback</groupId>
-            <artifactId>logstash-logback-encoder</artifactId>
-            <version>7.3</version> <!-- Use the latest version available -->
         </dependency>
         <dependency>
             <groupId>org.yaml</groupId>
@@ -141,6 +135,10 @@
                     <groupId>commons-codec</groupId>
                     <artifactId>commons-codec</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.apache.httpcomponents</groupId>
+                    <artifactId>httpcore</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -178,73 +176,11 @@
                             <goal>docker-native</goal>
                         </goals>
                         <configuration>
-<!--                            <imageName>bootstrap</imageName>-->
                             <mainClass>io.micronaut.function.aws.runtime.MicronautLambdaRuntime</mainClass>
-<!--                            <graalvmVersion>23.0.1</graalvmVersion>-->
-<!--                            <initializeAtRunTime>-->
-<!--                                <include>-->
-<!--                                    <pattern>ch.qos.logback.*</pattern>-->
-<!--                                    <pattern>org.slf4j.*</pattern>-->
-<!--                                    <pattern>io.netty.*</pattern>-->
-<!--                                </include>-->
-<!--                            </initializeAtRunTime>-->
-<!--                            <enableAllSecurityServices>true</enableAllSecurityServices>-->
-<!--                            <reportExceptionStackTraces>true</reportExceptionStackTraces>-->
-<!--                            <noFallback>true</noFallback>-->
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
-
-<!--            <plugin>-->
-<!--                <groupId>org.graalvm.buildtools</groupId>-->
-<!--                <artifactId>native-maven-plugin</artifactId>-->
-<!--                <version>0.9.22</version> &lt;!&ndash; Ensure this is the correct version for your setup &ndash;&gt;-->
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <id>build-native</id>-->
-<!--                        <goals>-->
-<!--                            <goal>compile-no-fork</goal>-->
-<!--                        </goals>-->
-<!--                        <configuration>-->
-<!--                            <imageName>bootstrap</imageName>-->
-<!--                            <mainClass>io.micronaut.function.aws.runtime.MicronautLambdaRuntime</mainClass>-->
-<!--&lt;!&ndash;                            <enableAllSecurityServices>true</enableAllSecurityServices>&ndash;&gt;-->
-<!--&lt;!&ndash;                            <reportExceptionStackTraces>true</reportExceptionStackTraces>&ndash;&gt;-->
-<!--&lt;!&ndash;                            <noFallback>true</noFallback>&ndash;&gt;-->
-<!--                            &lt;!&ndash; Additional configurations as needed &ndash;&gt;-->
-<!--                        </configuration>-->
-<!--                    </execution>-->
-<!--                </executions>-->
-<!--            </plugin>-->
-
-<!--            <plugin>-->
-<!--                <groupId>org.graalvm.nativeimage</groupId>-->
-<!--                <artifactId>native-image-maven-plugin</artifactId>-->
-<!--                <version>21.2.0</version>-->
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <id>build-native</id>-->
-<!--                        <goals>-->
-<!--                            <goal>compile-no-fork</goal>-->
-<!--                        </goals>-->
-<!--                        <configuration>-->
-<!--                            <enableSerialization>true</enableSerialization>-->
-<!--                            <initializeAtRunTime>-->
-<!--                                <include>-->
-<!--                                    <pattern>ch.qos.logback.*</pattern>-->
-<!--                                    <pattern>org.slf4j.*</pattern>-->
-<!--                                    <pattern>io.netty.*</pattern>-->
-<!--                                </include>-->
-<!--                            </initializeAtRunTime>-->
-<!--                            <mainClass>io.micronaut.function.aws.runtime.MicronautLambdaRuntime</mainClass>-->
-<!--                            <imageName>bootstrap</imageName>-->
-<!--                            <fallback>false</fallback>-->
-<!--                            <reportExceptionStackTraces>true</reportExceptionStackTraces>-->
-<!--                        </configuration>-->
-<!--                    </execution>-->
-<!--                </executions>-->
-<!--            </plugin>-->
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

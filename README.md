@@ -1,79 +1,53 @@
-## Micronaut 4.6.3 Documentation
+# Recipients Project v.1.0
 
-- [User Guide](https://docs.micronaut.io/4.6.3/guide/index.html)
-- [API Reference](https://docs.micronaut.io/4.6.3/api/index.html)
-- [Configuration Reference](https://docs.micronaut.io/4.6.3/guide/configurationreference.html)
-- [Micronaut Guides](https://guides.micronaut.io/index.html)
----
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=jcondotta_bank-account-management&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=jcondotta_bank-account-management)  
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=jcondotta_bank-account-management&metric=coverage)](https://sonarcloud.io/summary/new_code?id=jcondotta_bank-account-management)
 
-## Handler
+This project is part of a microservice architecture responsible for managing bank accounts. It provides RESTful APIs for creating and managing bank account data and integrates seamlessly with other services in the ecosystem. The service prioritizes performance, scalability, and interoperability using AWS native services and modern development practices.
 
-Handler: io.micronaut.function.aws.proxy.payload1.ApiGatewayProxyRequestEventFunction
+## Tech Stack
 
-[AWS Lambda Handler](https://docs.aws.amazon.com/lambda/latest/dg/java-handler.html)
+### Languages & Frameworks:
 
-## Deployment with GraalVM
+- **GraalVM 21.x (Java 21-based):** Modern and efficient JDK for building robust applications, with native image capabilities for optimized startup times and resource usage.
+- **Micronaut 4.5.0+:** Framework used to build the microservice with lightweight, fast startup times and cloud-native capabilities.
 
-If you want to deploy to AWS Lambda as a GraalVM native image, run:
+### Infrastructure:
 
-```bash
-./mvnw package -Dpackaging=docker-native -Dmicronaut.runtime=lambda -Pgraalvm
-```
+- **Amazon DynamoDB:** NoSQL database used to store bank account information.
+- **Amazon SNS:** Simple Notification Service for publishing notifications to subscribed consumers when bank accounts are created.
+- **AWS Lambda:** Serverless compute platform for running the microservice.
+- **AWS API Gateway:** Exposes and manages the API endpoints for secure and scalable access.
+- **Terraform:** Infrastructure as Code (IaC) tool used for managing AWS resources like DynamoDB, Lambda, and API Gateway.
+- **LocalStack:** A fully functional local AWS cloud stack used for local testing of AWS services like DynamoDB and Lambda.
 
-This will build the GraalVM native image inside a docker container and generate the `function.zip` ready for the deployment.
+### Authentication:
 
+- No authentication is implemented in this version, keeping the API accessible for internal use.
 
-- [Micronaut Maven Plugin documentation](https://micronaut-projects.github.io/micronaut-maven-plugin/latest/)
-## Feature http-client-jdk documentation
+### CI/CD & Containerization:
 
-- [Micronaut HTTP Client Jdk documentation](https://docs.micronaut.io/latest/guide/index.html#jdkHttpClient)
+- **GitHub Actions:** Automated pipeline for building, testing, and deploying the microservice.
+- **Docker:** Used to containerize the application for local development and deployment.
 
-- [https://openjdk.org/groups/net/httpclient/intro.html](https://openjdk.org/groups/net/httpclient/intro.html)
+### Testing:
 
+- **JUnit 5:** Framework for unit and integration testing.
+- **Mockito:** Framework for mocking dependencies in tests.
+- **AssertJ:** Library for fluent assertion statements.
+- **TestContainers:** Library for spinning up containers for integration testing with services like DynamoDB, SNS, and LocalStack.
 
-## Feature openapi documentation
+### Documentation:
 
-- [Micronaut OpenAPI Support documentation](https://micronaut-projects.github.io/micronaut-openapi/latest/guide/index.html)
+- **Swagger API:** API documentation and testing interface to explore the RESTful endpoints.
 
-- [https://www.openapis.org](https://www.openapis.org)
+## Features
 
+- **Bank Account Management:** APIs to create and manage bank accounts with robust data validation.
+- **Native Performance:** Compiled using GraalVM Native Image for lightning-fast startup and optimized resource usage.
+- **Notification System:** Publishes events to an SNS topic whenever a new bank account is created, enabling integration with downstream systems.
+- **Infrastructure as Code:** AWS infrastructure is managed and deployed using Terraform.
+- **Local Testing:** Comprehensive local testing using JUnit 5, Mockito, AssertJ, LocalStack, and TestContainers.
+- **CI/CD Pipeline:** Continuous integration and deployment through GitHub Actions for seamless delivery.
 
-## Feature maven-enforcer-plugin documentation
-
-- [https://maven.apache.org/enforcer/maven-enforcer-plugin/](https://maven.apache.org/enforcer/maven-enforcer-plugin/)
-
-
-## Feature serialization-jackson documentation
-
-- [Micronaut Serialization Jackson Core documentation](https://micronaut-projects.github.io/micronaut-serialization/latest/guide/)
-
-
-## Feature aws-lambda documentation
-
-- [Micronaut AWS Lambda Function documentation](https://micronaut-projects.github.io/micronaut-aws/latest/guide/index.html#lambda)
-
-
-## Feature aws-lambda-custom-runtime documentation
-
-- [Micronaut Custom AWS Lambda runtime documentation](https://micronaut-projects.github.io/micronaut-aws/latest/guide/index.html#lambdaCustomRuntimes)
-
-- [https://docs.aws.amazon.com/lambda/latest/dg/runtimes-custom.html](https://docs.aws.amazon.com/lambda/latest/dg/runtimes-custom.html)
-
-
-## Feature aws-lambda-events-serde documentation
-
-- [Micronaut AWS Lambda Events Serde documentation](https://micronaut-projects.github.io/micronaut-aws/snapshot/guide/#eventsLambdaSerde)
-
-- [https://github.com/aws/aws-lambda-java-libs/tree/main/aws-lambda-java-events](https://github.com/aws/aws-lambda-java-libs/tree/main/aws-lambda-java-events)
-
-
-## Feature validation documentation
-
-- [Micronaut Validation documentation](https://micronaut-projects.github.io/micronaut-validation/latest/guide/)
-
-
-## Feature micronaut-aot documentation
-
-- [Micronaut AOT documentation](https://micronaut-projects.github.io/micronaut-aot/latest/guide/)
-
-
+## Project Architecture

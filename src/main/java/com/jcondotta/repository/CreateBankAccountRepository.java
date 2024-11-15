@@ -34,7 +34,6 @@ public class CreateBankAccountRepository {
         try {
             MDC.put("bankAccountId", bankAccount.getBankAccountId().toString());
             MDC.put("accountHolderId", accountHolder.getAccountHolderId().toString());
-            MDC.put("accountHolderName", accountHolder.getAccountHolderName());
 
             LOGGER.debug("Initiating transaction to create bank account and account holder.");
 

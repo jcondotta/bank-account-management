@@ -1,7 +1,9 @@
 package com.jcondotta.service.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.jcondotta.domain.AccountHolderType;
 import com.jcondotta.domain.BankingEntity;
 import io.micronaut.serde.annotation.Serdeable;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -10,6 +12,7 @@ import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
@@ -78,5 +81,12 @@ public class BankAccountDTO {
 
     public LocalDateTime getDateOfOpening() {
         return dateOfOpening;
+    }
+
+    @JsonIgnore
+    public Optional<AccountHolderDTO> getPrimaryAccountHolder() {
+        return accountHolders.stream()
+                .filter(accountHolderDTO -> AccountHolderType.PRIMARY.equals(accountHolderDTO.getAccountHolderType()))
+                .findFirst();
     }
 }

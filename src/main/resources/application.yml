@@ -24,3 +24,4 @@ aws:
     topics:
       bank-account-created:
         topic-name: ${AWS_SNS_BANK_ACCOUNT_CREATED_TOPIC_NAME}
+        topic-arn: ${AWS_SNS_BANK_ACCOUNT_CREATED_TOPIC_ARN}

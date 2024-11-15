@@ -9,7 +9,9 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.lifecycle.Startables;
 import org.testcontainers.utility.DockerImageName;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Testcontainers
 public interface LocalStackTestContainer extends TestPropertyProvider {
@@ -23,6 +25,8 @@ public interface LocalStackTestContainer extends TestPropertyProvider {
             .withServices(Service.DYNAMODB, Service.SNS, Service.SQS)
             .withLogConsumer(outputFrame -> LOGGER.debug(outputFrame.getUtf8StringWithoutLineEnding()));
 
+    String SNS_BANK_ACCOUNT_CREATED_TOPIC_ARN = "bank-account-created-topic-test";
+
     @Override
     default Map<String, String> getProperties() {
         try {
@@ -34,13 +38,18 @@ public interface LocalStackTestContainer extends TestPropertyProvider {
             throw new RuntimeException("Failed to start LocalStack container", e);
         }
 
-        logContainerConfiguration();
+        var snsTopicARN = LocalStackSNSTopicCreator.createSNSTopicWithARNResponse(SNS_BANK_ACCOUNT_CREATED_TOPIC_ARN);
 
-        return getContainerProperties();
+        Map<String, String> containerProperties = getContainerProperties();
+        containerProperties.put("AWS_SNS_BANK_ACCOUNT_CREATED_TOPIC_ARN", snsTopicARN);
+
+        logContainerConfiguration(containerProperties);
+
+        return containerProperties;
     }
 
     default Map<String, String> getContainerProperties() {
-        return Map.ofEntries(
+        var mapContainerProperties = Map.ofEntries(
                 Map.entry("AWS_ACCESS_KEY_ID", LOCALSTACK_CONTAINER.getAccessKey()),
                 Map.entry("AWS_SECRET_ACCESS_KEY", LOCALSTACK_CONTAINER.getSecretKey()),
                 Map.entry("AWS_DEFAULT_REGION", LOCALSTACK_CONTAINER.getRegion()),
@@ -48,17 +57,20 @@ public interface LocalStackTestContainer extends TestPropertyProvider {
                 Map.entry("AWS_SNS_ENDPOINT", LOCALSTACK_CONTAINER.getEndpointOverride(Service.SNS).toString()),
                 Map.entry("AWS_SQS_ENDPOINT", LOCALSTACK_CONTAINER.getEndpointOverride(Service.SQS).toString())
         );
+
+        return new HashMap<>(mapContainerProperties);
     }
 
-    default void logContainerConfiguration() {
-        LOGGER.info("\n================== Container Configuration ==================\n" +
-                "LocalStack Configuration:\n" +
-                String.format("  Access Key       : %s%n", LOCALSTACK_CONTAINER.getAccessKey()) +
-                String.format("  Secret Key       : %s%n", LOCALSTACK_CONTAINER.getSecretKey()) +
-                String.format("  Region           : %s%n", LOCALSTACK_CONTAINER.getRegion()) +
-                String.format("  DynamoDB Endpoint: %s%n", LOCALSTACK_CONTAINER.getEndpointOverride(Service.DYNAMODB)) +
-                String.format("  SNS Endpoint: %s%n", LOCALSTACK_CONTAINER.getEndpointOverride(Service.SNS)) +
-                String.format("  SQS Endpoint: %s%n", LOCALSTACK_CONTAINER.getEndpointOverride(Service.SQS)) +
-                "===========================================================\n");
+    default void logContainerConfiguration(Map<String, String> containerProperties) {
+        var logBuilder = new StringBuilder();
+        logBuilder.append("\n================== Container Configuration ==================\n");
+
+        containerProperties.forEach((key, value) ->
+                logBuilder.append(String.format("  %s : %s%n", key, value))
+        );
+
+        logBuilder.append("=============================================================\n");
+
+        LOGGER.info(logBuilder.toString());
     }
 }

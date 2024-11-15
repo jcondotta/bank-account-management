@@ -1,5 +1,6 @@
 package com.jcondotta.web.controller.bank_account;
 
+import com.jcondotta.repository.CreateBankAccountResponse;
 import com.jcondotta.service.bank_account.CreateBankAccountService;
 import com.jcondotta.service.dto.BankAccountDTO;
 import com.jcondotta.service.dto.ExistentBankAccountDTO;
@@ -22,6 +23,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
+import software.amazon.awssdk.enhanced.dynamodb.model.TransactWriteItemsEnhancedRequest;
 
 @Validated
 @Controller(BankAccountURIBuilder.BASE_PATH_API_V1_MAPPING)
@@ -73,15 +76,25 @@ public class CreateBankAccountController {
     public HttpResponse<BankAccountDTO> createBankAccount(@Body CreateBankAccountRequest createBankAccountRequest) {
         LOGGER.info("Received request to create bank account for the account holder: {}", createBankAccountRequest.accountHolder());
 
-        BankAccountDTO bankAccountDTO = createBankAccountService.create(createBankAccountRequest);
+        try {
+            var bankAccountDTO = createBankAccountService.create(createBankAccountRequest);
+            MDC.put("bankAccountId", bankAccountDTO.getBankAccountId().toString());
 
-        if (bankAccountDTO instanceof ExistentBankAccountDTO) {
-            LOGGER.info("Bank account already exists for ID: {}", bankAccountDTO.getBankAccountId());
-            return HttpResponse.ok(bankAccountDTO);
+            bankAccountDTO.getPrimaryAccountHolder().ifPresent(accountHolderDTO -> {
+                MDC.put("accountHolderId", accountHolderDTO.getAccountHolderId().toString());
+            });
+
+            if (bankAccountDTO instanceof ExistentBankAccountDTO) {
+                LOGGER.info("Bank account already exists for ID: {}", bankAccountDTO.getBankAccountId());
+                return HttpResponse.ok(bankAccountDTO);
+            }
+            else {
+                LOGGER.info("Bank account created successfully");
+                return HttpResponse.created(bankAccountDTO, BankAccountURIBuilder.bankAccountURI(bankAccountDTO.getBankAccountId()));
+            }
         }
-        else {
-            LOGGER.info("Bank account created successfully with ID: {}", bankAccountDTO.getBankAccountId());
-            return HttpResponse.created(bankAccountDTO, BankAccountURIBuilder.bankAccountURI(bankAccountDTO.getBankAccountId()));
+        finally {
+            MDC.clear();
         }
     }
 }

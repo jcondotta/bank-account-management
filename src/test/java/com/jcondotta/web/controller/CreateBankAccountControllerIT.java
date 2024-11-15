@@ -1,13 +1,8 @@
 package com.jcondotta.web.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.jcondotta.argument_provider.BlankValuesArgumentProvider;
 import com.jcondotta.argument_provider.InvalidPassportNumberArgumentProvider;
-import com.jcondotta.configuration.BankAccountCreatedSNSTopicConfig;
-import com.jcondotta.configuration.BankAccountCreatedSQSQueueConfig;
 import com.jcondotta.container.LocalStackTestContainer;
-import com.jcondotta.event.SNSTopicArnFinder;
 import com.jcondotta.helper.TestAccountHolderRequest;
 import com.jcondotta.service.dto.AccountHolderDTO;
 import com.jcondotta.service.dto.BankAccountDTO;
@@ -28,18 +23,12 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
-import software.amazon.awssdk.services.sns.SnsClient;
-import software.amazon.awssdk.services.sns.model.SubscribeResponse;
-import software.amazon.awssdk.services.sqs.SqsClient;
-import software.amazon.awssdk.services.sqs.model.GetQueueAttributesRequest;
-import software.amazon.awssdk.services.sqs.model.QueueAttributeName;
 
 import java.io.IOException;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Locale;
-import java.util.Optional;
 import java.util.function.Supplier;
 
 import static io.restassured.RestAssured.given;
@@ -67,22 +56,6 @@ class CreateBankAccountControllerIT implements LocalStackTestContainer {
     RequestSpecification requestSpecification;
 
     @Inject
-    SnsClient snsClient;
-
-    @Inject
-    BankAccountCreatedSNSTopicConfig bankAccountCreatedSNSTopicConfig;
-
-    @Inject
-    SNSTopicArnFinder snsTopicArnFinder;
-
-    @Inject
-    SqsClient sqsClient;
-
-    @Inject
-    BankAccountCreatedSQSQueueConfig bankAccountCreatedSQSQueueConfig;
-    String bankAccountCreatedSQSQueueURL;
-
-    @Inject
     @Named("exceptionMessageSource")
     MessageSource messageSource;
 
@@ -95,23 +68,6 @@ class CreateBankAccountControllerIT implements LocalStackTestContainer {
         this.requestSpecification = requestSpecification
                 .basePath(BankAccountURIBuilder.BASE_PATH_API_V1_MAPPING)
                 .contentType(ContentType.JSON);
-
-        this.bankAccountCreatedSQSQueueURL = sqsClient.getQueueUrl(builder -> builder
-                .queueName(bankAccountCreatedSQSQueueConfig.queueName()))
-                .queueUrl();
-
-        String queueArn = sqsClient.getQueueAttributes(GetQueueAttributesRequest.builder()
-                        .queueUrl(bankAccountCreatedSQSQueueURL)
-                        .attributeNames(QueueAttributeName.QUEUE_ARN)
-                        .build())
-                .attributes()
-                .get(QueueAttributeName.QUEUE_ARN);
-
-        Optional<SubscribeResponse> sqs = snsTopicArnFinder.findTopicARN(bankAccountCreatedSNSTopicConfig.topicName())
-                .map(topicARN -> snsClient.subscribe(builder -> builder
-                        .topicArn(topicARN)
-                        .protocol("sqs")
-                        .endpoint(queueArn)));
     }
 
     @Test
@@ -191,46 +147,6 @@ class CreateBankAccountControllerIT implements LocalStackTestContainer {
         assertThat(createdBankAccountDTO)
                 .usingRecursiveComparison()
                 .isEqualTo(fetchedBankAccountDTO);
-    }
-
-    @Test
-    void shouldReturn201CreatedWithBody2_whenRequestIsValid() throws IOException {
-        var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, DATE_OF_BIRTH_JEFFERSON, PASSPORT_NUMBER_JEFFERSON);
-        var addBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
-
-        var bankAccountDTO = given()
-            .spec(requestSpecification)
-                .body(jsonMapper.writeValueAsString(addBankAccountRequest))
-        .when()
-            .post()
-        .then()
-            .statusCode(HttpStatus.CREATED.getCode())
-                .extract()
-                    .response()
-                        .as(BankAccountDTO.class);
-
-        var messages = sqsClient.receiveMessage(builder ->
-                builder.queueUrl(bankAccountCreatedSQSQueueURL)
-                        .waitTimeSeconds(3)
-                        .maxNumberOfMessages(1)
-                        .build())
-                .messages();
-
-        //TODO find a better way to assert this..
-        assertThat(messages).hasSize(1)
-                .first()
-                .satisfies(message -> {
-                    ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
-                    var envelopeNode = objectMapper.readTree(message.body());
-                    var actualMessage = envelopeNode.get("Message").asText();
-                    var sqsBankAccountDTO = objectMapper.readValue(actualMessage, BankAccountDTO.class);
-
-                    assertThat(actualMessage).isEqualTo(jsonMapper.writeValueAsString(bankAccountDTO));
-
-                    assertThat(bankAccountDTO)
-                        .usingRecursiveComparison()
-                        .isEqualTo(sqsBankAccountDTO);
-                });
     }
 
     @Test

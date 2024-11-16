@@ -15,7 +15,11 @@ public class TestBankAccountFactory {
         return BankingEntity.buildBankAccount(bankAccountId, iban, dateOfOpening);
     }
 
+    public static BankingEntity create(UUID bankAccountId) {
+        return create(bankAccountId, new Faker().finance().iban(), LocalDateTime.now(TEST_CLOCK_FIXED_INSTANT));
+    }
+
     public static BankingEntity create() {
-        return create(UUID.randomUUID(), new Faker().finance().iban(), LocalDateTime.now(TEST_CLOCK_FIXED_INSTANT));
+        return create(UUID.randomUUID());
     }
 }

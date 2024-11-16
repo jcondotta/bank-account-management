@@ -1,6 +1,5 @@
 package com.jcondotta.web.controller.bank_account;
 
-import com.jcondotta.repository.CreateBankAccountResponse;
 import com.jcondotta.service.bank_account.CreateBankAccountService;
 import com.jcondotta.service.dto.BankAccountDTO;
 import com.jcondotta.service.dto.ExistentBankAccountDTO;
@@ -24,7 +23,6 @@ import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
-import software.amazon.awssdk.enhanced.dynamodb.model.TransactWriteItemsEnhancedRequest;
 
 @Validated
 @Controller(BankAccountURIBuilder.BASE_PATH_API_V1_MAPPING)

@@ -34,4 +34,8 @@ public class TestAccountHolderFactory {
     public static BankingEntity createPrimaryAccountHolder(TestAccountHolderRequest testAccountHolderRequest, UUID bankAccountId) {
         return create(UUID.randomUUID(), testAccountHolderRequest, AccountHolderType.PRIMARY, bankAccountId);
     }
+
+    public static BankingEntity createJointAccountHolder(TestAccountHolderRequest testAccountHolderRequest, UUID bankAccountId) {
+        return create(UUID.randomUUID(), testAccountHolderRequest, AccountHolderType.JOINT, bankAccountId);
+    }
 }

@@ -11,7 +11,6 @@ import org.testcontainers.utility.DockerImageName;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 @Testcontainers
 public interface LocalStackTestContainer extends TestPropertyProvider {

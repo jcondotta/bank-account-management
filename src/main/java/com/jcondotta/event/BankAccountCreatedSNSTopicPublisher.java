@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import software.amazon.awssdk.services.sns.SnsClient;
+import software.amazon.awssdk.services.sns.model.PublishRequest;
 
 import java.io.IOException;
 
@@ -50,10 +51,12 @@ public class BankAccountCreatedSNSTopicPublisher {
 
             var notification = serializeNotification(bankAccountCreatedNotification);
 
-            var publishResponse = snsClient.publish(builder -> builder
-                    .topicArn(snsTopicConfig.topicArn())
+            var publishRequest = PublishRequest.builder()
                     .message(notification)
-                    .build());
+                    .topicArn(snsTopicConfig.topicArn())
+                    .build();
+
+            var publishResponse = snsClient.publish(publishRequest);
 
             LOGGER.info("Successfully published message to SNS topic '{}'. Message ID: {}", snsTopicConfig.topicArn(), publishResponse.messageId());
 

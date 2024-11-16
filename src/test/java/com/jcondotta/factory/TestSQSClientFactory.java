@@ -8,7 +8,6 @@ import jakarta.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.auth.credentials.AwsCredentials;
-import software.amazon.awssdk.auth.credentials.EnvironmentVariableCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.sqs.SqsClient;
@@ -23,7 +22,7 @@ public class TestSQSClientFactory {
     @Singleton
     @Replaces(SqsClient.class)
     @Requires(property = "aws.sqs.endpoint", pattern = "(.|\\s)*\\S(.|\\s)*")
-    public SqsClient sqsClientEndpointOverridden(AwsCredentials awsCredentials, Region region, @Value("${aws.sqs.endpoint}") String endpoint){
+    public SqsClient sqsClient(AwsCredentials awsCredentials, Region region, @Value("${aws.sqs.endpoint}") String endpoint){
         logger.info("Building SQSClient with params: awsCredentials: {}, region: {} and endpoint: {}", awsCredentials, region, endpoint);
 
         return SqsClient.builder()

@@ -17,12 +17,14 @@ import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
+import org.slf4j.MDC;
 
 import java.io.IOException;
 import java.time.Clock;
@@ -68,6 +70,16 @@ class CreateBankAccountControllerIT implements LocalStackTestContainer {
         this.requestSpecification = requestSpecification
                 .basePath(BankAccountURIBuilder.BASE_PATH_API_V1_MAPPING)
                 .contentType(ContentType.JSON);
+    }
+
+    @AfterEach
+    void afterEach(){
+        assertThat(MDC.get("bankAccountId"))
+                .as("MDC should be cleared after the publishMessage method completes for bankAccountId")
+                .isNull();
+        assertThat(MDC.get("accountHolderId"))
+                .as("MDC should be cleared after the publishMessage method completes for accountHolderId")
+                .isNull();
     }
 
     @Test

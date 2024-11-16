@@ -5,12 +5,14 @@ import com.jcondotta.factory.TestAccountHolderFactory;
 import com.jcondotta.factory.TestBankAccountFactory;
 import com.jcondotta.helper.TestAccountHolderRequest;
 import com.jcondotta.service.dto.BankAccountDTO;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.MDC;
 import software.amazon.awssdk.enhanced.dynamodb.*;
 import software.amazon.awssdk.enhanced.dynamodb.model.TransactWriteItemsEnhancedRequest;
 import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
@@ -40,6 +42,16 @@ class CreateBankAccountRepositoryTest {
 
     @Mock
     private TableMetadata tableMetadata;
+
+    @AfterEach
+    void afterEach(){
+        assertThat(MDC.get("bankAccountId"))
+                .as("MDC should be cleared after the publishMessage method completes for bankAccountId")
+                .isNull();
+        assertThat(MDC.get("accountHolderId"))
+                .as("MDC should be cleared after the publishMessage method completes for accountHolderId")
+                .isNull();
+    }
 
     @Test
     void shouldSaveBankAccount_whenRecipientIsValid() {

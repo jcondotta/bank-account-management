@@ -7,13 +7,9 @@ import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.sqs.SqsClient;
-import software.amazon.awssdk.services.sqs.model.GetQueueAttributesRequest;
-import software.amazon.awssdk.services.sqs.model.QueueAttributeName;
 
 import java.net.URI;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 
 import static com.jcondotta.container.LocalStackTestContainer.LOCALSTACK_CONTAINER;
 

@@ -1,4 +1,4 @@
-# Recipients Project v.1.0
+# Bank accounts management Project v.1.0
 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=jcondotta_bank-account-management&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=jcondotta_bank-account-management)  
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=jcondotta_bank-account-management&metric=coverage)](https://sonarcloud.io/summary/new_code?id=jcondotta_bank-account-management)

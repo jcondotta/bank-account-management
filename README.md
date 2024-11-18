@@ -51,3 +51,5 @@ This project is part of a microservice architecture responsible for managing ban
 - **CI/CD Pipeline:** Continuous integration and deployment through GitHub Actions for seamless delivery.
 
 ## Project Architecture
+
+![Recipients Project Architecture](./architecture/bank-accounts-architecture.png)

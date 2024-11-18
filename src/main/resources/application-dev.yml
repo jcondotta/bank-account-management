@@ -1,3 +1,7 @@
+micronaut:
+  application:
+    name: bank-accounts-service
+
 aws:
   access-key-id: 'test'
   secret-key: 'test'

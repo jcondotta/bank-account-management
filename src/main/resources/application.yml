@@ -1,8 +1,6 @@
 micronaut:
   server:
     port: 8090
-  openapi:
-    filename: bank-accounts-swagger-spec
   router:
     static-resources:
       swagger:
@@ -11,6 +9,17 @@ micronaut:
       swagger-ui:
         paths: classpath:META-INF/swagger/views/swagger-ui
         mapping: /swagger-ui/**
+  openapi:
+    enabled: true
+    url: /openapi
+    filename: bank-accounts-swagger-spec
+    info:
+      title: "Bank Accounts API"
+      version: "1.0.0"
+      description: "API documentation for the Bank Accounts microservice."
+    swagger:
+      ui:
+        path: /swagger-ui
 
 aws:
   access-key-id: ${AWS_ACCESS_KEY_ID}

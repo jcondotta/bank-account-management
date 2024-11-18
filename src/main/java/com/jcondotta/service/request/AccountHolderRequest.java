@@ -20,7 +20,7 @@ public record AccountHolderRequest(
         @Size(max = 255, message = "accountHolder.accountHolderName.tooLong")
         String accountHolderName,
 
-        @Schema(description = "Date of birth of the account holder", example = "1990-01-01", requiredMode = RequiredMode.REQUIRED)
+        @Schema(description = "Date of birth of the account holder", example = "1990-11-23", pattern = "yyyy-MM-dd", requiredMode = RequiredMode.REQUIRED)
         @Past(message = "accountHolder.dateOfBirth.past")
         @NotNull(message = "accountHolder.dateOfBirth.notNull")
         LocalDate dateOfBirth,

@@ -37,37 +37,26 @@ public class CreateBankAccountController {
         this.createBankAccountService = createBankAccountService;
     }
 
-    @Operation(summary = "Create a new bank account",
-            description = "Creates a new bank account with the provided account holder information.",
+    @Operation(summary = "${operation.createBankAccount.summary}", description = "${operation.createBankAccount.description}",
             requestBody = @RequestBody(
-                    description = "Primary account holder details",
+                    description = "${requestBody.createBankAccount.description}",
                     required = true,
-                    content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON,
-                            schema = @Schema(implementation = CreateBankAccountRequest.class)
-                    )
-            )
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CreateBankAccountRequest.class)))
     )
     @ApiResponses(value = {
             @ApiResponse(
-                    responseCode = "201",
-                    description = "Bank account successfully created.",
+                    responseCode = "201", description = "${response.createBankAccount.201.description}",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = BankAccountDTO.class)),
                     headers = {
-                            @Header(name = "Location", description = "URI of the newly created bank account",
-                                    schema = @Schema(
-                                            type = "string",
-                                            format = "uri",
-                                            example = "/api/v1/bank-accounts/01920bff-1338-7efd-ade6-e9128debe5d4"))
+                            @Header(name = "Location", description = "${response.createBankAccount.201.header.Location.description}",
+                                    schema = @Schema(type = "string", format = "uri",
+                                            example = "${response.createBankAccount.201.header.Location.example}"
+                                    )
+                            )
                     }
             ),
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Bank account already exists, returning the existing data.",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ExistentBankAccountDTO.class))
-            ),
-            @ApiResponse(responseCode = "400", description = "Invalid request data. Check the provided bank account details."),
-            @ApiResponse(responseCode = "500", description = "Internal server error. Unable to process the request at this time.")
+            @ApiResponse(responseCode = "400", description = "${response.createBankAccount.400.description}"),
+            @ApiResponse(responseCode = "500", description = "${response.createBankAccount.500.description}")
     })
     @Post(consumes = MediaType.APPLICATION_JSON, produces = MediaType.APPLICATION_JSON)
     @Status(HttpStatus.CREATED)
@@ -78,18 +67,11 @@ public class CreateBankAccountController {
             var bankAccountDTO = createBankAccountService.create(createBankAccountRequest);
             MDC.put("bankAccountId", bankAccountDTO.getBankAccountId().toString());
 
-            bankAccountDTO.getPrimaryAccountHolder().ifPresent(accountHolderDTO -> {
-                MDC.put("accountHolderId", accountHolderDTO.getAccountHolderId().toString());
-            });
+            bankAccountDTO.getPrimaryAccountHolder()
+                    .ifPresent(accountHolderDTO -> MDC.put("accountHolderId", accountHolderDTO.getAccountHolderId().toString()));
 
-            if (bankAccountDTO instanceof ExistentBankAccountDTO) {
-                LOGGER.info("Bank account already exists for ID: {}", bankAccountDTO.getBankAccountId());
-                return HttpResponse.ok(bankAccountDTO);
-            }
-            else {
-                LOGGER.info("Bank account created successfully");
-                return HttpResponse.created(bankAccountDTO, BankAccountURIBuilder.bankAccountURI(bankAccountDTO.getBankAccountId()));
-            }
+            LOGGER.info("Bank account created successfully");
+            return HttpResponse.created(bankAccountDTO, BankAccountURIBuilder.bankAccountURI(bankAccountDTO.getBankAccountId()));
         }
         finally {
             MDC.clear();

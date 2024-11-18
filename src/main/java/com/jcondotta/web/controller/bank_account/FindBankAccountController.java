@@ -60,14 +60,8 @@ public class FindBankAccountController {
 
         LOGGER.info("Received request to fetch bank account with ID: {}", bankAccountId);
 
-        return findBankAccountService.findBankAccountById(bankAccountId)
-                .map(account -> {
-                    LOGGER.info("Bank account found with ID: {}", bankAccountId);
-                    return HttpResponse.ok(account);
-                })
-                .orElseGet(() -> {
-                    LOGGER.warn("No bank account found with ID: {}", bankAccountId);
-                    return HttpResponse.notFound();
-                });
+        var bankAccountDTO = findBankAccountService.findBankAccountById(bankAccountId);
+
+        return HttpResponse.ok(bankAccountDTO);
     }
 }

@@ -2,12 +2,17 @@ package com.jcondotta.service.bank_account;
 
 import com.jcondotta.domain.BankingEntity;
 import com.jcondotta.domain.EntityType;
+import com.jcondotta.exception.BankAccountNotFoundException;
+import com.jcondotta.service.dto.AccountHolderDTO;
 import com.jcondotta.service.dto.BankAccountDTO;
+import com.jcondotta.web.controller.bank_account.BankAccountURIBuilder;
+import io.micronaut.http.HttpResponse;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
@@ -27,11 +32,26 @@ public class FindBankAccountService {
         this.bankingEntityDynamoDbTable = bankingEntityDynamoDbTable;
     }
 
-    public Optional<BankAccountDTO> findBankAccountById(@NotNull UUID bankAccountId) {
+    public BankAccountDTO findBankAccountById(@NotNull UUID bankAccountId) {
         var partitionKey = BankingEntity.BANK_ACCOUNT_PK_TEMPLATE.formatted(bankAccountId.toString());
         var queryConditional = QueryConditional.keyEqualTo(Key.builder()
                         .partitionValue(partitionKey)
                 .build());
+
+//
+//        try {
+//            MDC.put("bankAccountId", bankAccountDTO.getBankAccountId().toString());
+//
+//            bankAccountDTO.getPrimaryAccountHolder()
+//                    .ifPresent(accountHolderDTO -> MDC.put("accountHolderId", accountHolderDTO.getAccountHolderId().toString()));
+//
+//            LOGGER.info("Bank account created successfully");
+//            return HttpResponse.created(bankAccountDTO, BankAccountURIBuilder.bankAccountURI(bankAccountDTO.getBankAccountId()));
+//        }
+//        finally {
+//            MDC.clear();
+//        }
+
 
         var bankingEntities = bankingEntityDynamoDbTable.query(queryConditional)
                 .items().stream()
@@ -39,14 +59,16 @@ public class FindBankAccountService {
 
         var bankAccount = bankingEntities.stream()
                 .filter(bankingEntity -> bankingEntity.getEntityType().equals(EntityType.BANK_ACCOUNT))
-                .findFirst();
+                .peek(bankingEntity ->  LOGGER.info("Bank account found"))
+                .findFirst()
+                .orElseThrow(() -> new BankAccountNotFoundException("bankAccount.notFound", bankAccountId));
 
         var accountHolders = bankingEntities.stream()
                 .filter(bankingEntity -> bankingEntity.getEntityType().equals(EntityType.ACCOUNT_HOLDER))
+                .peek(bankingEntity ->  LOGGER.info(bankingEntity.getAccountHolderType() + " account holder found with ID: {} and name: {}", bankingEntity.getBankAccountId(), bankingEntity.getAccountHolderName()))
+                .map(AccountHolderDTO::new)
                 .toList();
 
-        return bankAccount
-                .map(bankingEntity -> new BankAccountDTO(bankingEntity, accountHolders));
-
+        return new BankAccountDTO(bankAccount, accountHolders);
     }
 }

@@ -2,7 +2,6 @@ package com.jcondotta.web.controller.bank_account;
 
 import com.jcondotta.service.bank_account.CreateBankAccountService;
 import com.jcondotta.service.dto.BankAccountDTO;
-import com.jcondotta.service.dto.ExistentBankAccountDTO;
 import com.jcondotta.service.request.CreateBankAccountRequest;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.HttpStatus;

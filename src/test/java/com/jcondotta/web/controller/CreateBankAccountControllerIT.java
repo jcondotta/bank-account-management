@@ -85,11 +85,11 @@ class CreateBankAccountControllerIT implements LocalStackTestContainer {
     @Test
     void shouldReturn201CreatedWithValidLocationHeader_whenRequestIsValid() throws IOException {
         var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, DATE_OF_BIRTH_JEFFERSON, PASSPORT_NUMBER_JEFFERSON);
-        var addBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
+        var createBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
 
         var response = given()
             .spec(requestSpecification)
-                .body(jsonMapper.writeValueAsString(addBankAccountRequest))
+                .body(jsonMapper.writeValueAsString(createBankAccountRequest))
         .when()
             .post()
         .then()
@@ -120,11 +120,11 @@ class CreateBankAccountControllerIT implements LocalStackTestContainer {
     @Test
     void shouldReturn201CreatedWithValidBody_whenRequestIsValid() throws IOException {
         var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, DATE_OF_BIRTH_JEFFERSON, PASSPORT_NUMBER_JEFFERSON);
-        var addBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
+        var createBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
 
         var createdBankAccountDTO = given()
             .spec(requestSpecification)
-                .body(jsonMapper.writeValueAsString(addBankAccountRequest))
+                .body(jsonMapper.writeValueAsString(createBankAccountRequest))
         .when()
             .post()
         .then()

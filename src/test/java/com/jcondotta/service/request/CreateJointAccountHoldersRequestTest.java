@@ -42,7 +42,7 @@ public class CreateJointAccountHoldersRequestTest {
     }
 
     @Test
-    void shouldNotDetectConstraintViolation_whenAccountHoldersListHasMultipleItems() {
+    void shouldNotDetectConstraintViolation_whenAccountHoldersListHasTwoItems() {
         var jeffersonAccountHolderRequest = TestAccountHolderRequest.JEFFERSON.toAccountHolderRequest();
         var virginioAccountHolderRequest = TestAccountHolderRequest.VIRGINIO.toAccountHolderRequest();
         var accountHolderRequests = List.of(jeffersonAccountHolderRequest, virginioAccountHolderRequest);
@@ -62,7 +62,7 @@ public class CreateJointAccountHoldersRequestTest {
     }
 
     @Test
-    void shouldDetectConstraintViolation_whenAccountHoldersListHasMoreThan2Items() {
+    void shouldDetectConstraintViolation_whenAccountHoldersListHasMoreThanTwoItems() {
         var accountHolderRequests = List.of(
                 TestAccountHolderRequest.JEFFERSON.toAccountHolderRequest(),
                 TestAccountHolderRequest.VIRGINIO.toAccountHolderRequest(),

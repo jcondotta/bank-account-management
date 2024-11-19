@@ -33,35 +33,41 @@ public class FindBankAccountController {
         this.findBankAccountService = findBankAccountService;
     }
 
-    @Operation(summary = "Retrieve bank account details", description = "Fetches details of a bank account by its unique ID.")
+    @Operation(
+            summary = "${operation.findBankAccount.summary}",
+            description = "${operation.findBankAccount.description}"
+    )
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "Bank account successfully retrieved.",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = BankAccountDTO.class))
+                    description = "${response.findBankAccount.200.description}",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = BankAccountDTO.class)
+                )
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Bank account not found for the provided ID."
+                    description = "${response.findBankAccount.404.description}"
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Invalid request data. The provided bank account ID is malformed."
+                    description = "${response.findBankAccount.400.description}"
             ),
             @ApiResponse(
                     responseCode = "500",
-                    description = "Internal server error. Unable to process the request at this time."
+                    description = "${response.findBankAccount.500.description}"
             )
     })
     @Get(produces = MediaType.APPLICATION_JSON)
     public HttpResponse<BankAccountDTO> findBankAccount(
-            @Parameter(description = "Unique identifier of the bank account", required = true, example = "01920bff-1338-7efd-ade6-e9128debe5d4")
+            @Parameter(
+                    description = "${parameter.findBankAccount.bankAccountId.description}", required = true,
+                    example = "${parameter.findBankAccount.bankAccountId.example}"
+            )
             @PathVariable("bank-account-id") UUID bankAccountId) {
 
         LOGGER.info("Received request to fetch bank account with ID: {}", bankAccountId);
 
         var bankAccountDTO = findBankAccountService.findBankAccountById(bankAccountId);
-
         return HttpResponse.ok(bankAccountDTO);
     }
 }

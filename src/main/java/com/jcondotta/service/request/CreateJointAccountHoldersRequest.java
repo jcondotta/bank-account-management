@@ -20,7 +20,7 @@ public record CreateJointAccountHoldersRequest(
         @Valid
         @Size(max = 2, message = "accountHolders.tooMany")
         @NotEmpty(message = "accountHolders.notEmpty")
-        List<@NotNull(message = "accountHolder.notNull")
+        List< //@NotNull(message = "accountHolder.notNull")
                 AccountHolderRequest> accountHolderRequests) {
 
     public CreateJointAccountHoldersRequest(UUID bankAccountId, AccountHolderRequest accountHolderRequest) {

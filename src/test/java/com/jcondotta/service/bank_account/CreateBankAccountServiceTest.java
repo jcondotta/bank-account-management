@@ -1,4 +1,4 @@
-package com.jcondotta.service;
+package com.jcondotta.service.bank_account;
 
 
 import com.jcondotta.argument_provider.BlankValuesArgumentProvider;
@@ -9,7 +9,6 @@ import com.jcondotta.factory.ValidatorTestFactory;
 import com.jcondotta.helper.TestAccountHolderRequest;
 import com.jcondotta.repository.CreateBankAccountRepository;
 import com.jcondotta.repository.CreateBankAccountResponse;
-import com.jcondotta.service.bank_account.CreateBankAccountService;
 import com.jcondotta.service.request.AccountHolderRequest;
 import com.jcondotta.service.request.CreateBankAccountRequest;
 import jakarta.validation.ConstraintViolationException;

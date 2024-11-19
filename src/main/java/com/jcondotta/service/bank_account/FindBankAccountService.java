@@ -5,19 +5,15 @@ import com.jcondotta.domain.EntityType;
 import com.jcondotta.exception.BankAccountNotFoundException;
 import com.jcondotta.service.dto.AccountHolderDTO;
 import com.jcondotta.service.dto.BankAccountDTO;
-import com.jcondotta.web.controller.bank_account.BankAccountURIBuilder;
-import io.micronaut.http.HttpResponse;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 
-import java.util.Optional;
 import java.util.UUID;
 
 @Singleton

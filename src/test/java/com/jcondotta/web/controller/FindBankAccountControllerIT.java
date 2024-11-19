@@ -24,7 +24,6 @@ import org.slf4j.MDC;
 import java.time.LocalDate;
 import java.util.Locale;
 import java.util.UUID;
-import java.util.function.Supplier;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;

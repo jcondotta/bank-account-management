@@ -24,19 +24,19 @@ class CreateBankAccountRequestTest {
     @Test
     void shouldNotDetectConstraintViolation_whenRequestIsValid() {
         var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, DATE_OF_BIRTH_JEFFERSON, PASSPORT_NUMBER_JEFFERSON);
-        var addBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
+        var createBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
 
-        var constraintViolations = VALIDATOR.validate(addBankAccountRequest);
+        var constraintViolations = VALIDATOR.validate(createBankAccountRequest);
 
         assertThat(constraintViolations).isEmpty();
-        assertThat(addBankAccountRequest.accountHolder()).isEqualTo(accountHolderRequest);
+        assertThat(createBankAccountRequest.accountHolder()).isEqualTo(accountHolderRequest);
     }
 
     @Test
     void shouldDetectConstraintViolation_whenRequestHasNullAccountHolder() {
-        var addBankAccountRequest = new CreateBankAccountRequest(null);
+        var createBankAccountRequest = new CreateBankAccountRequest(null);
 
-        var constraintViolations = VALIDATOR.validate(addBankAccountRequest);
+        var constraintViolations = VALIDATOR.validate(createBankAccountRequest);
         assertThat(constraintViolations)
                 .hasSize(1)
                 .first()
@@ -50,9 +50,9 @@ class CreateBankAccountRequestTest {
     @ArgumentsSource(BlankValuesArgumentProvider.class)
     void shouldDetectConstraintViolation_whenAccountHolderNameIsBlank(String blankAccountHolderName) {
         var accountHolderRequest = new AccountHolderRequest(blankAccountHolderName, DATE_OF_BIRTH_JEFFERSON, PASSPORT_NUMBER_JEFFERSON);
-        var addBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
+        var createBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
 
-        var constraintViolations = VALIDATOR.validate(addBankAccountRequest);
+        var constraintViolations = VALIDATOR.validate(createBankAccountRequest);
         assertThat(constraintViolations)
                 .hasSize(1)
                 .first()
@@ -66,9 +66,9 @@ class CreateBankAccountRequestTest {
     void shouldDetectConstraintViolation_whenAccountHolderNameIsLongerThan255Characters() {
         final var veryLongAccountHolderName = "J".repeat(256);
         var accountHolderRequest = new AccountHolderRequest(veryLongAccountHolderName, DATE_OF_BIRTH_JEFFERSON, PASSPORT_NUMBER_JEFFERSON);
-        var addBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
+        var createBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
 
-        var constraintViolations = VALIDATOR.validate(addBankAccountRequest);
+        var constraintViolations = VALIDATOR.validate(createBankAccountRequest);
         assertThat(constraintViolations)
                 .hasSize(1)
                 .first()
@@ -81,9 +81,9 @@ class CreateBankAccountRequestTest {
     @Test
     void shouldDetectConstraintViolation_whenDateOfBirthIsNull() {
         var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, null, PASSPORT_NUMBER_JEFFERSON);
-        var addBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
+        var createBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
 
-        var constraintViolations = VALIDATOR.validate(addBankAccountRequest);
+        var constraintViolations = VALIDATOR.validate(createBankAccountRequest);
         assertThat(constraintViolations)
                 .hasSize(1)
                 .first()
@@ -97,9 +97,9 @@ class CreateBankAccountRequestTest {
     void shouldDetectConstraintViolation_whenDateOfBirthIsInFuture() {
         LocalDate futureDate = LocalDate.now().plusDays(1);
         var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, futureDate, PASSPORT_NUMBER_JEFFERSON);
-        var addBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
+        var createBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
 
-        var constraintViolations = VALIDATOR.validate(addBankAccountRequest);
+        var constraintViolations = VALIDATOR.validate(createBankAccountRequest);
         assertThat(constraintViolations)
                 .hasSize(1)
                 .first()
@@ -113,9 +113,9 @@ class CreateBankAccountRequestTest {
     void shouldDetectConstraintViolation_whenDateOfBirthIsToday() {
         LocalDate today = LocalDate.now();
         var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, today, PASSPORT_NUMBER_JEFFERSON);
-        var addBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
+        var createBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
 
-        var constraintViolations = VALIDATOR.validate(addBankAccountRequest);
+        var constraintViolations = VALIDATOR.validate(createBankAccountRequest);
         assertThat(constraintViolations)
                 .hasSize(1)
                 .first()
@@ -128,9 +128,9 @@ class CreateBankAccountRequestTest {
     @Test
     void shouldDetectConstraintViolation_whenPassportNumberIsNull() {
         var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, DATE_OF_BIRTH_JEFFERSON, null);
-        var addBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
+        var createBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
 
-        var constraintViolations = VALIDATOR.validate(addBankAccountRequest);
+        var constraintViolations = VALIDATOR.validate(createBankAccountRequest);
         assertThat(constraintViolations)
                 .hasSize(1)
                 .first()
@@ -144,9 +144,9 @@ class CreateBankAccountRequestTest {
     @ArgumentsSource(InvalidPassportNumberArgumentProvider.class)
     void shouldDetectConstraintViolation_whenPassportNumberIsNot8CharactersLong(String invalidLengthPassportNumber) {
         var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, DATE_OF_BIRTH_JEFFERSON, invalidLengthPassportNumber);
-        var addBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
+        var createBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
 
-        var constraintViolations = VALIDATOR.validate(addBankAccountRequest);
+        var constraintViolations = VALIDATOR.validate(createBankAccountRequest);
         assertThat(constraintViolations)
                 .hasSize(1)
                 .first()

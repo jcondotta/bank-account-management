@@ -21,7 +21,7 @@ public class TestSQSClientFactory {
 
     @Singleton
     @Replaces(SqsClient.class)
-    @Requires(property = "aws.sqs.endpoint", pattern = "(.|\\s)*\\S(.|\\s)*")
+    @Requires(property = "aws.sqs.endpoint")
     public SqsClient sqsClient(AwsCredentials awsCredentials, Region region, @Value("${aws.sqs.endpoint}") String endpoint){
         logger.info("Building SQSClient with params: awsCredentials: {}, region: {} and endpoint: {}", awsCredentials, region, endpoint);
 

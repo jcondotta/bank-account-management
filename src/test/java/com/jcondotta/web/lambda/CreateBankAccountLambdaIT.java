@@ -73,9 +73,9 @@ class CreateBankAccountLambdaIT implements LocalStackTestContainer {
     @Test
     void shouldReturn201Created_whenRequestIsValid() throws IOException {
         var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, DATE_OF_BIRTH_JEFFERSON, PASSPORT_NUMBER_JEFFERSON);
-        var addBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
+        var createBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
 
-        requestEvent.setBody(jsonMapper.writeValueAsString(addBankAccountRequest));
+        requestEvent.setBody(jsonMapper.writeValueAsString(createBankAccountRequest));
 
         var response = requestEventFunction.handleRequest(requestEvent, mockLambdaContext);
 
@@ -91,8 +91,8 @@ class CreateBankAccountLambdaIT implements LocalStackTestContainer {
 
     @Test
     void shouldReturn400BadRequest_whenAccountHolderIsNull() throws IOException {
-        var addBankAccountRequest = new CreateBankAccountRequest(null);
-        requestEvent.setBody(jsonMapper.writeValueAsString(addBankAccountRequest));
+        var createBankAccountRequest = new CreateBankAccountRequest(null);
+        requestEvent.setBody(jsonMapper.writeValueAsString(createBankAccountRequest));
 
         var response = requestEventFunction.handleRequest(requestEvent, mockLambdaContext);
 

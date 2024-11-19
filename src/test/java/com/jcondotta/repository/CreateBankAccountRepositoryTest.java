@@ -54,7 +54,7 @@ class CreateBankAccountRepositoryTest {
     }
 
     @Test
-    void shouldSaveBankAccount_whenRecipientIsValid() {
+    void shouldSaveBankAccount_whenRequestIsValid() {
         when(bankingEntityDynamoDbTable.tableSchema()).thenReturn(bankingEntityTableSchema);
         when(bankingEntityTableSchema.itemType()).thenReturn(EnhancedType.of(BankingEntity.class));
         when(bankingEntityTableSchema.tableMetadata()).thenReturn(tableMetadata);

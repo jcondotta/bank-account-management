@@ -21,7 +21,8 @@ public class TestAccountHolderFactory {
         );
     }
 
-    public static BankingEntity create(UUID accountHolderId, TestAccountHolderRequest testAccountHolderRequest, AccountHolderType accountHolderType, UUID bankAccountId) {
+    public static BankingEntity create(UUID accountHolderId, TestAccountHolderRequest testAccountHolderRequest,
+                                       AccountHolderType accountHolderType, UUID bankAccountId) {
         return create(
                 accountHolderId,
                 testAccountHolderRequest.getAccountHolderName(),

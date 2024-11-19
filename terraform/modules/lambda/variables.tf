@@ -39,12 +39,12 @@ variable "sns_bank_account_created_topic_arn" {
 }
 
 variable "lambda_function_name" {
-  description = "The name of the recipients Lambda function"
+  description = "The name of the bank accounts Lambda function"
   type        = string
 
   validation {
     condition     = length(var.lambda_function_name) > 0
-    error_message = "recipients_lambda_function_name must be a non-empty string."
+    error_message = "bank_accounts_lambda_function_name must be a non-empty string."
   }
 }
 

@@ -55,13 +55,11 @@ public class FindBankAccountService {
 
         var bankAccount = bankingEntities.stream()
                 .filter(bankingEntity -> bankingEntity.getEntityType().equals(EntityType.BANK_ACCOUNT))
-                .peek(bankingEntity ->  LOGGER.info("Bank account found"))
                 .findFirst()
                 .orElseThrow(() -> new BankAccountNotFoundException("bankAccount.notFound", bankAccountId));
 
         var accountHolders = bankingEntities.stream()
                 .filter(bankingEntity -> bankingEntity.getEntityType().equals(EntityType.ACCOUNT_HOLDER))
-                .peek(bankingEntity ->  LOGGER.info(bankingEntity.getAccountHolderType() + " account holder found with ID: {} and name: {}", bankingEntity.getBankAccountId(), bankingEntity.getAccountHolderName()))
                 .map(AccountHolderDTO::new)
                 .toList();
 

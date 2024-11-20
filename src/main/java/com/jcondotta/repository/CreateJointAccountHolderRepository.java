@@ -13,7 +13,7 @@ import java.util.Objects;
 @Singleton
 public class CreateJointAccountHolderRepository {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CreateBankAccountRepository.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CreateJointAccountHolderRepository.class);
 
     private final DynamoDbTable<BankingEntity> bankingEntityDynamoDbTable;
 

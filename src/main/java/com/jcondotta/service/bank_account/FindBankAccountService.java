@@ -19,8 +19,6 @@ import java.util.UUID;
 @Singleton
 public class FindBankAccountService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FindBankAccountService.class);
-
     private final DynamoDbTable<BankingEntity> bankingEntityDynamoDbTable;
 
     @Inject

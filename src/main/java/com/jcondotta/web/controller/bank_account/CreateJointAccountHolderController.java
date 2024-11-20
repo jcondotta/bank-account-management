@@ -2,7 +2,6 @@ package com.jcondotta.web.controller.bank_account;
 
 import com.jcondotta.service.bank_account.CreateJointAccountHolderService;
 import com.jcondotta.service.dto.AccountHolderDTO;
-import com.jcondotta.service.dto.AccountHoldersDTO;
 import com.jcondotta.service.request.AccountHolderRequest;
 import com.jcondotta.service.request.CreateJointAccountHolderRequest;
 import io.micronaut.http.HttpResponse;

@@ -1,21 +1,10 @@
 package com.jcondotta.service.request;
 
-import com.jcondotta.argument_provider.BlankValuesArgumentProvider;
-import com.jcondotta.argument_provider.InvalidPassportNumberArgumentProvider;
 import com.jcondotta.factory.ValidatorTestFactory;
 import com.jcondotta.helper.TestAccountHolderRequest;
-import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import jakarta.validation.Validator;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ArgumentsSource;
 
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
 public class CreateJointAccountHoldersRequestTest {
 

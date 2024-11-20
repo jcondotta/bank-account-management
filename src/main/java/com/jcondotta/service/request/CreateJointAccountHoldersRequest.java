@@ -1,7 +1,7 @@
 package com.jcondotta.service.request;
 
-import io.micronaut.core.annotation.Introspected;
 import io.micronaut.serde.annotation.Serdeable;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
@@ -16,11 +16,17 @@ import java.util.Objects;
 @Schema(description = "Request containing information for creating joint account holders.")
 public record CreateJointAccountHoldersRequest(
 
+        @ArraySchema(
+                schema = @Schema(
+                        description = "List of account holder requests.",
+                        requiredMode = Schema.RequiredMode.REQUIRED
+                ), minItems = 1, maxItems = 2
+        )
         @Size(max = 2, message = "accountHolders.tooMany")
         @NotEmpty(message = "accountHolders.notEmpty")
-        List<@Valid AccountHolderRequest> accountHolderRequests) {
+        List<@Valid @NotNull(message = "accountHolder.notNull") AccountHolderRequest> accountHolderRequests) {
 
     public CreateJointAccountHoldersRequest(AccountHolderRequest accountHolderRequest) {
-        this(Objects.requireNonNullElse(List.of(accountHolderRequest), Collections.EMPTY_LIST));
+        this(Objects.requireNonNullElse(List.of(accountHolderRequest), Collections.emptyList()));
     }
 }

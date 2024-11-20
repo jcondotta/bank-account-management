@@ -38,10 +38,6 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 @MicronautTest(transactional = false)
 class CreateBankAccountLambdaIT implements LocalStackTestContainer {
 
-    private static final String ACCOUNT_HOLDER_NAME_JEFFERSON = TestAccountHolderRequest.JEFFERSON.getAccountHolderName();
-    private static final String PASSPORT_NUMBER_JEFFERSON = TestAccountHolderRequest.JEFFERSON.getPassportNumber();
-    private static final LocalDate DATE_OF_BIRTH_JEFFERSON = TestAccountHolderRequest.JEFFERSON.getDateOfBirth();
-
     private static final Context mockLambdaContext = new MockLambdaContext();
 
     private ApiGatewayProxyRequestEventFunction requestEventFunction;
@@ -72,7 +68,7 @@ class CreateBankAccountLambdaIT implements LocalStackTestContainer {
 
     @Test
     void shouldReturn201Created_whenRequestIsValid() throws IOException {
-        var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, DATE_OF_BIRTH_JEFFERSON, PASSPORT_NUMBER_JEFFERSON);
+        var accountHolderRequest = TestAccountHolderRequest.JEFFERSON.toAccountHolderRequest();
         var createBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
 
         requestEvent.setBody(jsonMapper.writeValueAsString(createBankAccountRequest));

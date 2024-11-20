@@ -61,7 +61,7 @@ public class FindBankAccountController {
     public HttpResponse<BankAccountDTO> findBankAccount(
             @Parameter(
                     description = "${parameter.findBankAccount.bankAccountId.description}", required = true,
-                    example = "${parameter.findBankAccount.bankAccountId.example}"
+                    example = "01920bff-1338-7efd-ade6-e9128debe5d4"
             )
             @PathVariable("bank-account-id") UUID bankAccountId) {
 

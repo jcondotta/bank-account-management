@@ -68,6 +68,7 @@ public class CreateBankAccountService {
                 createBankAccountRequest.accountHolder().passportNumber(),
                 createBankAccountRequest.accountHolder().dateOfBirth(),
                 AccountHolderType.PRIMARY,
+                LocalDateTime.now(currentInstant),
                 bankAccountId
         );
     }

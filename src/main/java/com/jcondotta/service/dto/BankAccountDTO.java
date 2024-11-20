@@ -60,11 +60,11 @@ public class BankAccountDTO {
     }
 
     public BankAccountDTO(BankingEntity bankAccount, BankingEntity accountHolder) {
-        this(bankAccount.getBankAccountId(), List.of(new AccountHolderDTO(accountHolder)), bankAccount.getIban(), bankAccount.getDateOfOpening());
+        this(bankAccount.getBankAccountId(), List.of(new AccountHolderDTO(accountHolder)), bankAccount.getIban(), bankAccount.getCreatedAt());
     }
 
     public BankAccountDTO(BankingEntity bankAccount, List<AccountHolderDTO> accountHolders) {
-        this(bankAccount.getBankAccountId(), accountHolders, bankAccount.getIban(), bankAccount.getDateOfOpening());
+        this(bankAccount.getBankAccountId(), accountHolders, bankAccount.getIban(), bankAccount.getCreatedAt());
     }
 
     public UUID getBankAccountId() {

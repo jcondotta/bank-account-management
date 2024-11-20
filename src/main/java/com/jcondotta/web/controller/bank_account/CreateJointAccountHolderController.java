@@ -2,7 +2,6 @@ package com.jcondotta.web.controller.bank_account;
 
 import com.jcondotta.service.bank_account.CreateJointAccountHolderService;
 import com.jcondotta.service.dto.AccountHoldersDTO;
-import com.jcondotta.service.request.AccountHolderRequest;
 import com.jcondotta.service.request.CreateJointAccountHoldersRequest;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.HttpStatus;
@@ -10,6 +9,7 @@ import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.*;
 import io.micronaut.validation.Validated;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -17,11 +17,9 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.inject.Inject;
-import jakarta.validation.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
 import java.util.UUID;
 
 @Validated
@@ -46,7 +44,7 @@ public class CreateJointAccountHolderController {
                     required = true,
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON,
-                            schema = @Schema(implementation = List.class)
+                            schema = @Schema(implementation = CreateJointAccountHoldersRequest.class)
                     )
             )
     )
@@ -82,17 +80,18 @@ public class CreateJointAccountHolderController {
     @Post(consumes = MediaType.APPLICATION_JSON, produces = MediaType.APPLICATION_JSON)
     @Status(HttpStatus.CREATED)
     public HttpResponse<AccountHoldersDTO> createJointAccountHolder(
-            @PathVariable("bank-account-id")
-            UUID bankAccountId,
+            @Parameter(
+                    description = "${parameter.createJointAccountHolders.bankAccountId.description}", required = true,
+                    example = "01920bff-1338-7efd-ade6-e9128debe5d4"
+            )
+            @PathVariable("bank-account-id") UUID bankAccountId,
 
             @Body
-            @NotEmpty List<AccountHolderRequest> accountHoldersRequest) {
+            CreateJointAccountHoldersRequest createJointAccountHoldersRequest) {
 
         LOGGER.info("Received request to create joint account holders for Bank Account ID: {}", bankAccountId);
 
-        var createJointAccountHoldersRequest = new CreateJointAccountHoldersRequest(bankAccountId, accountHoldersRequest);
-        var accountHoldersDTO = createJointAccountHolderService.create(createJointAccountHoldersRequest);
-
+        var accountHoldersDTO = createJointAccountHolderService.create(bankAccountId, createJointAccountHoldersRequest);
         return HttpResponse.created(accountHoldersDTO, BankAccountURIBuilder.bankAccountURI(bankAccountId));
     }
 }

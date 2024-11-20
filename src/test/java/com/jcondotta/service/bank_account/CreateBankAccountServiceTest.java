@@ -3,6 +3,8 @@ package com.jcondotta.service.bank_account;
 
 import com.jcondotta.argument_provider.BlankValuesArgumentProvider;
 import com.jcondotta.argument_provider.InvalidPassportNumberArgumentProvider;
+import com.jcondotta.domain.BankingEntity;
+import com.jcondotta.domain.EntityType;
 import com.jcondotta.event.BankAccountCreatedSNSTopicPublisher;
 import com.jcondotta.factory.TestClockFactory;
 import com.jcondotta.factory.ValidatorTestFactory;
@@ -19,14 +21,17 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
 
 import java.time.Clock;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -59,18 +64,47 @@ class CreateBankAccountServiceTest {
 
     @Test
     void shouldCreateBankAccount_whenRequestIsValid() {
-        var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, DATE_OF_BIRTH_JEFFERSON, PASSPORT_NUMBER_JEFFERSON);
+        var accountHolderRequest = TestAccountHolderRequest.JEFFERSON.toAccountHolderRequest();
         var createBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
 
-        when(createBankAccountRepository.create(any(), any())).thenReturn(createBankAccountResponse);
+        when(createBankAccountRepository.create(any(BankingEntity.class), any(BankingEntity.class)))
+                .thenReturn(createBankAccountResponse);
 
         createBankAccountService.create(createBankAccountRequest);
 
-        verify(createBankAccountRepository).create(any(), any());
-        verify(snsTopicPublisher).publishMessage(any());
+        var bankAccountCaptor = ArgumentCaptor.forClass(BankingEntity.class);
+        var accountHolderCaptor = ArgumentCaptor.forClass(BankingEntity.class);
+        verify(createBankAccountRepository).create(bankAccountCaptor.capture(), accountHolderCaptor.capture());
 
+        assertThat(bankAccountCaptor.getValue())
+                .satisfies(bankAccount -> assertAll(
+                        () -> assertThat(bankAccount.getBankAccountId()).isNotNull(),
+                        () -> assertThat(bankAccount.getEntityType()).isEqualTo(EntityType.BANK_ACCOUNT),
+                        () -> assertThat(bankAccount.getIban()).isNotNull(),
+                        () -> assertThat(bankAccount.getCreatedAt()).isEqualTo(LocalDateTime.now(TEST_CLOCK_FIXED_INSTANT))
+                ))
+                .satisfies(bankAccount -> assertAll(
+                        () -> assertThat(bankAccount.getAccountHolderId()).isNull(),
+                        () -> assertThat(bankAccount.getAccountHolderName()).isNull(),
+                        () -> assertThat(bankAccount.getPassportNumber()).isNull(),
+                        () -> assertThat(bankAccount.getDateOfBirth()).isNull()
+                ));
+
+        assertThat(accountHolderCaptor.getValue())
+                .satisfies(accountHolder -> assertAll(
+                        () -> assertThat(accountHolder.getAccountHolderId()).isNotNull(),
+                        () -> assertThat(accountHolder.getAccountHolderName()).isEqualTo(accountHolderRequest.accountHolderName()),
+                        () -> assertThat(accountHolder.getPassportNumber()).isEqualTo(accountHolderRequest.passportNumber()),
+                        () -> assertThat(accountHolder.getDateOfBirth()).isEqualTo(accountHolderRequest.dateOfBirth()),
+                        () -> assertThat(accountHolder.getBankAccountId()).isEqualTo(bankAccountCaptor.getValue().getBankAccountId()),
+                        () -> assertThat(accountHolder.getIban()).isNull(),
+                        () -> assertThat(accountHolder.getCreatedAt()).isEqualTo(LocalDateTime.now(TEST_CLOCK_FIXED_INSTANT))
+                ));
+
+        verify(snsTopicPublisher).publishMessage(any());
         verifyNoMoreInteractions(createBankAccountRepository, snsTopicPublisher);
     }
+
 
     @Test
     void shouldThrowConstraintViolationException_whenRequestHasNullAccountHolder() {

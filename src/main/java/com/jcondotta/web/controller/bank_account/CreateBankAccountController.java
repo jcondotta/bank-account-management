@@ -19,6 +19,7 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.inject.Inject;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -59,7 +60,7 @@ public class CreateBankAccountController {
     })
     @Post(consumes = MediaType.APPLICATION_JSON, produces = MediaType.APPLICATION_JSON)
     @Status(HttpStatus.CREATED)
-    public HttpResponse<BankAccountDTO> createBankAccount(@Body CreateBankAccountRequest createBankAccountRequest) {
+    public HttpResponse<BankAccountDTO> createBankAccount(@Valid @Body CreateBankAccountRequest createBankAccountRequest) {
         LOGGER.info("Received request to create bank account for the account holder: {}", createBankAccountRequest.accountHolder());
 
         try {

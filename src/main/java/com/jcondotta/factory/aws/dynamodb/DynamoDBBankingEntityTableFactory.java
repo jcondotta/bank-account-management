@@ -41,9 +41,6 @@ public class DynamoDBBankingEntityTableFactory {
                 .addAttribute(String.class, a -> a.name("iban")
                         .getter(BankingEntity::getIban)
                         .setter(BankingEntity::setIban))
-                .addAttribute(LocalDateTime.class, a -> a.name("dateOfOpening")
-                        .getter(BankingEntity::getDateOfOpening)
-                        .setter(BankingEntity::setDateOfOpening))
 
                 // AccountHolder Attributes
                 .addAttribute(UUID.class, a -> a.name("accountHolderId")
@@ -60,8 +57,11 @@ public class DynamoDBBankingEntityTableFactory {
                         .setter(BankingEntity::setDateOfBirth))
                 .addAttribute(AccountHolderType.class, a -> a.name("accountHolderType")
                         .getter(BankingEntity::getAccountHolderType)
-                        .setter(BankingEntity::setAccountHolderType)
-                .build())
+                        .setter(BankingEntity::setAccountHolderType))
+
+                .addAttribute(LocalDateTime.class, a -> a.name("createdAt")
+                        .getter(BankingEntity::getCreatedAt)
+                        .setter(BankingEntity::setCreatedAt))
             .build();
 
         return dynamoDbEnhancedClient.table(bankingEntitiesDynamoDBTableConfig.tableName(), bankingEntitySchema);

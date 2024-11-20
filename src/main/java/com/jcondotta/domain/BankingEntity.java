@@ -23,14 +23,17 @@ public class BankingEntity {
     private String partitionKey;
     private String sortKey;
     private EntityType entityType;
+
     private UUID bankAccountId;
     private String iban;
-    private LocalDateTime dateOfOpening;
+
     private UUID accountHolderId;
     private String accountHolderName;
     private String passportNumber;
     private LocalDate dateOfBirth;
     private AccountHolderType accountHolderType;
+
+    private LocalDateTime createdAt;
 
     @DynamoDbPartitionKey
     @DynamoDbAttribute("PK")
@@ -79,15 +82,6 @@ public class BankingEntity {
         this.iban = iban;
     }
 
-    @DynamoDbAttribute("dateOfOpening")
-    public LocalDateTime getDateOfOpening() {
-        return dateOfOpening;
-    }
-
-    public void setDateOfOpening(LocalDateTime dateOfOpening) {
-        this.dateOfOpening = dateOfOpening;
-    }
-
     @DynamoDbAttribute("accountHolderId")
     public UUID getAccountHolderId() {
         return accountHolderId;
@@ -133,18 +127,29 @@ public class BankingEntity {
         this.accountHolderType = accountHolderType;
     }
 
-    public static BankingEntity buildBankAccount(UUID bankAccountId, String iban, LocalDateTime dateOfOpening) {
+    @DynamoDbAttribute("createdAt")
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public static BankingEntity buildBankAccount(UUID bankAccountId, String iban, LocalDateTime createdAt) {
         BankingEntity entity = new BankingEntity();
         entity.setPartitionKey(BANK_ACCOUNT_PK_TEMPLATE.formatted(bankAccountId));
         entity.setSortKey(BANK_ACCOUNT_SK_TEMPLATE.formatted(bankAccountId));
         entity.setEntityType(EntityType.BANK_ACCOUNT);
         entity.setBankAccountId(bankAccountId);
         entity.setIban(iban);
-        entity.setDateOfOpening(dateOfOpening);
+        entity.setCreatedAt(createdAt);
         return entity;
     }
 
-    public static BankingEntity buildAccountHolder(UUID accountHolderId, String accountHolderName, String passportNumber, LocalDate dateOfBirth, AccountHolderType accountHolderType, UUID bankAccountId) {
+    public static BankingEntity buildAccountHolder(UUID accountHolderId, String accountHolderName, String passportNumber,
+                                                   LocalDate dateOfBirth, AccountHolderType accountHolderType, LocalDateTime createdAt,
+                                                   UUID bankAccountId) {
         BankingEntity entity = new BankingEntity();
         entity.setPartitionKey(ACCOUNT_HOLDER_PK_TEMPLATE.formatted(bankAccountId));
         entity.setSortKey(ACCOUNT_HOLDER_SK_TEMPLATE.formatted(accountHolderId));
@@ -154,6 +159,7 @@ public class BankingEntity {
         entity.setPassportNumber(passportNumber);
         entity.setDateOfBirth(dateOfBirth);
         entity.setAccountHolderType(accountHolderType);
+        entity.setCreatedAt(createdAt);
         entity.setBankAccountId(bankAccountId);
         return entity;
     }
@@ -166,7 +172,7 @@ public class BankingEntity {
                 ", entityType=" + entityType +
                 ", bankAccountId=" + bankAccountId +
                 ", iban='" + iban + '\'' +
-                ", dateOfOpening=" + dateOfOpening +
+                ", dateOfOpening=" + createdAt +
                 ", accountHolderId=" + accountHolderId +
                 ", accountHolderName='" + accountHolderName + '\'' +
                 ", passportNumber='" + passportNumber + '\'' +

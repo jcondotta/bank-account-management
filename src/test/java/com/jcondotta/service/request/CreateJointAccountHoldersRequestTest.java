@@ -4,7 +4,6 @@ import com.jcondotta.argument_provider.BlankValuesArgumentProvider;
 import com.jcondotta.argument_provider.InvalidPassportNumberArgumentProvider;
 import com.jcondotta.factory.ValidatorTestFactory;
 import com.jcondotta.helper.TestAccountHolderRequest;
-import com.jcondotta.helper.TestBankAccountId;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -13,14 +12,12 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 public class CreateJointAccountHoldersRequestTest {
 
-    private static final UUID BANK_ACCOUNT_ID_BRAZIL = TestBankAccountId.BRAZIL.getBankAccountId();
     private static final String ACCOUNT_HOLDER_NAME_JEFFERSON = TestAccountHolderRequest.JEFFERSON.getAccountHolderName();
     private static final String PASSPORT_NUMBER_JEFFERSON = TestAccountHolderRequest.JEFFERSON.getPassportNumber();
     private static final LocalDate DATE_OF_BIRTH_JEFFERSON = TestAccountHolderRequest.JEFFERSON.getDateOfBirth();
@@ -29,25 +26,26 @@ public class CreateJointAccountHoldersRequestTest {
 
     @Test
     void shouldNotDetectConstraintViolation_whenAccountHoldersListHasOneItem() {
-        var accountHolderRequest = TestAccountHolderRequest.JEFFERSON.toAccountHolderRequest();
-        var createJointAccountHolderRequest = new CreateJointAccountHoldersRequest(BANK_ACCOUNT_ID_BRAZIL, accountHolderRequest);
+        var jeffersonAccountHolderRequest = TestAccountHolderRequest.JEFFERSON.toAccountHolderRequest();
+        var createJointAccountHolderRequest = new CreateJointAccountHoldersRequest(jeffersonAccountHolderRequest);
 
         var constraintViolations = VALIDATOR.validate(createJointAccountHolderRequest);
-
         assertThat(constraintViolations).isEmpty();
+
         assertThat(createJointAccountHolderRequest.accountHolderRequests())
                 .hasSize(1)
-                .first()
-                .isEqualTo(accountHolderRequest);
+                .extracting("accountHolderName")
+                .containsExactly(TestAccountHolderRequest.JEFFERSON.getAccountHolderName());
     }
 
     @Test
     void shouldNotDetectConstraintViolation_whenAccountHoldersListHasTwoItems() {
-        var jeffersonAccountHolderRequest = TestAccountHolderRequest.JEFFERSON.toAccountHolderRequest();
-        var virginioAccountHolderRequest = TestAccountHolderRequest.VIRGINIO.toAccountHolderRequest();
-        var accountHolderRequests = List.of(jeffersonAccountHolderRequest, virginioAccountHolderRequest);
+        var accountHolderRequests = List.of(
+                TestAccountHolderRequest.JEFFERSON.toAccountHolderRequest(),
+                TestAccountHolderRequest.VIRGINIO.toAccountHolderRequest()
+        );
 
-        var createJointAccountHolderRequest = new CreateJointAccountHoldersRequest(BANK_ACCOUNT_ID_BRAZIL, accountHolderRequests);
+        var createJointAccountHolderRequest = new CreateJointAccountHoldersRequest(accountHolderRequests);
 
         var constraintViolations = VALIDATOR.validate(createJointAccountHolderRequest);
         assertThat(constraintViolations).isEmpty();
@@ -68,7 +66,7 @@ public class CreateJointAccountHoldersRequestTest {
                 TestAccountHolderRequest.VIRGINIO.toAccountHolderRequest(),
                 TestAccountHolderRequest.PATRIZIO.toAccountHolderRequest()
         );
-        var createJointAccountHolderRequest = new CreateJointAccountHoldersRequest(BANK_ACCOUNT_ID_BRAZIL, accountHolderRequests);
+        var createJointAccountHolderRequest = new CreateJointAccountHoldersRequest(accountHolderRequests);
 
         var constraintViolations = VALIDATOR.validate(createJointAccountHolderRequest);
 
@@ -82,24 +80,8 @@ public class CreateJointAccountHoldersRequestTest {
     }
 
     @Test
-    void shouldDetectConstraintViolation_whenBankAccountIdIsNull() {
-        var accountHolderRequest = TestAccountHolderRequest.JEFFERSON.toAccountHolderRequest();
-        var createJointAccountHolderRequest = new CreateJointAccountHoldersRequest(null, accountHolderRequest);
-
-        var constraintViolations = VALIDATOR.validate(createJointAccountHolderRequest);
-
-        assertThat(constraintViolations)
-                .hasSize(1)
-                .first()
-                .satisfies(violation -> assertAll(
-                        () -> assertThat(violation.getMessage()).isEqualTo("bankAccount.bankAccountId.notNull"),
-                        () -> assertThat(violation.getPropertyPath()).hasToString("bankAccountId")
-                ));
-    }
-
-    @Test
     void shouldDetectConstraintViolation_whenAccountHoldersListIsEmpty() {
-        var createJointAccountHolderRequest = new CreateJointAccountHoldersRequest(BANK_ACCOUNT_ID_BRAZIL, List.of());
+        var createJointAccountHolderRequest = new CreateJointAccountHoldersRequest(List.of());
 
         var constraintViolations = VALIDATOR.validate(createJointAccountHolderRequest);
 
@@ -118,7 +100,7 @@ public class CreateJointAccountHoldersRequestTest {
                 TestAccountHolderRequest.JEFFERSON.toAccountHolderRequest(),
                 null
         );
-        var createJointAccountHolderRequest = new CreateJointAccountHoldersRequest(BANK_ACCOUNT_ID_BRAZIL, accountHolderRequests);
+        var createJointAccountHolderRequest = new CreateJointAccountHoldersRequest(accountHolderRequests);
 
         var constraintViolations = VALIDATOR.validate(createJointAccountHolderRequest);
 
@@ -135,7 +117,7 @@ public class CreateJointAccountHoldersRequestTest {
     @ArgumentsSource(BlankValuesArgumentProvider.class)
     void shouldDetectConstraintViolation_whenAccountHolderNameIsBlank(String blankAccountHolderName) {
         var accountHolderRequest = new AccountHolderRequest(blankAccountHolderName, DATE_OF_BIRTH_JEFFERSON, PASSPORT_NUMBER_JEFFERSON);
-        var createJointAccountHolderRequest = new CreateJointAccountHoldersRequest(BANK_ACCOUNT_ID_BRAZIL, accountHolderRequest);
+        var createJointAccountHolderRequest = new CreateJointAccountHoldersRequest(accountHolderRequest);
 
         var constraintViolations = VALIDATOR.validate(createJointAccountHolderRequest);
 
@@ -152,9 +134,7 @@ public class CreateJointAccountHoldersRequestTest {
     void shouldDetectConstraintViolation_whenAccountHolderNameIsLongerThan255Characters() {
         final var veryLongAccountHolderName = "J".repeat(256);
         var accountHolderRequest = new AccountHolderRequest(veryLongAccountHolderName, DATE_OF_BIRTH_JEFFERSON, PASSPORT_NUMBER_JEFFERSON);
-        var createJointAccountHolderRequest = new CreateJointAccountHoldersRequest(
-                BANK_ACCOUNT_ID_BRAZIL, accountHolderRequest
-        );
+        var createJointAccountHolderRequest = new CreateJointAccountHoldersRequest(accountHolderRequest);
 
         var constraintViolations = VALIDATOR.validate(createJointAccountHolderRequest);
 
@@ -171,7 +151,7 @@ public class CreateJointAccountHoldersRequestTest {
     void shouldDetectConstraintViolation_whenDateOfBirthIsInFuture() {
         LocalDate futureDate = LocalDate.now().plusDays(1);
         var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, futureDate, PASSPORT_NUMBER_JEFFERSON);
-        var createJointAccountHolderRequest = new CreateJointAccountHoldersRequest(BANK_ACCOUNT_ID_BRAZIL, accountHolderRequest);
+        var createJointAccountHolderRequest = new CreateJointAccountHoldersRequest(accountHolderRequest);
 
         var constraintViolations = VALIDATOR.validate(createJointAccountHolderRequest);
 
@@ -188,9 +168,7 @@ public class CreateJointAccountHoldersRequestTest {
     void shouldDetectConstraintViolation_whenDateOfBirthIsToday() {
         LocalDate today = LocalDate.now();
         var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, today, PASSPORT_NUMBER_JEFFERSON);
-        var createJointAccountHolderRequest = new CreateJointAccountHoldersRequest(
-                BANK_ACCOUNT_ID_BRAZIL, accountHolderRequest
-        );
+        var createJointAccountHolderRequest = new CreateJointAccountHoldersRequest(accountHolderRequest);
 
         var constraintViolations = VALIDATOR.validate(createJointAccountHolderRequest);
         assertThat(constraintViolations)
@@ -205,9 +183,7 @@ public class CreateJointAccountHoldersRequestTest {
     @Test
     void shouldDetectConstraintViolation_whenPassportNumberIsNull() {
         var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, DATE_OF_BIRTH_JEFFERSON, null);
-        var createJointAccountHolderRequest = new CreateJointAccountHoldersRequest(
-                BANK_ACCOUNT_ID_BRAZIL, accountHolderRequest
-        );
+        var createJointAccountHolderRequest = new CreateJointAccountHoldersRequest(accountHolderRequest);
 
         var constraintViolations = VALIDATOR.validate(createJointAccountHolderRequest);
         assertThat(constraintViolations)
@@ -223,9 +199,7 @@ public class CreateJointAccountHoldersRequestTest {
     @ArgumentsSource(InvalidPassportNumberArgumentProvider.class)
     void shouldDetectConstraintViolation_whenPassportNumberIsNot8CharactersLong(String invalidLengthPassportNumber) {
         var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, DATE_OF_BIRTH_JEFFERSON, invalidLengthPassportNumber);
-        var createJointAccountHolderRequest = new CreateJointAccountHoldersRequest(
-                BANK_ACCOUNT_ID_BRAZIL, accountHolderRequest
-        );
+        var createJointAccountHolderRequest = new CreateJointAccountHoldersRequest(accountHolderRequest);
 
         var constraintViolations = VALIDATOR.validate(createJointAccountHolderRequest);
         assertThat(constraintViolations)

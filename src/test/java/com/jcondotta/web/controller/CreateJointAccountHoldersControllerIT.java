@@ -4,6 +4,7 @@ import com.jcondotta.container.LocalStackTestContainer;
 import com.jcondotta.helper.TestAccountHolderRequest;
 import com.jcondotta.helper.TestBankAccountId;
 import com.jcondotta.service.dto.AccountHoldersDTO;
+import com.jcondotta.service.request.CreateJointAccountHoldersRequest;
 import com.jcondotta.web.controller.bank_account.BankAccountURIBuilder;
 import io.micronaut.context.MessageSource;
 import io.micronaut.http.HttpStatus;
@@ -29,6 +30,7 @@ import java.util.function.Supplier;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 @TestInstance(Lifecycle.PER_CLASS)
 @MicronautTest(transactional = false)
@@ -75,14 +77,16 @@ class CreateJointAccountHoldersControllerIT implements LocalStackTestContainer {
     }
 
     @Test
-    void shouldReturn201Created_whenRequestAccountHoldersListHasOneItem() throws IOException {
-        var accountHolderRequest = TestAccountHolderRequest.JEFFERSON.toAccountHolderRequest();
-        var accountHoldersRequest = List.of(accountHolderRequest);
+    void shouldReturn201CreatedWithValidLocationHeader_whenRequestHasOneAccountHolder() throws IOException {
+        var jeffersonAccountHolderRequest = TestAccountHolderRequest.JEFFERSON.toAccountHolderRequest();
+        var accountHolders = List.of(jeffersonAccountHolderRequest);
+
+        var createJointAccountHoldersRequest = new CreateJointAccountHoldersRequest(accountHolders);
 
         var response = given()
             .spec(requestSpecification)
                 .pathParam("bank-account-id", BANK_ACCOUNT_ID_BRAZIL)
-                .body(jsonMapper.writeValueAsString(accountHoldersRequest))
+                .body(jsonMapper.writeValueAsString(createJointAccountHoldersRequest))
         .when()
             .post()
         .then()
@@ -96,210 +100,45 @@ class CreateJointAccountHoldersControllerIT implements LocalStackTestContainer {
         assertThat(accountHoldersDTO.accountHolders()).hasSize(1);
     }
 
-//    @Test
-//    void shouldReturn201CreatedWithValidBody_whenRequestIsValid() throws IOException {
-//        var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, DATE_OF_BIRTH_JEFFERSON, PASSPORT_NUMBER_JEFFERSON);
-//        var createBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
-//
-//        var createdBankAccountDTO = given()
-//            .spec(requestSpecification)
-//                .body(jsonMapper.writeValueAsString(createBankAccountRequest))
-//        .when()
-//            .post()
-//        .then()
-//            .statusCode(HttpStatus.CREATED.getCode())
-//                .extract()
-//                    .response()
-//                        .as(BankAccountDTO.class);
-//
-//        assertAll(
-//                () -> assertThat(createdBankAccountDTO.getBankAccountId()).isNotNull(),
-//                () -> assertThat(createdBankAccountDTO.getIban()).isNotBlank(),
-//                () -> assertThat(createdBankAccountDTO.getDateOfOpening()).isEqualTo(LocalDateTime.now(testClockUTC)),
-//                () -> assertThat(createdBankAccountDTO.getAccountHolders())
-//                        .hasSize(1)
-//                        .extracting(AccountHolderDTO::getAccountHolderName, AccountHolderDTO::getDateOfBirth, AccountHolderDTO::getPassportNumber)
-//                        .containsExactly(
-//                                tuple(ACCOUNT_HOLDER_NAME_JEFFERSON, DATE_OF_BIRTH_JEFFERSON, PASSPORT_NUMBER_JEFFERSON)
-//                        )
-//        );
-//
-//        var fetchedBankAccountDTO = given()
-//            .spec(requestSpecification.basePath(BankAccountURIBuilder.BANK_ACCOUNT_API_V1_MAPPING))
-//                .pathParam("bank-account-id", createdBankAccountDTO.getBankAccountId())
-//        .when()
-//            .get()
-//        .then()
-//            .statusCode(HttpStatus.OK.getCode())
-//                .extract()
-//                    .response()
-//                        .as(BankAccountDTO.class);
-//
-//        assertThat(createdBankAccountDTO)
-//                .usingRecursiveComparison()
-//                .isEqualTo(fetchedBankAccountDTO);
-//    }
-//
-//    @Test
-//    void shouldReturn400BadRequest_whenRequestHasNullAccountHolder() throws IOException {
-//        var createBankAccountRequest = new CreateBankAccountRequest(null);
-//        var expectedExceptionMessageKey = "bankAccount.accountHolder.notNull";
-//
-//        given()
-//            .spec(requestSpecification)
-//                .body(jsonMapper.writeValueAsString(createBankAccountRequest))
-//        .when()
-//            .post()
-//        .then()
-//            .statusCode(HttpStatus.BAD_REQUEST.getCode())
-//            .rootPath("_embedded")
-//                .body("errors", hasSize(1))
-//                .body("errors[0].message", equalTo(messageSource.getMessage(expectedExceptionMessageKey, Locale.getDefault())
-//                        .orElseThrow(messageKeyNotFoundException(expectedExceptionMessageKey))));
-//    }
-//
-//    @ParameterizedTest
-//    @ArgumentsSource(BlankValuesArgumentProvider.class)
-//    void shouldReturn400BadRequest_whenAccountHolderNameIsBlank(String blankAccountHolderName) throws IOException {
-//        var accountHolderRequest = new AccountHolderRequest(blankAccountHolderName, DATE_OF_BIRTH_JEFFERSON, PASSPORT_NUMBER_JEFFERSON);
-//        var createBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
-//
-//        var expectedExceptionMessageKey = "accountHolder.accountHolderName.notBlank";
-//
-//        given()
-//            .spec(requestSpecification)
-//                .body(jsonMapper.writeValueAsString(createBankAccountRequest))
-//        .when()
-//            .post()
-//        .then()
-//            .statusCode(HttpStatus.BAD_REQUEST.getCode())
-//            .rootPath("_embedded")
-//                .body("errors", hasSize(1))
-//                .body("errors[0].message", equalTo(messageSource.getMessage(expectedExceptionMessageKey, Locale.getDefault())
-//                        .orElseThrow(messageKeyNotFoundException(expectedExceptionMessageKey))));
-//    }
-//
-//    @Test
-//    void shouldReturn400BadRequest_whenAccountHolderNameIsLongerThan255Characters() throws IOException {
-//        final var veryLongAccountHolderName = "J".repeat(256);
-//        var accountHolderRequest = new AccountHolderRequest(veryLongAccountHolderName, DATE_OF_BIRTH_JEFFERSON, PASSPORT_NUMBER_JEFFERSON);
-//        var createBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
-//
-//        var expectedExceptionMessageKey = "accountHolder.accountHolderName.tooLong";
-//
-//        given()
-//            .spec(requestSpecification)
-//                .body(jsonMapper.writeValueAsString(createBankAccountRequest))
-//        .when()
-//            .post()
-//        .then()
-//            .statusCode(HttpStatus.BAD_REQUEST.getCode())
-//            .rootPath("_embedded")
-//                .body("errors", hasSize(1))
-//                .body("errors[0].message", equalTo(messageSource.getMessage(expectedExceptionMessageKey, Locale.getDefault())
-//                        .orElseThrow(messageKeyNotFoundException(expectedExceptionMessageKey))));
-//    }
-//
-//    @Test
-//    void shouldReturn400BadRequest_whenDateOfBirthIsNull() throws IOException {
-//        var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, null, PASSPORT_NUMBER_JEFFERSON);
-//        var createBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
-//
-//        var expectedExceptionMessageKey = "accountHolder.dateOfBirth.notNull";
-//
-//        given()
-//            .spec(requestSpecification)
-//                .body(jsonMapper.writeValueAsString(createBankAccountRequest))
-//        .when()
-//            .post()
-//        .then()
-//            .statusCode(HttpStatus.BAD_REQUEST.getCode())
-//            .rootPath("_embedded")
-//                .body("errors", hasSize(1))
-//                .body("errors[0].message", equalTo(messageSource.getMessage(expectedExceptionMessageKey, Locale.getDefault())
-//                        .orElseThrow(messageKeyNotFoundException(expectedExceptionMessageKey))));
-//    }
-//
-//    @Test
-//    void shouldReturn400BadRequest_whenDateOfBirthIsInFuture() throws IOException {
-//        LocalDate futureDate = LocalDate.now().plusDays(1);
-//        var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, futureDate, PASSPORT_NUMBER_JEFFERSON);
-//        var createBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
-//
-//        var expectedExceptionMessageKey = "accountHolder.dateOfBirth.past";
-//
-//        given()
-//            .spec(requestSpecification)
-//                .body(jsonMapper.writeValueAsString(createBankAccountRequest))
-//        .when()
-//            .post()
-//        .then()
-//            .statusCode(HttpStatus.BAD_REQUEST.getCode())
-//            .rootPath("_embedded")
-//                .body("errors", hasSize(1))
-//                .body("errors[0].message", equalTo(messageSource.getMessage(expectedExceptionMessageKey, Locale.getDefault())
-//                        .orElseThrow(messageKeyNotFoundException(expectedExceptionMessageKey))));
-//    }
-//
-//    @Test
-//    void shouldReturn400BadRequest_whenDateOfBirthIsToday() throws IOException {
-//        LocalDate today = LocalDate.now();
-//        var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, today, PASSPORT_NUMBER_JEFFERSON);
-//        var createBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
-//
-//        var expectedExceptionMessageKey = "accountHolder.dateOfBirth.past";
-//
-//        given()
-//            .spec(requestSpecification)
-//                .body(jsonMapper.writeValueAsString(createBankAccountRequest))
-//        .when()
-//            .post()
-//        .then()
-//            .statusCode(HttpStatus.BAD_REQUEST.getCode())
-//            .rootPath("_embedded")
-//                .body("errors", hasSize(1))
-//                .body("errors[0].message", equalTo(messageSource.getMessage(expectedExceptionMessageKey, Locale.getDefault())
-//                        .orElseThrow(messageKeyNotFoundException(expectedExceptionMessageKey))));
-//    }
-//
-//    @Test
-//    void shouldReturn400BadRequest_whenPassportNumberIsNull() throws IOException {
-//        var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, DATE_OF_BIRTH_JEFFERSON, null);
-//        var createBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
-//
-//        var expectedExceptionMessageKey = "accountHolder.passportNumber.notNull";
-//
-//        given()
-//            .spec(requestSpecification)
-//                .body(jsonMapper.writeValueAsString(createBankAccountRequest))
-//        .when()
-//            .post()
-//        .then()
-//            .statusCode(HttpStatus.BAD_REQUEST.getCode())
-//            .rootPath("_embedded")
-//                .body("errors", hasSize(1))
-//                .body("errors[0].message", equalTo(messageSource.getMessage(expectedExceptionMessageKey, Locale.getDefault())
-//                        .orElseThrow(messageKeyNotFoundException(expectedExceptionMessageKey))));
-//    }
-//
-//    @ParameterizedTest
-//    @ArgumentsSource(InvalidPassportNumberArgumentProvider.class)
-//    void shouldReturn400BadRequest_whenPassportNumberIsNot8CharactersLong(String invalidLengthPassportNumber) throws IOException {
-//        var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, DATE_OF_BIRTH_JEFFERSON, invalidLengthPassportNumber);
-//        var createBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
-//
-//        var expectedExceptionMessageKey = "accountHolder.passportNumber.invalidLength";
-//
-//        given()
-//            .spec(requestSpecification)
-//                .body(jsonMapper.writeValueAsString(createBankAccountRequest))
-//        .when()
-//            .post()
-//        .then()
-//            .statusCode(HttpStatus.BAD_REQUEST.getCode())
-//            .rootPath("_embedded")
-//                .body("errors", hasSize(1))
-//                .body("errors[0].message", equalTo(messageSource.getMessage(expectedExceptionMessageKey, Locale.getDefault())
-//                        .orElseThrow(messageKeyNotFoundException(expectedExceptionMessageKey))));
-//    }
+    @Test
+    void shouldReturn201Created_whenRequestHasTwoAccountHolders() throws IOException {
+        var jeffersonAccountHolderRequest = TestAccountHolderRequest.JEFFERSON.toAccountHolderRequest();
+        var virginioAccountHolderRequest = TestAccountHolderRequest.VIRGINIO.toAccountHolderRequest();
+        var accountHolders = List.of(jeffersonAccountHolderRequest, virginioAccountHolderRequest);
+
+        var createJointAccountHoldersRequest = new CreateJointAccountHoldersRequest(accountHolders);
+
+        var accountHoldersDTO = given()
+            .spec(requestSpecification)
+                .pathParam("bank-account-id", BANK_ACCOUNT_ID_BRAZIL)
+                .body(jsonMapper.writeValueAsString(createJointAccountHoldersRequest))
+        .when()
+            .post()
+        .then()
+            .statusCode(HttpStatus.CREATED.getCode())
+                .extract()
+                    .as(AccountHoldersDTO.class);
+
+        assertThat(accountHoldersDTO.accountHolders())
+            .hasSize(2)
+            .satisfies(entities -> assertAll(
+                    () -> {
+                        var jeffersonEntity = entities.get(0);
+                        assertThat(jeffersonEntity.getAccountHolderId()).isNotNull();
+                        assertThat(jeffersonEntity.getAccountHolderName()).isEqualTo(jeffersonAccountHolderRequest.accountHolderName());
+                        assertThat(jeffersonEntity.getPassportNumber()).isEqualTo(jeffersonAccountHolderRequest.passportNumber());
+                        assertThat(jeffersonEntity.getDateOfBirth()).isEqualTo(jeffersonAccountHolderRequest.dateOfBirth());
+                        assertThat(jeffersonEntity.getBankAccountId()).isEqualTo(BANK_ACCOUNT_ID_BRAZIL);
+                    },
+                    () -> {
+                        var virginioEntity = entities.get(1);
+                        assertThat(virginioEntity.getAccountHolderId()).isNotNull();
+                        assertThat(virginioEntity.getAccountHolderName()).isEqualTo(virginioAccountHolderRequest.accountHolderName());
+                        assertThat(virginioEntity.getPassportNumber()).isEqualTo(virginioAccountHolderRequest.passportNumber());
+                        assertThat(virginioEntity.getDateOfBirth()).isEqualTo(virginioAccountHolderRequest.dateOfBirth());
+                        assertThat(virginioEntity.getBankAccountId()).isEqualTo(BANK_ACCOUNT_ID_BRAZIL);
+                    }
+            )
+        );
+    }
 }

@@ -34,21 +34,6 @@ public class FindBankAccountService {
                         .partitionValue(partitionKey)
                 .build());
 
-//
-//        try {
-//            MDC.put("bankAccountId", bankAccountDTO.getBankAccountId().toString());
-//
-//            bankAccountDTO.getPrimaryAccountHolder()
-//                    .ifPresent(accountHolderDTO -> MDC.put("accountHolderId", accountHolderDTO.getAccountHolderId().toString()));
-//
-//            LOGGER.info("Bank account created successfully");
-//            return HttpResponse.created(bankAccountDTO, BankAccountURIBuilder.bankAccountURI(bankAccountDTO.getBankAccountId()));
-//        }
-//        finally {
-//            MDC.clear();
-//        }
-
-
         var bankingEntities = bankingEntityDynamoDbTable.query(queryConditional)
                 .items().stream()
                 .toList();

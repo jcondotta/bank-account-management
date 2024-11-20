@@ -77,7 +77,11 @@ public class BankAccountCreatedSNSTopicPublisher {
         }
         catch (IOException e) {
             LOGGER.error("Failed to serialize notification: {}", notification, e);
-            throw new NotificationSerializationException("Error serializing notification", e);
+            throw new NotificationSerializationException(
+                    String.format("Error serializing notification of type %s: %s",
+                            notification.getClass().getSimpleName(),
+                            e.getMessage()),
+                    e);
         }
     }
 }

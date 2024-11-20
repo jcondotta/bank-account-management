@@ -1,9 +1,7 @@
 package com.jcondotta;
 
-import com.jcondotta.service.request.CreateJointAccountHoldersRequest;
 import io.micronaut.context.env.Environment;
 import io.micronaut.runtime.Micronaut;
-import io.micronaut.serde.annotation.SerdeImport;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Contact;
 import io.swagger.v3.oas.annotations.info.Info;

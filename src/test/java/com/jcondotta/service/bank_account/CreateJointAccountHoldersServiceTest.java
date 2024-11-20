@@ -8,9 +8,9 @@ import com.jcondotta.factory.TestClockFactory;
 import com.jcondotta.factory.ValidatorTestFactory;
 import com.jcondotta.helper.TestAccountHolderRequest;
 import com.jcondotta.helper.TestBankAccountId;
-import com.jcondotta.repository.CreateJointAccountHoldersRepository;
+import com.jcondotta.repository.CreateJointAccountHolderRepository;
 import com.jcondotta.service.request.AccountHolderRequest;
-import com.jcondotta.service.request.CreateJointAccountHoldersRequest;
+import com.jcondotta.service.request.CreateJointAccountHolderRequest;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,8 +25,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -47,12 +45,9 @@ class CreateJointAccountHoldersServiceTest {
     private static final Validator VALIDATOR = ValidatorTestFactory.getValidator();
 
     @Mock
-    private CreateJointAccountHoldersRepository repository;
+    private CreateJointAccountHolderRepository repository;
 
     private CreateJointAccountHolderService createJointAccountHolderService;
-
-    @SuppressWarnings("unchecked")
-    private ArgumentCaptor<List<BankingEntity>> bankingEntityCaptor = ArgumentCaptor.forClass(List.class);
 
     @BeforeEach
     void beforeEach() {
@@ -60,18 +55,17 @@ class CreateJointAccountHoldersServiceTest {
     }
 
     @Test
-    void shouldCreateJointAccountHolder_whenRequestHasOneAccountHolder() {
+    void shouldCreateJointAccountHolder_whenRequestIsValid() {
         var jeffersonAccountHolderRequest = TestAccountHolderRequest.JEFFERSON.toAccountHolderRequest();
-        var createJointAccountHoldersRequest = new CreateJointAccountHoldersRequest(jeffersonAccountHolderRequest);
+        var createJointAccountHoldersRequest = new CreateJointAccountHolderRequest(BANK_ACCOUNT_ID_BRAZIL, jeffersonAccountHolderRequest);
 
-        createJointAccountHolderService.create(BANK_ACCOUNT_ID_BRAZIL, createJointAccountHoldersRequest);
+        createJointAccountHolderService.create(createJointAccountHoldersRequest);
 
+        var bankingEntityCaptor = ArgumentCaptor.forClass(BankingEntity.class);
         verify(repository).create(bankingEntityCaptor.capture());
 
-        List<BankingEntity> capturedBankingEntities = bankingEntityCaptor.getValue();
-        assertThat(capturedBankingEntities)
-                .hasSize(1)
-                .first()
+        var capturedBankingEntity = bankingEntityCaptor.getValue();
+        assertThat(capturedBankingEntity)
                 .satisfies(bankingEntity -> assertAll(
                         () -> assertThat(bankingEntity.getAccountHolderId()).isNotNull(),
                         () -> assertThat(bankingEntity.getAccountHolderName()).isEqualTo(jeffersonAccountHolderRequest.accountHolderName()),
@@ -84,77 +78,12 @@ class CreateJointAccountHoldersServiceTest {
     }
 
     @Test
-    void shouldCreateJointAccountHolders_whenRequestHasMultipleAccountHolders() {
-        var jeffersonAccountHolderRequest = TestAccountHolderRequest.JEFFERSON.toAccountHolderRequest();
-        var virginioAccountHolderRequest = TestAccountHolderRequest.VIRGINIO.toAccountHolderRequest();
-        var accountHolderRequests = List.of(jeffersonAccountHolderRequest, virginioAccountHolderRequest);
-
-        createJointAccountHolderService.create(BANK_ACCOUNT_ID_BRAZIL, new CreateJointAccountHoldersRequest(accountHolderRequests));
-
-        verify(repository).create(bankingEntityCaptor.capture());
-
-        List<BankingEntity> capturedBankingEntities = bankingEntityCaptor.getValue();
-        assertThat(capturedBankingEntities)
-                .hasSize(2)
-                .satisfies(entities -> assertAll(
-                        () -> {
-                            var jeffersonEntity = entities.get(0);
-                            assertThat(jeffersonEntity.getAccountHolderId()).isNotNull();
-                            assertThat(jeffersonEntity.getAccountHolderName()).isEqualTo(jeffersonAccountHolderRequest.accountHolderName());
-                            assertThat(jeffersonEntity.getPassportNumber()).isEqualTo(jeffersonAccountHolderRequest.passportNumber());
-                            assertThat(jeffersonEntity.getDateOfBirth()).isEqualTo(jeffersonAccountHolderRequest.dateOfBirth());
-                            assertThat(jeffersonEntity.getBankAccountId()).isEqualTo(BANK_ACCOUNT_ID_BRAZIL);
-                            assertThat(jeffersonEntity.getIban()).isNull();
-                            assertThat(jeffersonEntity.getCreatedAt()).isEqualTo(LocalDateTime.now(TEST_CLOCK_FIXED_INSTANT));
-                        },
-                        () -> {
-                            var virginioEntity = entities.get(1);
-                            assertThat(virginioEntity.getAccountHolderId()).isNotNull();
-                            assertThat(virginioEntity.getAccountHolderName()).isEqualTo(virginioAccountHolderRequest.accountHolderName());
-                            assertThat(virginioEntity.getPassportNumber()).isEqualTo(virginioAccountHolderRequest.passportNumber());
-                            assertThat(virginioEntity.getDateOfBirth()).isEqualTo(virginioAccountHolderRequest.dateOfBirth());
-                            assertThat(virginioEntity.getBankAccountId()).isEqualTo(BANK_ACCOUNT_ID_BRAZIL);
-                            assertThat(virginioEntity.getIban()).isNull();
-                            assertThat(virginioEntity.getCreatedAt()).isEqualTo(LocalDateTime.now(TEST_CLOCK_FIXED_INSTANT));
-                        }
-                ));
-    }
-
-    @Test
-    void shouldThrowConstraintViolationException_whenAccountHoldersListHasMoreThanTwoItems() {
-        var accountHolderRequests = List.of(
-                TestAccountHolderRequest.JEFFERSON.toAccountHolderRequest(),
-                TestAccountHolderRequest.VIRGINIO.toAccountHolderRequest(),
-                TestAccountHolderRequest.PATRIZIO.toAccountHolderRequest()
-        );
+    void shouldThrowConstraintViolationException_whenBankAccountIdIsNull() {
+        var accountHolderRequest = TestAccountHolderRequest.JEFFERSON.toAccountHolderRequest();
+        var createJointAccountHoldersRequest = new CreateJointAccountHolderRequest(null, accountHolderRequest);
 
         var exception = assertThrows(ConstraintViolationException.class, () ->
-                createJointAccountHolderService.create(BANK_ACCOUNT_ID_BRAZIL, new CreateJointAccountHoldersRequest(accountHolderRequests))
-        );
-
-        assertThat(exception.getConstraintViolations()).hasSize(1);
-    }
-
-    @Test
-    void shouldThrowConstraintViolationException_whenAccountHoldersListIsEmpty() {
-        var exception = assertThrows(ConstraintViolationException.class, () ->
-                createJointAccountHolderService.create(BANK_ACCOUNT_ID_BRAZIL, new CreateJointAccountHoldersRequest(List.of()))
-        );
-
-        assertThat(exception.getConstraintViolations()).hasSize(1);
-    }
-
-    @Test
-    void shouldThrowConstraintViolationException_whenAccountHolderRequestsListContainsNullItem() {
-        var accountHolderRequests = Arrays.asList(
-                TestAccountHolderRequest.JEFFERSON.toAccountHolderRequest(),
-                null
-        );
-
-        var createJointAccountHoldersRequest = new CreateJointAccountHoldersRequest(accountHolderRequests);
-
-        var exception = assertThrows(ConstraintViolationException.class, () ->
-                createJointAccountHolderService.create(BANK_ACCOUNT_ID_BRAZIL, createJointAccountHoldersRequest)
+                createJointAccountHolderService.create(createJointAccountHoldersRequest)
         );
 
         assertThat(exception.getConstraintViolations()).hasSize(1);
@@ -164,10 +93,10 @@ class CreateJointAccountHoldersServiceTest {
     @ArgumentsSource(BlankValuesArgumentProvider.class)
     void shouldThrowConstraintViolationException_whenAccountHolderNameIsBlank(String blankAccountHolderName) {
         var accountHolderRequest = new AccountHolderRequest(blankAccountHolderName, DATE_OF_BIRTH_JEFFERSON, PASSPORT_NUMBER_JEFFERSON);
-        var createJointAccountHoldersRequest = new CreateJointAccountHoldersRequest(accountHolderRequest);
+        var createJointAccountHoldersRequest = new CreateJointAccountHolderRequest(BANK_ACCOUNT_ID_BRAZIL, accountHolderRequest);
 
         var exception = assertThrows(ConstraintViolationException.class, () ->
-                createJointAccountHolderService.create(BANK_ACCOUNT_ID_BRAZIL, createJointAccountHoldersRequest)
+                createJointAccountHolderService.create(createJointAccountHoldersRequest)
         );
 
         assertThat(exception.getConstraintViolations()).hasSize(1);
@@ -177,10 +106,10 @@ class CreateJointAccountHoldersServiceTest {
     void shouldThrowConstraintViolationException_whenAccountHolderNameIsLongerThan255Characters() {
         final var veryLongAccountHolderName = "J".repeat(256);
         var accountHolderRequest = new AccountHolderRequest(veryLongAccountHolderName, DATE_OF_BIRTH_JEFFERSON, PASSPORT_NUMBER_JEFFERSON);
-        var createJointAccountHoldersRequest = new CreateJointAccountHoldersRequest(accountHolderRequest);
+        var createJointAccountHoldersRequest = new CreateJointAccountHolderRequest(BANK_ACCOUNT_ID_BRAZIL, accountHolderRequest);
 
         var exception = assertThrows(ConstraintViolationException.class, () ->
-                createJointAccountHolderService.create(BANK_ACCOUNT_ID_BRAZIL, createJointAccountHoldersRequest)
+                createJointAccountHolderService.create(createJointAccountHoldersRequest)
         );
 
         assertThat(exception.getConstraintViolations()).hasSize(1);
@@ -190,10 +119,10 @@ class CreateJointAccountHoldersServiceTest {
     void shouldThrowConstraintViolationException_whenDateOfBirthIsInFuture() {
         LocalDate futureDate = LocalDate.now().plusDays(1);
         var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, futureDate, PASSPORT_NUMBER_JEFFERSON);
-        var createJointAccountHoldersRequest = new CreateJointAccountHoldersRequest(accountHolderRequest);
+        var createJointAccountHoldersRequest = new CreateJointAccountHolderRequest(BANK_ACCOUNT_ID_BRAZIL, accountHolderRequest);
 
         var exception = assertThrows(ConstraintViolationException.class, () ->
-                createJointAccountHolderService.create(BANK_ACCOUNT_ID_BRAZIL, createJointAccountHoldersRequest)
+                createJointAccountHolderService.create(createJointAccountHoldersRequest)
         );
 
         assertThat(exception.getConstraintViolations()).hasSize(1);
@@ -203,10 +132,10 @@ class CreateJointAccountHoldersServiceTest {
     void shouldThrowConstraintViolationException_whenDateOfBirthIsToday() {
         LocalDate today = LocalDate.now();
         var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, today, PASSPORT_NUMBER_JEFFERSON);
-        var createJointAccountHoldersRequest = new CreateJointAccountHoldersRequest(accountHolderRequest);
+        var createJointAccountHoldersRequest = new CreateJointAccountHolderRequest(BANK_ACCOUNT_ID_BRAZIL, accountHolderRequest);
 
         var exception = assertThrows(ConstraintViolationException.class, () ->
-                createJointAccountHolderService.create(BANK_ACCOUNT_ID_BRAZIL, createJointAccountHoldersRequest)
+                createJointAccountHolderService.create(createJointAccountHoldersRequest)
         );
 
         assertThat(exception.getConstraintViolations()).hasSize(1);
@@ -215,10 +144,10 @@ class CreateJointAccountHoldersServiceTest {
     @Test
     void shouldThrowConstraintViolationException_whenPassportNumberIsNull() {
         var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, DATE_OF_BIRTH_JEFFERSON, null);
-        var createJointAccountHoldersRequest = new CreateJointAccountHoldersRequest(accountHolderRequest);
+        var createJointAccountHoldersRequest = new CreateJointAccountHolderRequest(BANK_ACCOUNT_ID_BRAZIL, accountHolderRequest);
 
         var exception = assertThrows(ConstraintViolationException.class, () ->
-                createJointAccountHolderService.create(BANK_ACCOUNT_ID_BRAZIL, createJointAccountHoldersRequest)
+                createJointAccountHolderService.create(createJointAccountHoldersRequest)
         );
 
         assertThat(exception.getConstraintViolations()).hasSize(1);
@@ -228,12 +157,24 @@ class CreateJointAccountHoldersServiceTest {
     @ArgumentsSource(InvalidPassportNumberArgumentProvider.class)
     void shouldThrowConstraintViolationException_whenPassportNumberIsNot8CharactersLong(String invalidLengthPassportNumber) {
         var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, DATE_OF_BIRTH_JEFFERSON, invalidLengthPassportNumber);
-        var createJointAccountHoldersRequest = new CreateJointAccountHoldersRequest(accountHolderRequest);
+        var createJointAccountHoldersRequest = new CreateJointAccountHolderRequest(BANK_ACCOUNT_ID_BRAZIL, accountHolderRequest);
 
         var exception = assertThrows(ConstraintViolationException.class, () ->
-                createJointAccountHolderService.create(BANK_ACCOUNT_ID_BRAZIL, createJointAccountHoldersRequest)
+                createJointAccountHolderService.create(createJointAccountHoldersRequest)
         );
 
         assertThat(exception.getConstraintViolations()).hasSize(1);
+    }
+
+    @Test
+    void shouldThrowMultipleConstraintViolationException_whenAllFieldsAreNull() {
+        var accountHolderRequest = new AccountHolderRequest(null, null, null);
+        var createJointAccountHoldersRequest = new CreateJointAccountHolderRequest(BANK_ACCOUNT_ID_BRAZIL, accountHolderRequest);
+
+        var exception = assertThrows(ConstraintViolationException.class, () ->
+                createJointAccountHolderService.create(createJointAccountHoldersRequest)
+        );
+
+        assertThat(exception.getConstraintViolations()).hasSize(3);
     }
 }

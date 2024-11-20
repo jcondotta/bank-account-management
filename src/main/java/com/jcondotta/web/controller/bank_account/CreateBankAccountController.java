@@ -38,6 +38,7 @@ public class CreateBankAccountController {
     }
 
     @Operation(summary = "${operation.createBankAccount.summary}", description = "${operation.createBankAccount.description}",
+            tags = {"bank accounts"},
             requestBody = @RequestBody(
                     description = "${requestBody.createBankAccount.description}",
                     required = true,

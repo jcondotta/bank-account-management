@@ -35,7 +35,8 @@ public class FindBankAccountController {
 
     @Operation(
             summary = "${operation.findBankAccount.summary}",
-            description = "${operation.findBankAccount.description}"
+            description = "${operation.findBankAccount.description}",
+            tags = {"bank accounts"}
     )
     @ApiResponses(value = {
             @ApiResponse(

@@ -105,7 +105,6 @@ class CreateBankAccountServiceTest {
         verifyNoMoreInteractions(createBankAccountRepository, snsTopicPublisher);
     }
 
-
     @Test
     void shouldThrowConstraintViolationException_whenRequestHasNullAccountHolder() {
         var createBankAccountRequest = new CreateBankAccountRequest(null);

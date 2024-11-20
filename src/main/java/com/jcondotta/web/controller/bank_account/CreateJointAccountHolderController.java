@@ -1,8 +1,10 @@
 package com.jcondotta.web.controller.bank_account;
 
 import com.jcondotta.service.bank_account.CreateJointAccountHolderService;
+import com.jcondotta.service.dto.AccountHolderDTO;
 import com.jcondotta.service.dto.AccountHoldersDTO;
-import com.jcondotta.service.request.CreateJointAccountHoldersRequest;
+import com.jcondotta.service.request.AccountHolderRequest;
+import com.jcondotta.service.request.CreateJointAccountHolderRequest;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.MediaType;
@@ -36,62 +38,63 @@ public class CreateJointAccountHolderController {
     }
 
     @Operation(
-            summary = "${operation.createJointAccountHolders.summary}",
-            description = "${operation.createJointAccountHolders.description}",
-            tags = {"Joint Accounts"},
+            summary = "${operation.createJointAccountHolder.summary}",
+            description = "${operation.createJointAccountHolder.description}",
+            tags = {"joint account holders"},
             requestBody = @RequestBody(
-                    description = "${requestBody.createJointAccountHolders.description}",
+                    description = "${requestBody.createJointAccountHolder.description}",
                     required = true,
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON,
-                            schema = @Schema(implementation = CreateJointAccountHoldersRequest.class)
+                            schema = @Schema(implementation = CreateJointAccountHolderRequest.class)
                     )
             )
     )
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "201",
-                    description = "${response.createJointAccountHolders.201.description}",
+                    description = "${response.createJointAccountHolder.201.description}",
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON,
-                            schema = @Schema(implementation = AccountHoldersDTO.class)
+                            schema = @Schema(implementation = AccountHolderDTO.class)
                     ),
                     headers = {
                             @Header(
                                     name = "Location",
-                                    description = "${response.createJointAccountHolders.201.header.Location.description}",
+                                    description = "${response.createJointAccountHolder.201.header.Location.description}",
                                     schema = @Schema(
                                             type = "string",
                                             format = "uri",
-                                            example = "${response.createJointAccountHolders.201.header.Location.example}"
+                                            example = "${response.createJointAccountHolder.201.header.Location.example}"
                                     )
                             )
                     }
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "${response.createJointAccountHolders.400.description}"
+                    description = "${response.createJointAccountHolder.400.description}"
             ),
             @ApiResponse(
                     responseCode = "500",
-                    description = "${response.createJointAccountHolders.500.description}"
+                    description = "${response.createJointAccountHolder.500.description}"
             )
     })
     @Post(consumes = MediaType.APPLICATION_JSON, produces = MediaType.APPLICATION_JSON)
     @Status(HttpStatus.CREATED)
-    public HttpResponse<AccountHoldersDTO> createJointAccountHolder(
+    public HttpResponse<AccountHolderDTO> createJointAccountHolder(
             @Parameter(
-                    description = "${parameter.createJointAccountHolders.bankAccountId.description}", required = true,
+                    description = "${parameter.createJointAccountHolder.bankAccountId.description}", required = true,
                     example = "01920bff-1338-7efd-ade6-e9128debe5d4"
             )
             @PathVariable("bank-account-id") UUID bankAccountId,
 
-            @Body
-            CreateJointAccountHoldersRequest createJointAccountHoldersRequest) {
+            @Body AccountHolderRequest accountHolderRequest) {
 
         LOGGER.info("Received request to create joint account holders for Bank Account ID: {}", bankAccountId);
 
-        var accountHoldersDTO = createJointAccountHolderService.create(bankAccountId, createJointAccountHoldersRequest);
+        var createJointAccountHolderRequest = new CreateJointAccountHolderRequest(bankAccountId, accountHolderRequest);
+        var accountHoldersDTO = createJointAccountHolderService.create(createJointAccountHolderRequest);
+
         return HttpResponse.created(accountHoldersDTO, BankAccountURIBuilder.bankAccountURI(bankAccountId));
     }
 }

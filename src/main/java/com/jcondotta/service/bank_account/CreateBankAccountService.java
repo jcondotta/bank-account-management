@@ -43,10 +43,12 @@ public class CreateBankAccountService {
 
         var constraintViolations = validator.validate(createBankAccountRequest);
         if (!constraintViolations.isEmpty()) {
-            LOGGER.warn("Validation errors: {}", constraintViolations.stream()
-                    .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
-                    .collect(Collectors.joining(", ")));
-
+            if (LOGGER.isWarnEnabled()) {
+                var validationMessages = constraintViolations.stream()
+                        .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
+                        .collect(Collectors.joining(", "));
+                LOGGER.warn("Validation errors: {}", validationMessages);
+            }
             throw new ConstraintViolationException(constraintViolations);
         }
 

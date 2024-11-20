@@ -72,15 +72,15 @@ public class BankAccountCreatedSNSTopicPublisher {
         try {
             var serializedNotification = jsonMapper.writeValueAsString(notification);
             LOGGER.debug("Successfully serialized notification: {}", serializedNotification);
-
             return serializedNotification;
         }
         catch (IOException e) {
-            LOGGER.error("Failed to serialize notification: {}", notification, e);
+            LOGGER.error("Failed to serialize notification of type {}: {}",
+                    notification.getClass().getSimpleName(), notification, e);
+
             throw new NotificationSerializationException(
-                    String.format("Error serializing notification of type %s: %s",
-                            notification.getClass().getSimpleName(),
-                            e.getMessage()),
+                    String.format("Error serializing notification of type %s. Details: %s",
+                            notification.getClass().getSimpleName(), e.getMessage()),
                     e);
         }
     }

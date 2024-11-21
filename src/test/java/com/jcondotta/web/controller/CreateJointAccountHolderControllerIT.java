@@ -40,7 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 @TestInstance(Lifecycle.PER_CLASS)
 @MicronautTest(transactional = false)
-class CreateJointAccountHoldersControllerIT implements LocalStackTestContainer {
+class CreateJointAccountHolderControllerIT implements LocalStackTestContainer {
 
     private static final UUID BANK_ACCOUNT_ID_BRAZIL = TestBankAccountId.BRAZIL.getBankAccountId();
 

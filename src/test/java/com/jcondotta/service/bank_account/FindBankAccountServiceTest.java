@@ -50,8 +50,9 @@ class FindBankAccountServiceTest {
 
         var bankAccountEntity = TestBankAccountFactory.create(BANK_ACCOUNT_ID_BRAZIL);
         var primaryAccountHolder = TestAccountHolderFactory.createPrimaryAccountHolder(TestAccountHolderRequest.JEFFERSON, BANK_ACCOUNT_ID_BRAZIL);
+        var jointAccountHolder = TestAccountHolderFactory.createJointAccountHolder(TestAccountHolderRequest.PATRIZIO, BANK_ACCOUNT_ID_BRAZIL);
 
-        when(sdkIterable.stream()).thenReturn(Stream.of(bankAccountEntity, primaryAccountHolder));
+        when(sdkIterable.stream()).thenReturn(Stream.of(bankAccountEntity, primaryAccountHolder, jointAccountHolder));
 
         var bankAccountDTO = findBankAccountService.findBankAccountById(BANK_ACCOUNT_ID_BRAZIL);
 
@@ -60,13 +61,18 @@ class FindBankAccountServiceTest {
                 () -> assertThat(bankAccountDTO.getIban()).isNotBlank(),
                 () -> assertThat(bankAccountDTO.getDateOfOpening()).isEqualTo(LocalDateTime.now(TestClockFactory.testClockFixedInstant)),
                 () -> assertThat(bankAccountDTO.getAccountHolders())
-                        .hasSize(1)
-                        .first()
-                        .satisfies(accountHolderDTO -> {
+                        .hasSize(2)
+                        .anySatisfy(accountHolderDTO -> {
                             assertThat(accountHolderDTO.getAccountHolderId()).isEqualTo(primaryAccountHolder.getAccountHolderId());
                             assertThat(accountHolderDTO.getAccountHolderName()).isEqualTo(primaryAccountHolder.getAccountHolderName());
                             assertThat(accountHolderDTO.getPassportNumber()).isEqualTo(primaryAccountHolder.getPassportNumber());
                             assertThat(accountHolderDTO.getDateOfBirth()).isEqualTo(primaryAccountHolder.getDateOfBirth());
+                        })
+                        .anySatisfy(accountHolderDTO -> {
+                            assertThat(accountHolderDTO.getAccountHolderId()).isEqualTo(jointAccountHolder.getAccountHolderId());
+                            assertThat(accountHolderDTO.getAccountHolderName()).isEqualTo(jointAccountHolder.getAccountHolderName());
+                            assertThat(accountHolderDTO.getPassportNumber()).isEqualTo(jointAccountHolder.getPassportNumber());
+                            assertThat(accountHolderDTO.getDateOfBirth()).isEqualTo(jointAccountHolder.getDateOfBirth());
                         })
         );
     }

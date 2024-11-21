@@ -3,9 +3,11 @@ package com.jcondotta.web.controller;
 import com.jcondotta.container.LocalStackTestContainer;
 import com.jcondotta.helper.TestAccountHolderRequest;
 import com.jcondotta.service.bank_account.CreateBankAccountService;
+import com.jcondotta.service.bank_account.CreateJointAccountHolderService;
 import com.jcondotta.service.dto.BankAccountDTO;
 import com.jcondotta.service.request.AccountHolderRequest;
 import com.jcondotta.service.request.CreateBankAccountRequest;
+import com.jcondotta.service.request.CreateJointAccountHolderRequest;
 import com.jcondotta.web.controller.bank_account.BankAccountURIBuilder;
 import io.micronaut.context.MessageSource;
 import io.micronaut.http.HttpStatus;
@@ -21,13 +23,16 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.slf4j.MDC;
 
+import java.time.Clock;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Locale;
 import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 @TestInstance(Lifecycle.PER_CLASS)
 @MicronautTest(transactional = false)
@@ -38,7 +43,13 @@ class FindBankAccountControllerIT implements LocalStackTestContainer {
     private static final LocalDate DATE_OF_BIRTH_JEFFERSON = TestAccountHolderRequest.JEFFERSON.getDateOfBirth();
 
     @Inject
+    Clock testClockUTC;
+
+    @Inject
     CreateBankAccountService createBankAccountService;
+
+    @Inject
+    CreateJointAccountHolderService createJointAccountHolderService;
 
     @Inject
     RequestSpecification requestSpecification;
@@ -62,10 +73,61 @@ class FindBankAccountControllerIT implements LocalStackTestContainer {
         assertThat(MDC.get("accountHolderId"))
                 .as("MDC should be cleared after the publishMessage method completes for accountHolderId")
                 .isNull();
+
     }
 
     @Test
-    void shouldReturn200OkWithAccountHolder_whenBankAccountExists() {
+    void shouldReturn200Ok_whenBankAccountWithAccountHolderExists() {
+        var jeffersonAccountHolderRequest = TestAccountHolderRequest.JEFFERSON.toAccountHolderRequest();
+
+        var createBankAccountRequest = new CreateBankAccountRequest(jeffersonAccountHolderRequest);
+        var createdBankAccountDTO = createBankAccountService.create(createBankAccountRequest);
+
+        var patrizioAccountHolderRequest = TestAccountHolderRequest.PATRIZIO.toAccountHolderRequest();
+        var patrizioJointRequest = new CreateJointAccountHolderRequest(createdBankAccountDTO.getBankAccountId(), patrizioAccountHolderRequest);
+        createJointAccountHolderService.create(patrizioJointRequest);
+
+        var virginioAccountHolderRequest = TestAccountHolderRequest.VIRGINIO.toAccountHolderRequest();
+        var virginioJointRequest = new CreateJointAccountHolderRequest(createdBankAccountDTO.getBankAccountId(), virginioAccountHolderRequest);
+        createJointAccountHolderService.create(virginioJointRequest);
+
+        var fetchedBankAccountDTO = given()
+            .spec(requestSpecification)
+                .pathParam("bank-account-id", createdBankAccountDTO.getBankAccountId())
+        .when()
+            .get()
+        .then()
+            .statusCode(HttpStatus.OK.getCode())
+                .extract()
+                    .response()
+                        .as(BankAccountDTO.class);
+
+        assertAll(
+                () -> assertThat(fetchedBankAccountDTO.getBankAccountId()).isNotNull(),
+                () -> assertThat(fetchedBankAccountDTO.getIban()).isNotBlank(),
+                () -> assertThat(fetchedBankAccountDTO.getDateOfOpening()).isEqualTo(LocalDateTime.now(testClockUTC)),
+                () -> assertThat(fetchedBankAccountDTO.getAccountHolders())
+                        .hasSize(3)
+                        .anySatisfy(accountHolderDTO -> {
+                            assertThat(accountHolderDTO.getAccountHolderName()).isEqualTo(jeffersonAccountHolderRequest.accountHolderName());
+                            assertThat(accountHolderDTO.getPassportNumber()).isEqualTo(jeffersonAccountHolderRequest.passportNumber());
+                            assertThat(accountHolderDTO.getDateOfBirth()).isEqualTo(jeffersonAccountHolderRequest.dateOfBirth());
+                        })
+                        .anySatisfy(accountHolderDTO -> {
+                            assertThat(accountHolderDTO.getAccountHolderName()).isEqualTo(patrizioAccountHolderRequest.accountHolderName());
+                            assertThat(accountHolderDTO.getPassportNumber()).isEqualTo(patrizioAccountHolderRequest.passportNumber());
+                            assertThat(accountHolderDTO.getDateOfBirth()).isEqualTo(patrizioAccountHolderRequest.dateOfBirth());
+                        })
+                        .anySatisfy(accountHolderDTO -> {
+                            assertThat(accountHolderDTO.getAccountHolderName()).isEqualTo(virginioAccountHolderRequest.accountHolderName());
+                            assertThat(accountHolderDTO.getPassportNumber()).isEqualTo(virginioAccountHolderRequest.passportNumber());
+                            assertThat(accountHolderDTO.getDateOfBirth()).isEqualTo(virginioAccountHolderRequest.dateOfBirth());
+                        })
+        );
+    }
+
+    @Test
+    void shouldReturn200Ok_whenBankAccountWithMultipleAccountHoldersExists() {
         var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, DATE_OF_BIRTH_JEFFERSON, PASSPORT_NUMBER_JEFFERSON);
         var createBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
 

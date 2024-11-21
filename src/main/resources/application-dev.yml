@@ -12,6 +12,4 @@ aws:
       banking-entities:
         table-name: 'banking-entities-localstack'
   sns:
-    topics:
-      account-holder-created:
-        topic-name: 'account-holder-created-topic-localstack'
+    endpoint: 'http://localhost:4566'

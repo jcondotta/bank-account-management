@@ -1,8 +1,7 @@
 package com.jcondotta.web.controller;
 
-import com.jcondotta.configuration.BankAccountCreatedSNSTopicConfig;
-import com.jcondotta.configuration.BankAccountCreatedSQSQueueConfig;
-import com.jcondotta.container.LocalStackSQSQueueCreator;
+import com.jcondotta.configuration.AccountHolderCreatedSNSTopicConfig;
+import com.jcondotta.configuration.AccountHolderCreatedSQSQueueConfig;
 import com.jcondotta.container.LocalStackTestContainer;
 import com.jcondotta.helper.TestAccountHolderRequest;
 import com.jcondotta.service.dto.BankAccountDTO;
@@ -49,14 +48,13 @@ class BankAccountCreatedSNSTopicIT implements LocalStackTestContainer {
     SnsClient snsClient;
 
     @Inject
-    BankAccountCreatedSNSTopicConfig bankAccountCreatedSNSTopicConfig;
+    AccountHolderCreatedSNSTopicConfig snsTopicConfig;
 
     @Inject
     SqsClient sqsClient;
 
     @Inject
-    BankAccountCreatedSQSQueueConfig sqsQueueConfig;
-    String bankAccountCreatedSQSQueueURL;
+    AccountHolderCreatedSQSQueueConfig sqsQueueConfig;
     String bankAccountCreatedSQSQueueARN;
 
     @BeforeEach
@@ -65,10 +63,8 @@ class BankAccountCreatedSNSTopicIT implements LocalStackTestContainer {
                 .basePath(BankAccountURIBuilder.BASE_PATH_API_V1_MAPPING)
                 .contentType(ContentType.JSON);
 
-        this.bankAccountCreatedSQSQueueURL = LocalStackSQSQueueCreator.createQueueWithURLResponse(sqsClient, sqsQueueConfig.queueName());
-
-        this.bankAccountCreatedSQSQueueARN = getQueueArn(sqsClient, bankAccountCreatedSQSQueueURL);
-        subscribeTopicWithQueue(snsClient, bankAccountCreatedSNSTopicConfig.topicArn(), bankAccountCreatedSQSQueueARN);
+        this.bankAccountCreatedSQSQueueARN = getQueueArn(sqsClient, sqsQueueConfig.queueURL());
+        subscribeTopicWithQueue(snsClient, snsTopicConfig.topicArn(), bankAccountCreatedSQSQueueARN);
     }
 
     @Test
@@ -87,7 +83,7 @@ class BankAccountCreatedSNSTopicIT implements LocalStackTestContainer {
                     .response()
                         .as(BankAccountDTO.class);
 
-        var messages = sqsClient.receiveMessage(builder -> builder.queueUrl(bankAccountCreatedSQSQueueURL)
+        var messages = sqsClient.receiveMessage(builder -> builder.queueUrl(sqsQueueConfig.queueURL())
                         .waitTimeSeconds(3)
                         .build())
                 .messages();

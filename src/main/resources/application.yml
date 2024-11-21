@@ -31,6 +31,5 @@ aws:
         table-name: ${AWS_DYNAMODB_BANKING_ENTITIES_TABLE_NAME}
   sns:
     topics:
-      bank-account-created:
-        topic-name: ${AWS_SNS_BANK_ACCOUNT_CREATED_TOPIC_NAME}
-        topic-arn: ${AWS_SNS_BANK_ACCOUNT_CREATED_TOPIC_ARN}
+      account-holder-created:
+        topic-arn: ${AWS_SNS_ACCOUNT_HOLDER_CREATED_TOPIC_ARN}

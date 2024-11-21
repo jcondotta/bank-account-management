@@ -1,6 +1,6 @@
 package com.jcondotta.event;
 
-import com.jcondotta.configuration.BankAccountCreatedSNSTopicConfig;
+import com.jcondotta.configuration.AccountHolderCreatedSNSTopicConfig;
 import com.jcondotta.factory.TestAccountHolderFactory;
 import com.jcondotta.factory.TestBankAccountFactory;
 import com.jcondotta.helper.TestAccountHolderRequest;
@@ -40,7 +40,7 @@ class BankAccountCreatedSNSTopicPublisherTest {
     private SnsClient snsClient;
 
     @Mock
-    private BankAccountCreatedSNSTopicConfig snsTopicConfig;
+    private AccountHolderCreatedSNSTopicConfig snsTopicConfig;
 
     private BankAccountCreatedSNSTopicPublisher snsTopicPublisher;
 

@@ -1,6 +1,6 @@
 package com.jcondotta.event;
 
-import com.jcondotta.configuration.BankAccountCreatedSNSTopicConfig;
+import com.jcondotta.configuration.AccountHolderCreatedSNSTopicConfig;
 import com.jcondotta.domain.AccountHolderType;
 import com.jcondotta.service.dto.BankAccountDTO;
 import io.micronaut.json.JsonMapper;
@@ -20,11 +20,11 @@ public class BankAccountCreatedSNSTopicPublisher {
     private static final Logger LOGGER = LoggerFactory.getLogger(BankAccountCreatedSNSTopicPublisher.class);
 
     private final SnsClient snsClient;
-    private final BankAccountCreatedSNSTopicConfig snsTopicConfig;
+    private final AccountHolderCreatedSNSTopicConfig snsTopicConfig;
     private final JsonMapper jsonMapper;
 
     @Inject
-    public BankAccountCreatedSNSTopicPublisher(SnsClient snsClient, BankAccountCreatedSNSTopicConfig snsTopicConfig, JsonMapper jsonMapper) {
+    public BankAccountCreatedSNSTopicPublisher(SnsClient snsClient, AccountHolderCreatedSNSTopicConfig snsTopicConfig, JsonMapper jsonMapper) {
         this.snsClient = snsClient;
         this.snsTopicConfig = snsTopicConfig;
         this.jsonMapper = jsonMapper;

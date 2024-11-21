@@ -27,6 +27,11 @@ public class LocalStackSQSQueueCreator {
         return createQueue(sqsClient, queueName);
     }
 
+    public static String createQueueWithURLResponse(String queueName) {
+        var sqsClient = initializeSQSClient();
+        return createQueueWithURLResponse(sqsClient, queueName);
+    }
+
     private static String createQueue(SqsClient sqsClient, String queueName) {
         sqsClient = Objects.requireNonNullElseGet(sqsClient, LocalStackSQSQueueCreator::initializeSQSClient);
 

@@ -17,12 +17,8 @@ aws:
         table-name: 'bank-entities-test'
   sns:
     endpoint: ${AWS_SNS_ENDPOINT}
-    topics:
-      bank-account-created:
-        topic-name: 'bank-account-created-test'
   sqs:
     endpoint: ${AWS_SQS_ENDPOINT}
     queues:
-      bank-account-created:
-        queue-name: 'bank-account-created-test'
-
+      account-holder-created:
+        queue-url: ${AWS_SQS_ACCOUNT_HOLDER_CREATED_QUEUE_URL}

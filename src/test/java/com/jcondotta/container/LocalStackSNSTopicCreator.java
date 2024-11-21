@@ -18,7 +18,7 @@ public class LocalStackSNSTopicCreator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LocalStackSNSTopicCreator.class);
 
-    public static String createSNSTopicWithARNResponse(String topicName) {
+    public static String createTopicWithARNResponse(String topicName) {
         if (!LOCALSTACK_CONTAINER.isRunning()) {
             LOGGER.error("LocalStack is not running. Please ensure the container is started.");
 

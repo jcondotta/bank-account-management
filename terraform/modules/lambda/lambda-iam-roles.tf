@@ -48,11 +48,11 @@ resource "aws_iam_role_policy" "lambda_policy" {
         },
         {
           Action   = [
-            "sns:ListTopics",      # Temporary permission to allow listing topics if needed
+            "sns:ListTopics",
             "sns:Publish"
           ],
           Effect   = "Allow",
-          Resource = "arn:aws:sns:us-east-1:470315484552:*" # Change to specific topic ARN if possible to reduce scope
+          Resource = "arn:aws:sns:us-east-1:470315484552:*"
         }
       ]
     }

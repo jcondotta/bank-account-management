@@ -2,7 +2,6 @@ package com.jcondotta.event;
 
 import com.jcondotta.configuration.BankAccountCreatedSNSTopicConfig;
 import com.jcondotta.domain.AccountHolderType;
-import com.jcondotta.exception.NotificationSerializationException;
 import com.jcondotta.service.dto.BankAccountDTO;
 import io.micronaut.json.JsonMapper;
 import jakarta.inject.Inject;
@@ -72,16 +71,13 @@ public class BankAccountCreatedSNSTopicPublisher {
         try {
             var serializedNotification = jsonMapper.writeValueAsString(notification);
             LOGGER.debug("Successfully serialized notification: {}", serializedNotification);
+
             return serializedNotification;
         }
         catch (IOException e) {
-            LOGGER.error("Failed to serialize notification of type {}: {}",
-                    notification.getClass().getSimpleName(), notification, e);
+            LOGGER.error("Failed to serialize notification: {}", notification, e);
 
-            throw new NotificationSerializationException(
-                    String.format("Error serializing notification of type %s. Details: %s",
-                            notification.getClass().getSimpleName(), e.getMessage()),
-                    e);
+            throw new RuntimeException("Error serializing notification", e);
         }
     }
 }

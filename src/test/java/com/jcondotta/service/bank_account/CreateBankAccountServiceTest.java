@@ -5,7 +5,7 @@ import com.jcondotta.argument_provider.BlankValuesArgumentProvider;
 import com.jcondotta.argument_provider.InvalidPassportNumberArgumentProvider;
 import com.jcondotta.domain.BankingEntity;
 import com.jcondotta.domain.EntityType;
-import com.jcondotta.event.BankAccountCreatedSNSTopicPublisher;
+import com.jcondotta.event.AccountHolderCreatedSNSTopicPublisher;
 import com.jcondotta.factory.TestClockFactory;
 import com.jcondotta.factory.ValidatorTestFactory;
 import com.jcondotta.helper.TestAccountHolderRequest;
@@ -53,7 +53,7 @@ class CreateBankAccountServiceTest {
     private CreateBankAccountResponse createBankAccountResponse;
 
     @Mock
-    private BankAccountCreatedSNSTopicPublisher snsTopicPublisher;
+    private AccountHolderCreatedSNSTopicPublisher snsTopicPublisher;
 
     private CreateBankAccountService createBankAccountService;
 

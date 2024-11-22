@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 import java.util.UUID;
 
 @Validated
-@Controller(BankAccountURIBuilder.BANK_ACCOUNT_API_V1_MAPPING)
+@Controller(BankAccountURIBuilder.ACCOUNT_HOLDERS_API_V1_MAPPING)
 public class CreateJointAccountHolderController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CreateJointAccountHolderController.class);

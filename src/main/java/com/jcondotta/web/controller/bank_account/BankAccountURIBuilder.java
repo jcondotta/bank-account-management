@@ -11,6 +11,7 @@ public interface BankAccountURIBuilder {
 
     String BASE_PATH_API_V1_MAPPING = "/api/v1/bank-accounts";
     String BANK_ACCOUNT_API_V1_MAPPING = BASE_PATH_API_V1_MAPPING + "/bank-account-id/{bank-account-id}";
+    String ACCOUNT_HOLDERS_API_V1_MAPPING = BANK_ACCOUNT_API_V1_MAPPING + "/account-holders";
 
     static URI bankAccountURI(@NotNull UUID bankAccountId) {
         return UriBuilder.of(BANK_ACCOUNT_API_V1_MAPPING)

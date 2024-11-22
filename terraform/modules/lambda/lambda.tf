@@ -12,7 +12,7 @@ resource "aws_lambda_function" "bank_accounts_lambda" {
     variables = merge(
       {
         AWS_DYNAMODB_BANKING_ENTITIES_TABLE_NAME = var.dynamodb_banking_entities_table_name
-        AWS_SNS_BANK_ACCOUNT_CREATED_TOPIC_ARN = var.sns_bank_account_created_topic_arn
+        AWS_SNS_ACCOUNT_HOLDER_CREATED_TOPIC_ARN = var.sns_account_holder_created_topic_arn
       },
       var.lambda_environment_variables
     )

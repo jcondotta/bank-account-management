@@ -29,7 +29,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class BankAccountCreatedSNSTopicPublisherTest {
+class AccountHolderCreatedSNSTopicPublisherTest {
 
     private static final String BANK_ACCOUNT_CREATED_TOPIC_ARN = "arn:aws:sns:us-east-1:123456789012:bank-account-created-topic";
 
@@ -42,7 +42,7 @@ class BankAccountCreatedSNSTopicPublisherTest {
     @Mock
     private AccountHolderCreatedSNSTopicConfig snsTopicConfig;
 
-    private BankAccountCreatedSNSTopicPublisher snsTopicPublisher;
+    private AccountHolderCreatedSNSTopicPublisher snsTopicPublisher;
 
     private BankAccountDTO bankAccountDTO;
     private JsonMapper jsonMapper = JsonMapper.createDefault();
@@ -51,7 +51,7 @@ class BankAccountCreatedSNSTopicPublisherTest {
 
     @BeforeEach
     void beforeEach() {
-        snsTopicPublisher = new BankAccountCreatedSNSTopicPublisher(snsClient, snsTopicConfig, jsonMapper);
+        snsTopicPublisher = new AccountHolderCreatedSNSTopicPublisher(snsClient, snsTopicConfig, jsonMapper);
     }
 
     @AfterEach
@@ -86,10 +86,10 @@ class BankAccountCreatedSNSTopicPublisherTest {
         var capturedRequest = publishRequestCaptor.getValue();
         assertThat(capturedRequest.topicArn()).isEqualTo(BANK_ACCOUNT_CREATED_TOPIC_ARN);
 
-        var expectedNotification = new BankAccountCreatedNotification(
-                BANK_ACCOUNT_ID_BRAZIL,
+        var expectedNotification = new AccountHolderCreatedNotification(
                 primaryAccountHolder.getAccountHolderId(),
-                primaryAccountHolder.getAccountHolderName()
+                primaryAccountHolder.getAccountHolderName(),
+                BANK_ACCOUNT_ID_BRAZIL
         );
         assertThat(capturedRequest.message()).isEqualTo(jsonMapper.writeValueAsString(expectedNotification));
 

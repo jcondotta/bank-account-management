@@ -8,8 +8,8 @@ variable "environment" {
   type        = string
 }
 
-variable "sns_bank_account_created_topic_name" {
-  description = "The name of the SNS topic for the bank-account-created event."
+variable "sns_account_holder_created_topic_name" {
+  description = "The name of the SNS topic for the account-holder-created event."
   type        = string
 }
 

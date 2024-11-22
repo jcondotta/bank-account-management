@@ -68,7 +68,7 @@ class CreateJointAccountHolderControllerIT implements LocalStackTestContainer {
     @BeforeEach
     void beforeEach(RequestSpecification requestSpecification) {
         this.requestSpecification = requestSpecification
-                .basePath(BankAccountURIBuilder.BANK_ACCOUNT_API_V1_MAPPING)
+                .basePath(BankAccountURIBuilder.ACCOUNT_HOLDERS_API_V1_MAPPING)
                 .contentType(ContentType.JSON);
     }
 

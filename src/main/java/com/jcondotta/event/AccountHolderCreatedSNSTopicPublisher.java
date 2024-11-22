@@ -15,16 +15,16 @@ import software.amazon.awssdk.services.sns.model.PublishRequest;
 import java.io.IOException;
 
 @Singleton
-public class BankAccountCreatedSNSTopicPublisher {
+public class AccountHolderCreatedSNSTopicPublisher {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(BankAccountCreatedSNSTopicPublisher.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AccountHolderCreatedSNSTopicPublisher.class);
 
     private final SnsClient snsClient;
     private final AccountHolderCreatedSNSTopicConfig snsTopicConfig;
     private final JsonMapper jsonMapper;
 
     @Inject
-    public BankAccountCreatedSNSTopicPublisher(SnsClient snsClient, AccountHolderCreatedSNSTopicConfig snsTopicConfig, JsonMapper jsonMapper) {
+    public AccountHolderCreatedSNSTopicPublisher(SnsClient snsClient, AccountHolderCreatedSNSTopicConfig snsTopicConfig, JsonMapper jsonMapper) {
         this.snsClient = snsClient;
         this.snsTopicConfig = snsTopicConfig;
         this.jsonMapper = jsonMapper;
@@ -35,10 +35,10 @@ public class BankAccountCreatedSNSTopicPublisher {
             var bankAccountCreatedNotification = bankAccountDTO.getAccountHolders().stream()
                 .filter(accountHolderDTO -> AccountHolderType.PRIMARY.equals(accountHolderDTO.getAccountHolderType()))
                 .findFirst()
-                .map(accountHolderDTO -> new BankAccountCreatedNotification(
-                        bankAccountDTO.getBankAccountId(),
+                .map(accountHolderDTO -> new AccountHolderCreatedNotification(
                         accountHolderDTO.getAccountHolderId(),
-                        accountHolderDTO.getAccountHolderName())
+                        accountHolderDTO.getAccountHolderName(),
+                        bankAccountDTO.getBankAccountId())
                 )
                 .orElseThrow(() -> {
                             LOGGER.error("Primary account holder not found for BankAccount ID: {}", bankAccountDTO.getBankAccountId());
@@ -67,7 +67,7 @@ public class BankAccountCreatedSNSTopicPublisher {
         }
     }
 
-    private String serializeNotification(BankAccountCreatedNotification notification) {
+    private String serializeNotification(AccountHolderCreatedNotification notification) {
         try {
             var serializedNotification = jsonMapper.writeValueAsString(notification);
             LOGGER.debug("Successfully serialized notification: {}", serializedNotification);

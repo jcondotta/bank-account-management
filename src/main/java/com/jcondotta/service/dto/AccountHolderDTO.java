@@ -9,6 +9,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
@@ -67,6 +68,13 @@ public class AccountHolderDTO {
     )
     private AccountHolderType accountHolderType;
 
+    @NotNull
+    @Schema(description = "Date and time when the account holder was created.",
+            example = "2023-08-23T14:55:00Z",
+            requiredMode = RequiredMode.REQUIRED)
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
+    private LocalDateTime createdAt;
+
     public AccountHolderDTO() {}
 
     public AccountHolderDTO(UUID bankAccountId,
@@ -74,13 +82,15 @@ public class AccountHolderDTO {
                             String accountHolderName,
                             LocalDate dateOfBirth,
                             String passportNumber,
-                            AccountHolderType accountHolderType) {
+                            AccountHolderType accountHolderType,
+                            LocalDateTime createdAt) {
         this.bankAccountId = bankAccountId;
         this.accountHolderId = accountHolderId;
         this.accountHolderName = accountHolderName;
         this.dateOfBirth = dateOfBirth;
         this.passportNumber = passportNumber;
         this.accountHolderType = accountHolderType;
+        this.createdAt = createdAt;
     }
 
     public AccountHolderDTO(BankingEntity accountHolder) {
@@ -90,7 +100,8 @@ public class AccountHolderDTO {
                 accountHolder.getAccountHolderName(),
                 accountHolder.getDateOfBirth(),
                 accountHolder.getPassportNumber(),
-                accountHolder.getAccountHolderType()
+                accountHolder.getAccountHolderType(),
+                accountHolder.getCreatedAt()
         );
     }
 
@@ -134,5 +145,12 @@ public class AccountHolderDTO {
     }
     public void setAccountHolderType(AccountHolderType accountHolderType) {
         this.accountHolderType = accountHolderType;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 }

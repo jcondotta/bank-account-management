@@ -28,6 +28,7 @@ import org.slf4j.MDC;
 import java.io.IOException;
 import java.time.Clock;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Locale;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -106,7 +107,8 @@ class CreateJointAccountHolderControllerIT implements LocalStackTestContainer {
                         () -> assertThat(accountHolderDTO.getAccountHolderName()).isEqualTo(jeffersonAccountHolderRequest.accountHolderName()),
                         () -> assertThat(accountHolderDTO.getPassportNumber()).isEqualTo(jeffersonAccountHolderRequest.passportNumber()),
                         () -> assertThat(accountHolderDTO.getDateOfBirth()).isEqualTo(jeffersonAccountHolderRequest.dateOfBirth()),
-                        () -> assertThat(accountHolderDTO.getBankAccountId()).isEqualTo(BANK_ACCOUNT_ID_BRAZIL)
+                        () -> assertThat(accountHolderDTO.getBankAccountId()).isEqualTo(BANK_ACCOUNT_ID_BRAZIL),
+                        () -> assertThat(accountHolderDTO.getCreatedAt()).isEqualTo(LocalDateTime.now(testClockUTC))
                 ));
     }
 

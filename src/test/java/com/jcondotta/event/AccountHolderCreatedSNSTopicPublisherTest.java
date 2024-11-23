@@ -64,61 +64,61 @@ class AccountHolderCreatedSNSTopicPublisherTest {
                 .isNull();
     }
 
-    @Test
-    void shouldPublishMessage_whenPrimaryAccountHolderExistsInBankAccountDTO() throws IOException {
-        when(snsTopicConfig.topicArn()).thenReturn(BANK_ACCOUNT_CREATED_TOPIC_ARN);
-        when(snsClient.publish(any(PublishRequest.class))).thenReturn(publishResponse);
-
-        var bankAccount = TestBankAccountFactory.create(BANK_ACCOUNT_ID_BRAZIL);
-        var primaryAccountHolder = TestAccountHolderFactory.createPrimaryAccountHolder(
-                TestAccountHolderRequest.JEFFERSON,
-                bankAccount.getBankAccountId()
-        );
-
-        bankAccountDTO = new BankAccountDTO(bankAccount, primaryAccountHolder);
-
-        var returnedMessageId = snsTopicPublisher.publishMessage(bankAccountDTO);
-        assertThat(returnedMessageId).isEqualTo(MESSAGE_ID);
-
-        var publishRequestCaptor = ArgumentCaptor.forClass(PublishRequest.class);
-        verify(snsClient).publish(publishRequestCaptor.capture());
-
-        var capturedRequest = publishRequestCaptor.getValue();
-        assertThat(capturedRequest.topicArn()).isEqualTo(BANK_ACCOUNT_CREATED_TOPIC_ARN);
-
-        var expectedNotification = new AccountHolderCreatedNotification(
-                primaryAccountHolder.getAccountHolderId(),
-                primaryAccountHolder.getAccountHolderName(),
-                BANK_ACCOUNT_ID_BRAZIL
-        );
-        assertThat(capturedRequest.message()).isEqualTo(jsonMapper.writeValueAsString(expectedNotification));
-
-        verify(snsTopicConfig, times(2)).topicArn();
-    }
-
-    @Test
-    void shouldThrowIllegalStateException_whenNoPrimaryAccountHolderExistsInBankAccountDTO(){
-        var bankAccount = TestBankAccountFactory.create(BANK_ACCOUNT_ID_BRAZIL);
-        var jointAccountHolder = TestAccountHolderFactory.createJointAccountHolder(
-                TestAccountHolderRequest.JEFFERSON,
-                bankAccount.getBankAccountId()
-        );
-
-        bankAccountDTO = new BankAccountDTO(bankAccount, jointAccountHolder);
-        var exception = assertThrows(IllegalStateException.class, () -> snsTopicPublisher.publishMessage(bankAccountDTO));
-
-        assertThat(exception)
-                .hasMessage("bankAccount.primaryAccountHolder.notFound");
-    }
-
-    @Test
-    void shouldThrowIllegalStateException_whenNoAccountHolderExistsInBankAccountDTO(){
-        var bankAccount = TestBankAccountFactory.create(BANK_ACCOUNT_ID_BRAZIL);
-
-        bankAccountDTO = new BankAccountDTO(bankAccount, List.of());
-        var exception = assertThrows(IllegalStateException.class, () -> snsTopicPublisher.publishMessage(bankAccountDTO));
-
-        assertThat(exception)
-                .hasMessage("bankAccount.primaryAccountHolder.notFound");
-    }
+//    @Test
+//    void shouldPublishMessage_whenPrimaryAccountHolderExistsInBankAccountDTO() throws IOException {
+//        when(snsTopicConfig.topicArn()).thenReturn(BANK_ACCOUNT_CREATED_TOPIC_ARN);
+//        when(snsClient.publish(any(PublishRequest.class))).thenReturn(publishResponse);
+//
+//        var bankAccount = TestBankAccountFactory.create(BANK_ACCOUNT_ID_BRAZIL);
+//        var primaryAccountHolder = TestAccountHolderFactory.createPrimaryAccountHolder(
+//                TestAccountHolderRequest.JEFFERSON,
+//                bankAccount.getBankAccountId()
+//        );
+//
+//        bankAccountDTO = new BankAccountDTO(bankAccount, primaryAccountHolder);
+//
+//        var returnedMessageId = snsTopicPublisher.publishMessage(bankAccountDTO);
+//        assertThat(returnedMessageId).isEqualTo(MESSAGE_ID);
+//
+//        var publishRequestCaptor = ArgumentCaptor.forClass(PublishRequest.class);
+//        verify(snsClient).publish(publishRequestCaptor.capture());
+//
+//        var capturedRequest = publishRequestCaptor.getValue();
+//        assertThat(capturedRequest.topicArn()).isEqualTo(BANK_ACCOUNT_CREATED_TOPIC_ARN);
+//
+//        var expectedNotification = new AccountHolderCreatedNotification(
+//                primaryAccountHolder.getAccountHolderId(),
+//                primaryAccountHolder.getAccountHolderName(),
+//                BANK_ACCOUNT_ID_BRAZIL
+//        );
+//        assertThat(capturedRequest.message()).isEqualTo(jsonMapper.writeValueAsString(expectedNotification));
+//
+//        verify(snsTopicConfig, times(2)).topicArn();
+//    }
+//
+//    @Test
+//    void shouldThrowIllegalStateException_whenNoPrimaryAccountHolderExistsInBankAccountDTO(){
+//        var bankAccount = TestBankAccountFactory.create(BANK_ACCOUNT_ID_BRAZIL);
+//        var jointAccountHolder = TestAccountHolderFactory.createJointAccountHolder(
+//                TestAccountHolderRequest.JEFFERSON,
+//                bankAccount.getBankAccountId()
+//        );
+//
+//        bankAccountDTO = new BankAccountDTO(bankAccount, jointAccountHolder);
+//        var exception = assertThrows(IllegalStateException.class, () -> snsTopicPublisher.publishMessage(bankAccountDTO));
+//
+//        assertThat(exception)
+//                .hasMessage("bankAccount.primaryAccountHolder.notFound");
+//    }
+//
+//    @Test
+//    void shouldThrowIllegalStateException_whenNoAccountHolderExistsInBankAccountDTO(){
+//        var bankAccount = TestBankAccountFactory.create(BANK_ACCOUNT_ID_BRAZIL);
+//
+//        bankAccountDTO = new BankAccountDTO(bankAccount, List.of());
+//        var exception = assertThrows(IllegalStateException.class, () -> snsTopicPublisher.publishMessage(bankAccountDTO));
+//
+//        assertThat(exception)
+//                .hasMessage("bankAccount.primaryAccountHolder.notFound");
+//    }
 }

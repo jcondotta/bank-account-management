@@ -11,6 +11,8 @@ import com.jcondotta.factory.ValidatorTestFactory;
 import com.jcondotta.helper.TestAccountHolderRequest;
 import com.jcondotta.repository.CreateBankAccountRepository;
 import com.jcondotta.repository.CreateBankAccountResponse;
+import com.jcondotta.service.dto.AccountHolderDTO;
+import com.jcondotta.service.dto.BankAccountDTO;
 import com.jcondotta.service.request.AccountHolderRequest;
 import com.jcondotta.service.request.CreateBankAccountRequest;
 import jakarta.validation.ConstraintViolationException;
@@ -70,7 +72,7 @@ class CreateBankAccountServiceTest {
         when(createBankAccountRepository.create(any(BankingEntity.class), any(BankingEntity.class)))
                 .thenReturn(createBankAccountResponse);
 
-        createBankAccountService.create(createBankAccountRequest);
+        var bankAccountDTO = createBankAccountService.create(createBankAccountRequest);
 
         var bankAccountCaptor = ArgumentCaptor.forClass(BankingEntity.class);
         var accountHolderCaptor = ArgumentCaptor.forClass(BankingEntity.class);
@@ -101,7 +103,7 @@ class CreateBankAccountServiceTest {
                         () -> assertThat(accountHolder.getCreatedAt()).isEqualTo(LocalDateTime.now(TEST_CLOCK_FIXED_INSTANT))
                 ));
 
-        verify(snsTopicPublisher).publishMessage(any());
+        verify(snsTopicPublisher).publishMessage(any(AccountHolderDTO.class));
         verifyNoMoreInteractions(createBankAccountRepository, snsTopicPublisher);
     }
 

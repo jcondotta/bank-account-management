@@ -4,6 +4,7 @@ import com.jcondotta.domain.AccountHolderType;
 import com.jcondotta.domain.BankingEntity;
 import com.jcondotta.event.AccountHolderCreatedSNSTopicPublisher;
 import com.jcondotta.repository.CreateBankAccountRepository;
+import com.jcondotta.service.dto.AccountHolderDTO;
 import com.jcondotta.service.dto.BankAccountDTO;
 import com.jcondotta.service.request.CreateBankAccountRequest;
 import jakarta.inject.Inject;
@@ -58,9 +59,9 @@ public class CreateBankAccountService {
         var createBankAccountResponse = createBankAccountRepository.create(bankAccount, accountHolder);
         var bankAccountDTO = createBankAccountResponse.bankAccountDTO();
 
-        snsTopicPublisher.publishMessage(bankAccountDTO);
+        snsTopicPublisher.publishMessage(new AccountHolderDTO(accountHolder));
 
-        return createBankAccountResponse.bankAccountDTO();
+        return bankAccountDTO;
     }
 
     private BankingEntity buildPrimaryAccountHolder(UUID bankAccountId, CreateBankAccountRequest createBankAccountRequest) {

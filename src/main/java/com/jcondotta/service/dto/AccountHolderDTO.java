@@ -77,31 +77,31 @@ public class AccountHolderDTO {
 
     public AccountHolderDTO() {}
 
-    public AccountHolderDTO(UUID bankAccountId,
-                            UUID accountHolderId,
+    public AccountHolderDTO(UUID accountHolderId,
                             String accountHolderName,
                             LocalDate dateOfBirth,
                             String passportNumber,
                             AccountHolderType accountHolderType,
-                            LocalDateTime createdAt) {
-        this.bankAccountId = bankAccountId;
+                            LocalDateTime createdAt,
+                            UUID bankAccountId) {
         this.accountHolderId = accountHolderId;
         this.accountHolderName = accountHolderName;
         this.dateOfBirth = dateOfBirth;
         this.passportNumber = passportNumber;
         this.accountHolderType = accountHolderType;
         this.createdAt = createdAt;
+        this.bankAccountId = bankAccountId;
     }
 
     public AccountHolderDTO(BankingEntity accountHolder) {
         this(
-                accountHolder.getBankAccountId(),
                 accountHolder.getAccountHolderId(),
                 accountHolder.getAccountHolderName(),
                 accountHolder.getDateOfBirth(),
                 accountHolder.getPassportNumber(),
                 accountHolder.getAccountHolderType(),
-                accountHolder.getCreatedAt()
+                accountHolder.getCreatedAt(),
+                accountHolder.getBankAccountId()
         );
     }
 

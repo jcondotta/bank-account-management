@@ -33,7 +33,8 @@ public class TestAccountHolderFactory {
                 testAccountHolderRequest.getAccountHolderName(),
                 testAccountHolderRequest.getPassportNumber(),
                 testAccountHolderRequest.getDateOfBirth(),
-                accountHolderType, bankAccountId
+                accountHolderType,
+                bankAccountId
         );
     }
 

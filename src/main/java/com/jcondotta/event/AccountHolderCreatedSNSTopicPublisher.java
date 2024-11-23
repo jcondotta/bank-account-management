@@ -1,8 +1,7 @@
 package com.jcondotta.event;
 
 import com.jcondotta.configuration.AccountHolderCreatedSNSTopicConfig;
-import com.jcondotta.domain.AccountHolderType;
-import com.jcondotta.service.dto.BankAccountDTO;
+import com.jcondotta.service.dto.AccountHolderDTO;
 import io.micronaut.json.JsonMapper;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -30,26 +29,18 @@ public class AccountHolderCreatedSNSTopicPublisher {
         this.jsonMapper = jsonMapper;
     }
 
-    public String publishMessage(BankAccountDTO bankAccountDTO) {
+    public String publishMessage(AccountHolderDTO accountHolderDTO) {
         try {
-            var bankAccountCreatedNotification = bankAccountDTO.getAccountHolders().stream()
-                .filter(accountHolderDTO -> AccountHolderType.PRIMARY.equals(accountHolderDTO.getAccountHolderType()))
-                .findFirst()
-                .map(accountHolderDTO -> new AccountHolderCreatedNotification(
-                        accountHolderDTO.getAccountHolderId(),
-                        accountHolderDTO.getAccountHolderName(),
-                        bankAccountDTO.getBankAccountId())
-                )
-                .orElseThrow(() -> {
-                            LOGGER.error("Primary account holder not found for BankAccount ID: {}", bankAccountDTO.getBankAccountId());
-                            return new IllegalStateException("bankAccount.primaryAccountHolder.notFound");
-                        }
-                );
+            var accountHolderCreatedNotification = new AccountHolderCreatedNotification(
+                    accountHolderDTO.getAccountHolderId(),
+                    accountHolderDTO.getAccountHolderName(),
+                    accountHolderDTO.getBankAccountId()
+            );
 
-            MDC.put("bankAccountId", bankAccountCreatedNotification.bankAccountId().toString());
-            MDC.put("accountHolderId", bankAccountCreatedNotification.accountHolderId().toString());
+            MDC.put("bankAccountId", accountHolderCreatedNotification.bankAccountId().toString());
+            MDC.put("accountHolderId", accountHolderCreatedNotification.accountHolderId().toString());
 
-            var notification = serializeNotification(bankAccountCreatedNotification);
+            var notification = serializeNotification(accountHolderCreatedNotification);
 
             var publishRequest = PublishRequest.builder()
                     .message(notification)

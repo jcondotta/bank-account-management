@@ -4,11 +4,13 @@ package com.jcondotta.service.bank_account;
 import com.jcondotta.argument_provider.BlankValuesArgumentProvider;
 import com.jcondotta.argument_provider.InvalidPassportNumberArgumentProvider;
 import com.jcondotta.domain.BankingEntity;
+import com.jcondotta.event.AccountHolderCreatedSNSTopicPublisher;
 import com.jcondotta.factory.TestClockFactory;
 import com.jcondotta.factory.ValidatorTestFactory;
 import com.jcondotta.helper.TestAccountHolderRequest;
 import com.jcondotta.helper.TestBankAccountId;
 import com.jcondotta.repository.CreateJointAccountHolderRepository;
+import com.jcondotta.service.dto.AccountHolderDTO;
 import com.jcondotta.service.request.AccountHolderRequest;
 import com.jcondotta.service.request.CreateJointAccountHolderRequest;
 import jakarta.validation.ConstraintViolationException;
@@ -47,11 +49,14 @@ class CreateJointAccountHoldersServiceTest {
     @Mock
     private CreateJointAccountHolderRepository repository;
 
+    @Mock
+    private AccountHolderCreatedSNSTopicPublisher snsTopicPublisher;
+
     private CreateJointAccountHolderService createJointAccountHolderService;
 
     @BeforeEach
     void beforeEach() {
-        createJointAccountHolderService = new CreateJointAccountHolderService(repository, TEST_CLOCK_FIXED_INSTANT, VALIDATOR);
+        createJointAccountHolderService = new CreateJointAccountHolderService(repository, snsTopicPublisher, TEST_CLOCK_FIXED_INSTANT, VALIDATOR);
     }
 
     @Test
@@ -59,7 +64,7 @@ class CreateJointAccountHoldersServiceTest {
         var jeffersonAccountHolderRequest = TestAccountHolderRequest.JEFFERSON.toAccountHolderRequest();
         var createJointAccountHoldersRequest = new CreateJointAccountHolderRequest(BANK_ACCOUNT_ID_BRAZIL, jeffersonAccountHolderRequest);
 
-        createJointAccountHolderService.create(createJointAccountHoldersRequest);
+        var accountHolderDTO = createJointAccountHolderService.create(createJointAccountHoldersRequest);
 
         var bankingEntityCaptor = ArgumentCaptor.forClass(BankingEntity.class);
         verify(repository).create(bankingEntityCaptor.capture());
@@ -75,6 +80,8 @@ class CreateJointAccountHoldersServiceTest {
                         () -> assertThat(bankingEntity.getIban()).isNull(),
                         () -> assertThat(bankingEntity.getCreatedAt()).isEqualTo(LocalDateTime.now(TEST_CLOCK_FIXED_INSTANT))
                 ));
+
+        verify(snsTopicPublisher).publishMessage(accountHolderDTO);
     }
 
     @Test

@@ -2,6 +2,7 @@ package com.jcondotta.web.controller.bank_account;
 
 import com.jcondotta.service.bank_account.CreateBankAccountService;
 import com.jcondotta.service.dto.BankAccountDTO;
+import com.jcondotta.service.request.AccountHolderRequest;
 import com.jcondotta.service.request.CreateBankAccountRequest;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.HttpStatus;
@@ -61,11 +62,11 @@ public class CreateBankAccountController {
     })
     @Post(consumes = MediaType.APPLICATION_JSON, produces = MediaType.APPLICATION_JSON)
     @Status(HttpStatus.CREATED)
-    public HttpResponse<BankAccountDTO> createBankAccount(@Valid @Body CreateBankAccountRequest createBankAccountRequest) {
-        LOGGER.info("Received request to create bank account for the account holder: {}", createBankAccountRequest.accountHolder());
+    public HttpResponse<BankAccountDTO> createBankAccount(@Valid @Body AccountHolderRequest accountHolderRequest) {
+        LOGGER.info("Received request to create bank account for the account holder: {}", accountHolderRequest);
 
         try {
-            var bankAccountDTO = createBankAccountService.create(createBankAccountRequest);
+            var bankAccountDTO = createBankAccountService.create(accountHolderRequest);
             MDC.put("bankAccountId", bankAccountDTO.getBankAccountId().toString());
 
             bankAccountDTO.getPrimaryAccountHolder()

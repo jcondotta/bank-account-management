@@ -73,7 +73,8 @@ class AccountHolderCreatedSNSTopicIT implements LocalStackTestContainer {
 
     @Test
     void shouldPublishMessageSuccessfullyToSNSTopic_whenJointAccountHolderIsCreated() throws IOException {
-        var bankAccountId = TestBankAccountId.ITALY.getBankAccountId();
+        sqsClient.purgeQueue(builder -> builder.queueUrl(sqsQueueConfig.queueURL()));
+        var bankAccountId = TestBankAccountId.BRAZIL.getBankAccountId();
         var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, DATE_OF_BIRTH_JEFFERSON, PASSPORT_NUMBER_JEFFERSON);
 
         var accountHolderDTO = given()
@@ -93,17 +94,20 @@ class AccountHolderCreatedSNSTopicIT implements LocalStackTestContainer {
                         .build())
                 .messages();
 
+        System.out.println(messages.size() + "*SIZE");
         assertThat(messages)
                 .hasSize(1)
                 .first()
                 .satisfies(message -> {
                     var snsMessageWrapper = jsonMapper.readValue(message.body(), JsonNode.class);
+                    System.out.println(snsMessageWrapper.toString());
                     var rawMessage = snsMessageWrapper.get("Message").getStringValue();
+                    System.out.println(rawMessage);
 
-//                    var notification = jsonMapper.readValue(rawMessage, AccountHolderCreatedNotification.class);
-//                    assertThat(notification.bankAccountId()).isEqualTo(accountHolderDTO.getBankAccountId());
-//                    assertThat(notification.accountHolderId()).isEqualTo(accountHolderDTO.getAccountHolderId());
-//                    assertThat(notification.accountHolderName()).isEqualTo(accountHolderDTO.getAccountHolderName());
+                    var notification = jsonMapper.readValue(rawMessage, AccountHolderCreatedNotification.class);
+                    assertThat(notification.bankAccountId()).isEqualTo(accountHolderDTO.getBankAccountId());
+                    assertThat(notification.accountHolderId()).isEqualTo(accountHolderDTO.getAccountHolderId());
+                    assertThat(notification.accountHolderName()).isEqualTo(accountHolderDTO.getAccountHolderName());
             }
         );
     }

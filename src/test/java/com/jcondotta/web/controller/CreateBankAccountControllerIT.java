@@ -85,11 +85,10 @@ class CreateBankAccountControllerIT implements LocalStackTestContainer {
     @Test
     void shouldReturn201CreatedWithValidLocationHeader_whenRequestIsValid() throws IOException {
         var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, DATE_OF_BIRTH_JEFFERSON, PASSPORT_NUMBER_JEFFERSON);
-        var createBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
 
         var response = given()
             .spec(requestSpecification)
-                .body(jsonMapper.writeValueAsString(createBankAccountRequest))
+                .body(jsonMapper.writeValueAsString(accountHolderRequest))
         .when()
             .post()
         .then()
@@ -120,11 +119,10 @@ class CreateBankAccountControllerIT implements LocalStackTestContainer {
     @Test
     void shouldReturn201CreatedWithValidBody_whenRequestIsValid() throws IOException {
         var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, DATE_OF_BIRTH_JEFFERSON, PASSPORT_NUMBER_JEFFERSON);
-        var createBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
 
         var createdBankAccountDTO = given()
             .spec(requestSpecification)
-                .body(jsonMapper.writeValueAsString(createBankAccountRequest))
+                .body(jsonMapper.writeValueAsString(accountHolderRequest))
         .when()
             .post()
         .then()
@@ -161,35 +159,16 @@ class CreateBankAccountControllerIT implements LocalStackTestContainer {
                 .isEqualTo(fetchedBankAccountDTO);
     }
 
-    @Test
-    void shouldReturn400BadRequest_whenRequestHasNullAccountHolder() throws IOException {
-        var createBankAccountRequest = new CreateBankAccountRequest(null);
-        var expectedExceptionMessageKey = "bankAccount.accountHolder.notNull";
-
-        given()
-            .spec(requestSpecification)
-                .body(jsonMapper.writeValueAsString(createBankAccountRequest))
-        .when()
-            .post()
-        .then()
-            .statusCode(HttpStatus.BAD_REQUEST.getCode())
-            .rootPath("_embedded")
-                .body("errors", hasSize(1))
-                .body("errors[0].message", equalTo(messageSource.getMessage(expectedExceptionMessageKey, Locale.getDefault())
-                        .orElseThrow(messageKeyNotFoundException(expectedExceptionMessageKey))));
-    }
-
     @ParameterizedTest
     @ArgumentsSource(BlankValuesArgumentProvider.class)
     void shouldReturn400BadRequest_whenAccountHolderNameIsBlank(String blankAccountHolderName) throws IOException {
         var accountHolderRequest = new AccountHolderRequest(blankAccountHolderName, DATE_OF_BIRTH_JEFFERSON, PASSPORT_NUMBER_JEFFERSON);
-        var createBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
 
         var expectedExceptionMessageKey = "accountHolder.accountHolderName.notBlank";
 
         given()
             .spec(requestSpecification)
-                .body(jsonMapper.writeValueAsString(createBankAccountRequest))
+                .body(jsonMapper.writeValueAsString(accountHolderRequest))
         .when()
             .post()
         .then()
@@ -204,13 +183,12 @@ class CreateBankAccountControllerIT implements LocalStackTestContainer {
     void shouldReturn400BadRequest_whenAccountHolderNameIsLongerThan255Characters() throws IOException {
         final var veryLongAccountHolderName = "J".repeat(256);
         var accountHolderRequest = new AccountHolderRequest(veryLongAccountHolderName, DATE_OF_BIRTH_JEFFERSON, PASSPORT_NUMBER_JEFFERSON);
-        var createBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
 
         var expectedExceptionMessageKey = "accountHolder.accountHolderName.tooLong";
 
         given()
             .spec(requestSpecification)
-                .body(jsonMapper.writeValueAsString(createBankAccountRequest))
+                .body(jsonMapper.writeValueAsString(accountHolderRequest))
         .when()
             .post()
         .then()
@@ -224,13 +202,12 @@ class CreateBankAccountControllerIT implements LocalStackTestContainer {
     @Test
     void shouldReturn400BadRequest_whenDateOfBirthIsNull() throws IOException {
         var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, null, PASSPORT_NUMBER_JEFFERSON);
-        var createBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
 
         var expectedExceptionMessageKey = "accountHolder.dateOfBirth.notNull";
 
         given()
             .spec(requestSpecification)
-                .body(jsonMapper.writeValueAsString(createBankAccountRequest))
+                .body(jsonMapper.writeValueAsString(accountHolderRequest))
         .when()
             .post()
         .then()
@@ -245,13 +222,12 @@ class CreateBankAccountControllerIT implements LocalStackTestContainer {
     void shouldReturn400BadRequest_whenDateOfBirthIsInFuture() throws IOException {
         LocalDate futureDate = LocalDate.now().plusDays(1);
         var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, futureDate, PASSPORT_NUMBER_JEFFERSON);
-        var createBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
 
         var expectedExceptionMessageKey = "accountHolder.dateOfBirth.past";
 
         given()
             .spec(requestSpecification)
-                .body(jsonMapper.writeValueAsString(createBankAccountRequest))
+                .body(jsonMapper.writeValueAsString(accountHolderRequest))
         .when()
             .post()
         .then()
@@ -266,13 +242,12 @@ class CreateBankAccountControllerIT implements LocalStackTestContainer {
     void shouldReturn400BadRequest_whenDateOfBirthIsToday() throws IOException {
         LocalDate today = LocalDate.now();
         var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, today, PASSPORT_NUMBER_JEFFERSON);
-        var createBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
 
         var expectedExceptionMessageKey = "accountHolder.dateOfBirth.past";
 
         given()
             .spec(requestSpecification)
-                .body(jsonMapper.writeValueAsString(createBankAccountRequest))
+                .body(jsonMapper.writeValueAsString(accountHolderRequest))
         .when()
             .post()
         .then()
@@ -286,13 +261,12 @@ class CreateBankAccountControllerIT implements LocalStackTestContainer {
     @Test
     void shouldReturn400BadRequest_whenPassportNumberIsNull() throws IOException {
         var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, DATE_OF_BIRTH_JEFFERSON, null);
-        var createBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
 
         var expectedExceptionMessageKey = "accountHolder.passportNumber.notNull";
 
         given()
             .spec(requestSpecification)
-                .body(jsonMapper.writeValueAsString(createBankAccountRequest))
+                .body(jsonMapper.writeValueAsString(accountHolderRequest))
         .when()
             .post()
         .then()
@@ -307,13 +281,12 @@ class CreateBankAccountControllerIT implements LocalStackTestContainer {
     @ArgumentsSource(InvalidPassportNumberArgumentProvider.class)
     void shouldReturn400BadRequest_whenPassportNumberIsNot8CharactersLong(String invalidLengthPassportNumber) throws IOException {
         var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, DATE_OF_BIRTH_JEFFERSON, invalidLengthPassportNumber);
-        var createBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
 
         var expectedExceptionMessageKey = "accountHolder.passportNumber.invalidLength";
 
         given()
             .spec(requestSpecification)
-                .body(jsonMapper.writeValueAsString(createBankAccountRequest))
+                .body(jsonMapper.writeValueAsString(accountHolderRequest))
         .when()
             .post()
         .then()

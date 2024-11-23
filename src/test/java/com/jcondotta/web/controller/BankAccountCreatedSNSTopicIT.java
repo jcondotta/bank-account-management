@@ -72,11 +72,10 @@ class BankAccountCreatedSNSTopicIT implements LocalStackTestContainer {
     @Test
     void shouldPublishMessageSuccessfullyToSNSTopic_whenBankAccountIsCreated() throws IOException {
         var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, DATE_OF_BIRTH_JEFFERSON, PASSPORT_NUMBER_JEFFERSON);
-        var createBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
 
         var bankAccountDTO = given()
             .spec(requestSpecification)
-                .body(jsonMapper.writeValueAsString(createBankAccountRequest))
+                .body(jsonMapper.writeValueAsString(accountHolderRequest))
         .when()
             .post()
         .then()

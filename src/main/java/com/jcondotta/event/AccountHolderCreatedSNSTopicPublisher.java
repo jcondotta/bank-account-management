@@ -41,12 +41,15 @@ public class AccountHolderCreatedSNSTopicPublisher {
             MDC.put("accountHolderId", accountHolderCreatedNotification.accountHolderId().toString());
 
             var notification = serializeNotification(accountHolderCreatedNotification);
+            System.out.println("Notification: " + notification.toString());
+
 
             var publishRequest = PublishRequest.builder()
                     .message(notification)
                     .topicArn(snsTopicConfig.topicArn())
                     .build();
 
+            System.out.println("Message: " + publishRequest.message());
             var publishResponse = snsClient.publish(publishRequest);
 
             LOGGER.info("Successfully published message to SNS topic '{}'. Message ID: {}", snsTopicConfig.topicArn(), publishResponse.messageId());

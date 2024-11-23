@@ -47,10 +47,6 @@ class CreateBankAccountLambdaIT implements LocalStackTestContainer {
     @Inject
     ApplicationContext applicationContext;
 
-    @Inject
-    @Named("exceptionMessageSource")
-    MessageSource messageSource;
-
     @BeforeAll
     void beforeAll() {
         requestEventFunction = new ApiGatewayProxyRequestEventFunction(applicationContext);
@@ -67,9 +63,7 @@ class CreateBankAccountLambdaIT implements LocalStackTestContainer {
     @Test
     void shouldReturn201Created_whenRequestIsValid() throws IOException {
         var accountHolderRequest = TestAccountHolderRequest.JEFFERSON.toAccountHolderRequest();
-        var createBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
-
-        requestEvent.setBody(jsonMapper.writeValueAsString(createBankAccountRequest));
+        requestEvent.setBody(jsonMapper.writeValueAsString(accountHolderRequest));
 
         var response = requestEventFunction.handleRequest(requestEvent, mockLambdaContext);
 
@@ -81,29 +75,6 @@ class CreateBankAccountLambdaIT implements LocalStackTestContainer {
         assertAll(
                 () -> assertThat(bankAccount.getBankAccountId()).isNotNull()
         );
-    }
-
-    @Test
-    void shouldReturn400BadRequest_whenAccountHolderIsNull() throws IOException {
-        var createBankAccountRequest = new CreateBankAccountRequest(null);
-        requestEvent.setBody(jsonMapper.writeValueAsString(createBankAccountRequest));
-
-        var response = requestEventFunction.handleRequest(requestEvent, mockLambdaContext);
-
-        assertThat(response.getStatusCode())
-                .as("Verify the response has the correct status code")
-                .isEqualTo(HttpStatus.BAD_REQUEST.getCode());
-
-        var responseBodyJSON = jsonMapper.readValue(response.getBody(), JsonNode.class);
-        var errorMessage = responseBodyJSON.get("_embedded").get("errors")
-                .get(0).get("message")
-                .coerceStringValue();
-
-        var expectedMessageKey = "bankAccount.accountHolder.notNull";
-        assertThat(errorMessage)
-                .as("Verify the error message in the response body")
-                .isEqualTo(messageSource.getMessage(expectedMessageKey, Locale.getDefault())
-                        .orElseThrow(() -> new IllegalArgumentException("Message not found for key: " + expectedMessageKey)));
     }
 }
 

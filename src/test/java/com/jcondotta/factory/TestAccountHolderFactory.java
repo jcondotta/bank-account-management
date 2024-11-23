@@ -26,6 +26,18 @@ public class TestAccountHolderFactory {
         );
     }
 
+    public static BankingEntity create(TestAccountHolderRequest testAccountHolderRequest,
+                                       AccountHolderType accountHolderType, UUID bankAccountId) {
+        return create(
+                UUID.randomUUID(),
+                testAccountHolderRequest.getAccountHolderName(),
+                testAccountHolderRequest.getPassportNumber(),
+                testAccountHolderRequest.getDateOfBirth(),
+                accountHolderType,
+                bankAccountId
+        );
+    }
+
     public static BankingEntity create(UUID accountHolderId, TestAccountHolderRequest testAccountHolderRequest,
                                        AccountHolderType accountHolderType, UUID bankAccountId) {
         return create(

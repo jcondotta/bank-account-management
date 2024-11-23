@@ -65,7 +65,7 @@ class CreateBankAccountRepositoryTest {
                 bankAccount.getBankAccountId()
         );
 
-        var createBankAccountResponse = createBankAccountRepository.create(bankAccount, jeffersonAccountHolder);
+        createBankAccountRepository.create(bankAccount, jeffersonAccountHolder);
 
         var argumentCaptor = ArgumentCaptor.forClass(TransactWriteItemsEnhancedRequest.class);
         verify(dynamoDbEnhancedClient).transactWriteItems(argumentCaptor.capture());
@@ -80,11 +80,6 @@ class CreateBankAccountRepositoryTest {
                 () -> assertThat(transactWriteItems.get(0).put()).isNotNull(),
                 () -> assertThat(transactWriteItems.get(1).put()).isNotNull()
         );
-
-        var expectedBankAccountDTO = new BankAccountDTO(bankAccount, jeffersonAccountHolder);
-        assertThat(createBankAccountResponse.bankAccountDTO())
-                .usingRecursiveComparison()
-                .isEqualTo(expectedBankAccountDTO);
 
         verifyNoMoreInteractions(dynamoDbEnhancedClient);
     }

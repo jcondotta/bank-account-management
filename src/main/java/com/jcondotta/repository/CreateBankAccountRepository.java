@@ -27,7 +27,7 @@ public class CreateBankAccountRepository {
         this.bankingEntityDynamoDbTable = bankingEntityDynamoDbTable;
     }
 
-    public CreateBankAccountResponse create(BankingEntity bankAccount, BankingEntity accountHolder) {
+    public void create(BankingEntity bankAccount, BankingEntity accountHolder) {
         Objects.requireNonNull(bankAccount, "bankAccount.notNull");
         Objects.requireNonNull(accountHolder, "accountHolder.notNull");
 
@@ -45,10 +45,6 @@ public class CreateBankAccountRepository {
             dynamoDbEnhancedClient.transactWriteItems(transactWriteRequest);
 
             LOGGER.info("Successfully saved bank account and primary account holder to DB.");
-
-            return CreateBankAccountResponse.builder(new BankAccountDTO(bankAccount, accountHolder))
-                    .isIdempotent(false)
-                    .build();
         }
         finally {
             MDC.clear();

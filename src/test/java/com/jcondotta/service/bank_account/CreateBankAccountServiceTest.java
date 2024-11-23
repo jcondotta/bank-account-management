@@ -6,9 +6,12 @@ import com.jcondotta.argument_provider.InvalidPassportNumberArgumentProvider;
 import com.jcondotta.domain.BankingEntity;
 import com.jcondotta.domain.EntityType;
 import com.jcondotta.event.AccountHolderCreatedSNSTopicPublisher;
+import com.jcondotta.factory.TestAccountHolderFactory;
+import com.jcondotta.factory.TestBankAccountFactory;
 import com.jcondotta.factory.TestClockFactory;
 import com.jcondotta.factory.ValidatorTestFactory;
 import com.jcondotta.helper.TestAccountHolderRequest;
+import com.jcondotta.helper.TestBankAccountId;
 import com.jcondotta.repository.CreateBankAccountRepository;
 import com.jcondotta.repository.CreateBankAccountResponse;
 import com.jcondotta.service.dto.AccountHolderDTO;
@@ -31,6 +34,7 @@ import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -52,9 +56,6 @@ class CreateBankAccountServiceTest {
     private CreateBankAccountRepository createBankAccountRepository;
 
     @Mock
-    private CreateBankAccountResponse createBankAccountResponse;
-
-    @Mock
     private AccountHolderCreatedSNSTopicPublisher snsTopicPublisher;
 
     private CreateBankAccountService createBankAccountService;
@@ -67,15 +68,11 @@ class CreateBankAccountServiceTest {
     @Test
     void shouldCreateBankAccount_whenRequestIsValid() {
         var accountHolderRequest = TestAccountHolderRequest.JEFFERSON.toAccountHolderRequest();
-        var createBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
-
-        when(createBankAccountRepository.create(any(BankingEntity.class), any(BankingEntity.class)))
-                .thenReturn(createBankAccountResponse);
-
-        var bankAccountDTO = createBankAccountService.create(createBankAccountRequest);
 
         var bankAccountCaptor = ArgumentCaptor.forClass(BankingEntity.class);
         var accountHolderCaptor = ArgumentCaptor.forClass(BankingEntity.class);
+
+        var bankAccountDTO = createBankAccountService.create(accountHolderRequest);
         verify(createBankAccountRepository).create(bankAccountCaptor.capture(), accountHolderCaptor.capture());
 
         assertThat(bankAccountCaptor.getValue())
@@ -103,27 +100,17 @@ class CreateBankAccountServiceTest {
                         () -> assertThat(accountHolder.getCreatedAt()).isEqualTo(LocalDateTime.now(TEST_CLOCK_FIXED_INSTANT))
                 ));
 
-        verify(snsTopicPublisher).publishMessage(any(AccountHolderDTO.class));
+        verify(snsTopicPublisher).publishMessage(bankAccountDTO.getPrimaryAccountHolder()
+                .orElseThrow(() -> new IllegalStateException("Primary account holder was not found")));
         verifyNoMoreInteractions(createBankAccountRepository, snsTopicPublisher);
-    }
-
-    @Test
-    void shouldThrowConstraintViolationException_whenRequestHasNullAccountHolder() {
-        var createBankAccountRequest = new CreateBankAccountRequest(null);
-
-        var exception = assertThrows(ConstraintViolationException.class, () -> createBankAccountService.create(createBankAccountRequest));
-        assertThat(exception.getConstraintViolations()).hasSize(1);
-
-        verifyNoInteractions(createBankAccountRepository, snsTopicPublisher);
     }
 
     @ParameterizedTest
     @ArgumentsSource(BlankValuesArgumentProvider.class)
     void shouldThrowConstraintViolationException_whenAccountHolderNameIsBlank(String blankAccountHolderName) {
         var accountHolderRequest = new AccountHolderRequest(blankAccountHolderName, DATE_OF_BIRTH_JEFFERSON, PASSPORT_NUMBER_JEFFERSON);
-        var createBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
 
-        var exception = assertThrows(ConstraintViolationException.class, () -> createBankAccountService.create(createBankAccountRequest));
+        var exception = assertThrows(ConstraintViolationException.class, () -> createBankAccountService.create(accountHolderRequest));
         assertThat(exception.getConstraintViolations()).hasSize(1);
 
         verifyNoInteractions(createBankAccountRepository, snsTopicPublisher);
@@ -133,9 +120,8 @@ class CreateBankAccountServiceTest {
     void shouldThrowConstraintViolationException_whenAccountHolderNameIsLongerThan255Characters() {
         final var veryLongAccountHolderName = "J".repeat(256);
         var accountHolderRequest = new AccountHolderRequest(veryLongAccountHolderName, DATE_OF_BIRTH_JEFFERSON, PASSPORT_NUMBER_JEFFERSON);
-        var createBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
 
-        var exception = assertThrows(ConstraintViolationException.class, () -> createBankAccountService.create(createBankAccountRequest));
+        var exception = assertThrows(ConstraintViolationException.class, () -> createBankAccountService.create(accountHolderRequest));
         assertThat(exception.getConstraintViolations()).hasSize(1);
 
         verifyNoInteractions(createBankAccountRepository, snsTopicPublisher);
@@ -144,9 +130,8 @@ class CreateBankAccountServiceTest {
     @Test
     void shouldThrowConstraintViolationException_whenDateOfBirthIsNull() {
         var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, null, PASSPORT_NUMBER_JEFFERSON);
-        var createBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
 
-        var exception = assertThrows(ConstraintViolationException.class, () -> createBankAccountService.create(createBankAccountRequest));
+        var exception = assertThrows(ConstraintViolationException.class, () -> createBankAccountService.create(accountHolderRequest));
         assertThat(exception.getConstraintViolations()).hasSize(1);
 
         verifyNoInteractions(createBankAccountRepository, snsTopicPublisher);
@@ -156,9 +141,8 @@ class CreateBankAccountServiceTest {
     void shouldThrowConstraintViolationException_whenDateOfBirthIsInFuture() {
         LocalDate futureDate = LocalDate.now().plusDays(1);
         var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, futureDate, PASSPORT_NUMBER_JEFFERSON);
-        var createBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
 
-        var exception = assertThrows(ConstraintViolationException.class, () -> createBankAccountService.create(createBankAccountRequest));
+        var exception = assertThrows(ConstraintViolationException.class, () -> createBankAccountService.create(accountHolderRequest));
         assertThat(exception.getConstraintViolations()).hasSize(1);
 
         verifyNoInteractions(createBankAccountRepository, snsTopicPublisher);
@@ -168,9 +152,8 @@ class CreateBankAccountServiceTest {
     void shouldThrowConstraintViolationException_whenDateOfBirthIsToday() {
         LocalDate today = LocalDate.now();
         var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, today, PASSPORT_NUMBER_JEFFERSON);
-        var createBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
 
-        var exception = assertThrows(ConstraintViolationException.class, () -> createBankAccountService.create(createBankAccountRequest));
+        var exception = assertThrows(ConstraintViolationException.class, () -> createBankAccountService.create(accountHolderRequest));
         assertThat(exception.getConstraintViolations()).hasSize(1);
 
         verifyNoInteractions(createBankAccountRepository, snsTopicPublisher);
@@ -179,9 +162,8 @@ class CreateBankAccountServiceTest {
     @Test
     void shouldThrowConstraintViolationException_whenPassportNumberIsNull() {
         var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, DATE_OF_BIRTH_JEFFERSON, null);
-        var createBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
 
-        var exception = assertThrows(ConstraintViolationException.class, () -> createBankAccountService.create(createBankAccountRequest));
+        var exception = assertThrows(ConstraintViolationException.class, () -> createBankAccountService.create(accountHolderRequest));
         assertThat(exception.getConstraintViolations()).hasSize(1);
 
         verifyNoInteractions(createBankAccountRepository, snsTopicPublisher);
@@ -191,9 +173,8 @@ class CreateBankAccountServiceTest {
     @ArgumentsSource(InvalidPassportNumberArgumentProvider.class)
     void shouldThrowConstraintViolationException_whenPassportNumberIsNot8CharactersLong(String invalidLengthPassportNumber) {
         var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, DATE_OF_BIRTH_JEFFERSON, invalidLengthPassportNumber);
-        var createBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
 
-        var exception = assertThrows(ConstraintViolationException.class, () -> createBankAccountService.create(createBankAccountRequest));
+        var exception = assertThrows(ConstraintViolationException.class, () -> createBankAccountService.create(accountHolderRequest));
         assertThat(exception.getConstraintViolations()).hasSize(1);
 
         verifyNoInteractions(createBankAccountRepository, snsTopicPublisher);
@@ -202,7 +183,6 @@ class CreateBankAccountServiceTest {
     @Test
     void shouldThrowDynamoDBException_whenRepositoryTransactionFails() {
         var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, DATE_OF_BIRTH_JEFFERSON, PASSPORT_NUMBER_JEFFERSON);
-        var createBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
 
         var exceptionMessage = "DynamoDB Transaction Failed";
 
@@ -210,7 +190,7 @@ class CreateBankAccountServiceTest {
                 .when(createBankAccountRepository).create(any(), any());
 
         var exception = assertThrows(DynamoDbException.class, () ->
-                createBankAccountService.create(createBankAccountRequest)
+                createBankAccountService.create(accountHolderRequest)
         );
 
         assertThat(exception.getMessage()).isEqualTo(exceptionMessage);
@@ -224,13 +204,12 @@ class CreateBankAccountServiceTest {
     @ValueSource(strings = {"bankAccount.notNull", "accountHolder.notNull"})
     void shouldThrowNullPointerException_whenRepositoryThrowsNullPointerException(String exceptionMessage) {
         var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, DATE_OF_BIRTH_JEFFERSON, PASSPORT_NUMBER_JEFFERSON);
-        var createBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
 
         doThrow(new NullPointerException(exceptionMessage))
                 .when(createBankAccountRepository).create(any(), any());
 
         var exception = assertThrows(NullPointerException.class, () ->
-                createBankAccountService.create(createBankAccountRequest)
+                createBankAccountService.create(accountHolderRequest)
         );
 
         assertThat(exception.getMessage()).isEqualTo(exceptionMessage);
@@ -243,12 +222,10 @@ class CreateBankAccountServiceTest {
     @Test
     void shouldThrowException_whenSNSTopicPublisherFails() {
         var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, DATE_OF_BIRTH_JEFFERSON, PASSPORT_NUMBER_JEFFERSON);
-        var createBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
 
-        when(createBankAccountRepository.create(any(), any())).thenReturn(createBankAccountResponse);
         doThrow(new RuntimeException()).when(snsTopicPublisher).publishMessage(any());
 
-        assertThrows(RuntimeException.class, () -> createBankAccountService.create(createBankAccountRequest));
+        assertThrows(RuntimeException.class, () -> createBankAccountService.create(accountHolderRequest));
 
         verify(createBankAccountRepository).create(any(), any());
         verify(snsTopicPublisher).publishMessage(any());

@@ -6,11 +6,13 @@ import com.jcondotta.event.AccountHolderCreatedSNSTopicPublisher;
 import com.jcondotta.repository.CreateBankAccountRepository;
 import com.jcondotta.service.dto.AccountHolderDTO;
 import com.jcondotta.service.dto.BankAccountDTO;
+import com.jcondotta.service.request.AccountHolderRequest;
 import com.jcondotta.service.request.CreateBankAccountRequest;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
+import jakarta.validation.constraints.NotNull;
 import net.datafaker.Faker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,10 +41,10 @@ public class CreateBankAccountService {
         this.validator = validator;
     }
 
-    public BankAccountDTO create(CreateBankAccountRequest createBankAccountRequest) {
+    public BankAccountDTO create(@NotNull AccountHolderRequest accountHolderRequest) {
         LOGGER.debug("Starting the creation process for a new bank account and its primary account holder.");
 
-        var constraintViolations = validator.validate(createBankAccountRequest);
+        var constraintViolations = validator.validate(accountHolderRequest);
         if (!constraintViolations.isEmpty()) {
             if (LOGGER.isWarnEnabled()) {
                 var validationMessages = constraintViolations.stream()
@@ -54,22 +56,24 @@ public class CreateBankAccountService {
         }
 
         var bankAccount = buildBankAccount();
-        var accountHolder = buildPrimaryAccountHolder(bankAccount.getBankAccountId(), createBankAccountRequest);
+        var accountHolder = buildPrimaryAccountHolder(bankAccount.getBankAccountId(), accountHolderRequest);
 
-        var createBankAccountResponse = createBankAccountRepository.create(bankAccount, accountHolder);
-        var bankAccountDTO = createBankAccountResponse.bankAccountDTO();
+        createBankAccountRepository.create(bankAccount, accountHolder);
+        var bankAccountDTO = new BankAccountDTO(bankAccount, accountHolder);
 
-        snsTopicPublisher.publishMessage(new AccountHolderDTO(accountHolder));
+        snsTopicPublisher.publishMessage(bankAccountDTO.getPrimaryAccountHolder()
+                .orElseThrow(() -> new IllegalStateException("Primary account holder was not found for the created bank account: "
+                        + bankAccountDTO.getBankAccountId())));
 
         return bankAccountDTO;
     }
 
-    private BankingEntity buildPrimaryAccountHolder(UUID bankAccountId, CreateBankAccountRequest createBankAccountRequest) {
+    private BankingEntity buildPrimaryAccountHolder(UUID bankAccountId, AccountHolderRequest accountHolderRequest) {
         return BankingEntity.buildAccountHolder(
                 UUID.randomUUID(),
-                createBankAccountRequest.accountHolder().accountHolderName(),
-                createBankAccountRequest.accountHolder().passportNumber(),
-                createBankAccountRequest.accountHolder().dateOfBirth(),
+                accountHolderRequest.accountHolderName(),
+                accountHolderRequest.passportNumber(),
+                accountHolderRequest.dateOfBirth(),
                 AccountHolderType.PRIMARY,
                 LocalDateTime.now(currentInstant),
                 bankAccountId

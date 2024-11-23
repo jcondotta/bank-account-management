@@ -79,9 +79,7 @@ class FindBankAccountControllerIT implements LocalStackTestContainer {
     @Test
     void shouldReturn200Ok_whenBankAccountWithAccountHolderExists() {
         var jeffersonAccountHolderRequest = TestAccountHolderRequest.JEFFERSON.toAccountHolderRequest();
-
-        var createBankAccountRequest = new CreateBankAccountRequest(jeffersonAccountHolderRequest);
-        var createdBankAccountDTO = createBankAccountService.create(createBankAccountRequest);
+        var createdBankAccountDTO = createBankAccountService.create(jeffersonAccountHolderRequest);
 
         var patrizioAccountHolderRequest = TestAccountHolderRequest.PATRIZIO.toAccountHolderRequest();
         var patrizioJointRequest = new CreateJointAccountHolderRequest(createdBankAccountDTO.getBankAccountId(), patrizioAccountHolderRequest);
@@ -129,9 +127,7 @@ class FindBankAccountControllerIT implements LocalStackTestContainer {
     @Test
     void shouldReturn200Ok_whenBankAccountWithMultipleAccountHoldersExists() {
         var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, DATE_OF_BIRTH_JEFFERSON, PASSPORT_NUMBER_JEFFERSON);
-        var createBankAccountRequest = new CreateBankAccountRequest(accountHolderRequest);
-
-        var createdBankAccountDTO = createBankAccountService.create(createBankAccountRequest);
+        var createdBankAccountDTO = createBankAccountService.create(accountHolderRequest);
 
         var fetchedBankAccountDTO = given()
             .spec(requestSpecification)

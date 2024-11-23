@@ -92,15 +92,12 @@ class AccountHolderCreatedSNSTopicIT implements LocalStackTestContainer {
                         .build())
                 .messages();
 
-        System.out.println(messages.size() + "*SIZE");
         assertThat(messages)
                 .hasSize(1)
                 .first()
                 .satisfies(message -> {
                     var snsMessageWrapper = jsonMapper.readValue(message.body(), JsonNode.class);
-                    System.out.println(snsMessageWrapper.toString());
                     var rawMessage = snsMessageWrapper.get("Message").getStringValue();
-                    System.out.println(rawMessage);
 
                     var notification = jsonMapper.readValue(rawMessage, AccountHolderCreatedNotification.class);
                     assertThat(notification.bankAccountId()).isEqualTo(accountHolderDTO.getBankAccountId());

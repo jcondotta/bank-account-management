@@ -7,7 +7,6 @@ import com.jcondotta.helper.TestAccountHolderRequest;
 import com.jcondotta.service.dto.AccountHolderDTO;
 import com.jcondotta.service.dto.BankAccountDTO;
 import com.jcondotta.service.request.AccountHolderRequest;
-import com.jcondotta.service.request.CreateBankAccountRequest;
 import com.jcondotta.web.controller.bank_account.BankAccountURIBuilder;
 import io.micronaut.context.MessageSource;
 import io.micronaut.http.HttpStatus;

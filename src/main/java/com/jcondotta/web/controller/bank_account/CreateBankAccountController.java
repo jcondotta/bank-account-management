@@ -3,7 +3,6 @@ package com.jcondotta.web.controller.bank_account;
 import com.jcondotta.service.bank_account.CreateBankAccountService;
 import com.jcondotta.service.dto.BankAccountDTO;
 import com.jcondotta.service.request.AccountHolderRequest;
-import com.jcondotta.service.request.CreateBankAccountRequest;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.MediaType;
@@ -43,7 +42,7 @@ public class CreateBankAccountController {
             requestBody = @RequestBody(
                     description = "${requestBody.createBankAccount.description}",
                     required = true,
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CreateBankAccountRequest.class)))
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AccountHolderRequest.class)))
     )
     @ApiResponses(value = {
             @ApiResponse(

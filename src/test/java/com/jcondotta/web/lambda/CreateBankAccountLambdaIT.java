@@ -5,10 +5,8 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.jcondotta.container.LocalStackTestContainer;
 import com.jcondotta.domain.BankingEntity;
 import com.jcondotta.helper.TestAccountHolderRequest;
-import com.jcondotta.service.request.CreateBankAccountRequest;
 import com.jcondotta.web.controller.bank_account.BankAccountURIBuilder;
 import io.micronaut.context.ApplicationContext;
-import io.micronaut.context.MessageSource;
 import io.micronaut.function.aws.proxy.MockLambdaContext;
 import io.micronaut.function.aws.proxy.payload1.ApiGatewayProxyRequestEventFunction;
 import io.micronaut.http.HttpHeaders;
@@ -16,17 +14,14 @@ import io.micronaut.http.HttpMethod;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.MediaType;
 import io.micronaut.json.JsonMapper;
-import io.micronaut.json.tree.JsonNode;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import jakarta.inject.Inject;
-import jakarta.inject.Named;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
 import java.io.IOException;
-import java.util.Locale;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;

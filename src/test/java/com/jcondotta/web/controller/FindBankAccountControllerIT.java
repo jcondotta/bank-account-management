@@ -6,7 +6,6 @@ import com.jcondotta.service.bank_account.CreateBankAccountService;
 import com.jcondotta.service.bank_account.CreateJointAccountHolderService;
 import com.jcondotta.service.dto.BankAccountDTO;
 import com.jcondotta.service.request.AccountHolderRequest;
-import com.jcondotta.service.request.CreateBankAccountRequest;
 import com.jcondotta.service.request.CreateJointAccountHolderRequest;
 import com.jcondotta.web.controller.bank_account.BankAccountURIBuilder;
 import io.micronaut.context.MessageSource;

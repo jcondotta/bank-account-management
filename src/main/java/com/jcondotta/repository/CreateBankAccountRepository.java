@@ -1,7 +1,6 @@
 package com.jcondotta.repository;
 
 import com.jcondotta.domain.BankingEntity;
-import com.jcondotta.service.dto.BankAccountDTO;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import org.slf4j.Logger;

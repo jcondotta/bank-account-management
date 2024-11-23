@@ -4,7 +4,6 @@ import com.jcondotta.domain.BankingEntity;
 import com.jcondotta.factory.TestAccountHolderFactory;
 import com.jcondotta.factory.TestBankAccountFactory;
 import com.jcondotta.helper.TestAccountHolderRequest;
-import com.jcondotta.service.dto.BankAccountDTO;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

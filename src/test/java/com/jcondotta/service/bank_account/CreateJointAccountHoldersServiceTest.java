@@ -10,7 +10,6 @@ import com.jcondotta.factory.ValidatorTestFactory;
 import com.jcondotta.helper.TestAccountHolderRequest;
 import com.jcondotta.helper.TestBankAccountId;
 import com.jcondotta.repository.CreateJointAccountHolderRepository;
-import com.jcondotta.service.dto.AccountHolderDTO;
 import com.jcondotta.service.request.AccountHolderRequest;
 import com.jcondotta.service.request.CreateJointAccountHolderRequest;
 import jakarta.validation.ConstraintViolationException;

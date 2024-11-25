@@ -2,13 +2,13 @@ package com.jcondotta.web.controller;
 
 import com.jcondotta.configuration.AccountHolderCreatedSNSTopicConfig;
 import com.jcondotta.configuration.AccountHolderCreatedSQSQueueConfig;
+import com.jcondotta.configuration.BankAccountURIConfiguration;
 import com.jcondotta.container.LocalStackTestContainer;
 import com.jcondotta.event.AccountHolderCreatedNotification;
 import com.jcondotta.helper.TestAccountHolderRequest;
 import com.jcondotta.helper.TestBankAccountId;
 import com.jcondotta.service.dto.AccountHolderDTO;
 import com.jcondotta.service.request.AccountHolderRequest;
-import com.jcondotta.web.controller.bank_account.BankAccountURIBuilder;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.json.JsonMapper;
 import io.micronaut.json.tree.JsonNode;
@@ -62,10 +62,13 @@ class AccountHolderCreatedSNSTopicIT implements LocalStackTestContainer {
     String bankAccountCreatedSQSQueueARN;
     String sqsQueueSubscriptionARN;
 
+    @Inject
+    BankAccountURIConfiguration bankAccountURIConfig;
+
     @BeforeEach
     void beforeEach(RequestSpecification requestSpecification) {
         this.requestSpecification = requestSpecification
-                .basePath(BankAccountURIBuilder.ACCOUNT_HOLDERS_API_V1_MAPPING)
+                .basePath(bankAccountURIConfig.accountHoldersPath())
                 .contentType(ContentType.JSON);
 
         bankAccountCreatedSQSQueueARN = getQueueArn(sqsClient, sqsQueueConfig.queueURL());

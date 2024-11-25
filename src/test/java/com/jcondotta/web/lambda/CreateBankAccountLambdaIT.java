@@ -2,10 +2,10 @@ package com.jcondotta.web.lambda;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
+import com.jcondotta.configuration.BankAccountURIConfiguration;
 import com.jcondotta.container.LocalStackTestContainer;
 import com.jcondotta.domain.BankingEntity;
 import com.jcondotta.helper.TestAccountHolderRequest;
-import com.jcondotta.web.controller.bank_account.BankAccountURIBuilder;
 import io.micronaut.context.ApplicationContext;
 import io.micronaut.function.aws.proxy.MockLambdaContext;
 import io.micronaut.function.aws.proxy.payload1.ApiGatewayProxyRequestEventFunction;
@@ -50,7 +50,7 @@ class CreateBankAccountLambdaIT implements LocalStackTestContainer {
     @BeforeEach
     void beforeEach() {
         requestEvent = new APIGatewayProxyRequestEvent()
-                .withPath(BankAccountURIBuilder.BASE_PATH_API_V1_MAPPING)
+                .withPath(BankAccountURIConfiguration.BASE_PATH_API_V1_MAPPING)
                 .withHttpMethod(HttpMethod.POST.name())
                 .withHeaders(Map.of(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON));
     }

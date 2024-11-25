@@ -1,5 +1,6 @@
 package com.jcondotta.web.controller.bank_account;
 
+import com.jcondotta.configuration.BankAccountURIConfiguration;
 import com.jcondotta.service.bank_account.CreateBankAccountService;
 import com.jcondotta.service.dto.BankAccountDTO;
 import com.jcondotta.service.request.AccountHolderRequest;
@@ -25,7 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 @Validated
-@Controller(value = "${api.v1.bankAccounts.basePath}")
+@Controller(value = "${api.v1.root-path}")
 public class CreateBankAccountController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CreateBankAccountController.class);
@@ -72,7 +73,7 @@ public class CreateBankAccountController {
                     .ifPresent(accountHolderDTO -> MDC.put("accountHolderId", accountHolderDTO.getAccountHolderId().toString()));
 
             LOGGER.info("Bank account created successfully");
-            return HttpResponse.created(bankAccountDTO, BankAccountURIBuilder.bankAccountURI(bankAccountDTO.getBankAccountId()));
+            return HttpResponse.created(bankAccountDTO, BankAccountURIConfiguration.bankAccountURI(bankAccountDTO.getBankAccountId()));
         }
         finally {
             MDC.clear();

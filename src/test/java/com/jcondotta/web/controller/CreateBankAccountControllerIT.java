@@ -2,12 +2,12 @@ package com.jcondotta.web.controller;
 
 import com.jcondotta.argument_provider.BlankValuesArgumentProvider;
 import com.jcondotta.argument_provider.InvalidPassportNumberArgumentProvider;
+import com.jcondotta.configuration.BankAccountURIConfiguration;
 import com.jcondotta.container.LocalStackTestContainer;
 import com.jcondotta.helper.TestAccountHolderRequest;
 import com.jcondotta.service.dto.AccountHolderDTO;
 import com.jcondotta.service.dto.BankAccountDTO;
 import com.jcondotta.service.request.AccountHolderRequest;
-import com.jcondotta.web.controller.bank_account.BankAccountURIBuilder;
 import io.micronaut.context.MessageSource;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.json.JsonMapper;
@@ -60,6 +60,9 @@ class CreateBankAccountControllerIT implements LocalStackTestContainer {
     @Named("exceptionMessageSource")
     MessageSource messageSource;
 
+    @Inject
+    BankAccountURIConfiguration bankAccountURIConfiguration;
+
     public static Supplier<IllegalArgumentException> messageKeyNotFoundException(String messageKey) {
         return () -> new IllegalArgumentException("Message not found for key: " + messageKey);
     }
@@ -67,7 +70,7 @@ class CreateBankAccountControllerIT implements LocalStackTestContainer {
     @BeforeEach
     void beforeEach(RequestSpecification requestSpecification) {
         this.requestSpecification = requestSpecification
-                .basePath(BankAccountURIBuilder.BASE_PATH_API_V1_MAPPING)
+                .basePath(bankAccountURIConfiguration.rootPath())
                 .contentType(ContentType.JSON);
     }
 
@@ -97,7 +100,7 @@ class CreateBankAccountControllerIT implements LocalStackTestContainer {
 
         var createdBankAccountDTO = response.as(BankAccountDTO.class);
 
-        var expectedLocation = BankAccountURIBuilder.bankAccountURI(createdBankAccountDTO.getBankAccountId());
+        var expectedLocation = BankAccountURIConfiguration.bankAccountURI(createdBankAccountDTO.getBankAccountId());
         assertThat(response.header("location")).isEqualTo(expectedLocation.getRawPath());
 
         var fetchedBankAccountDTO = given()
@@ -143,7 +146,7 @@ class CreateBankAccountControllerIT implements LocalStackTestContainer {
         );
 
         var fetchedBankAccountDTO = given()
-            .spec(requestSpecification.basePath(BankAccountURIBuilder.BANK_ACCOUNT_API_V1_MAPPING))
+            .spec(requestSpecification.basePath(BankAccountURIConfiguration.BANK_ACCOUNT_API_V1_MAPPING))
                 .pathParam("bank-account-id", createdBankAccountDTO.getBankAccountId())
         .when()
             .get()

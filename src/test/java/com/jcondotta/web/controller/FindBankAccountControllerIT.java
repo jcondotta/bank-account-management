@@ -1,5 +1,6 @@
 package com.jcondotta.web.controller;
 
+import com.jcondotta.configuration.BankAccountURIConfiguration;
 import com.jcondotta.container.LocalStackTestContainer;
 import com.jcondotta.helper.TestAccountHolderRequest;
 import com.jcondotta.service.bank_account.CreateBankAccountService;
@@ -7,7 +8,6 @@ import com.jcondotta.service.bank_account.CreateJointAccountHolderService;
 import com.jcondotta.service.dto.BankAccountDTO;
 import com.jcondotta.service.request.AccountHolderRequest;
 import com.jcondotta.service.request.CreateJointAccountHolderRequest;
-import com.jcondotta.web.controller.bank_account.BankAccountURIBuilder;
 import io.micronaut.context.MessageSource;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
@@ -57,10 +57,13 @@ class FindBankAccountControllerIT implements LocalStackTestContainer {
     @Named("exceptionMessageSource")
     MessageSource messageSource;
 
+    @Inject
+    BankAccountURIConfiguration bankAccountURIConfig;
+
     @BeforeEach
     void beforeEach(RequestSpecification requestSpecification) {
         this.requestSpecification = requestSpecification
-                .basePath(BankAccountURIBuilder.BANK_ACCOUNT_API_V1_MAPPING)
+                .basePath(bankAccountURIConfig.bankAccountPath())
                 .contentType(ContentType.JSON);
     }
 

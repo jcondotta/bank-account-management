@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 import java.util.UUID;
 
 @Validated
-@Controller(value = "${api.v1.bankAccounts.bankAccountPath}")
+@Controller(value = "${api.v1.bank-account-path}")
 public class FindBankAccountController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FindBankAccountController.class);

@@ -1,9 +1,9 @@
 package com.jcondotta.web.controller;
 
+import com.jcondotta.configuration.BankAccountURIConfiguration;
 import com.jcondotta.container.LocalStackTestContainer;
 import com.jcondotta.helper.TestBankAccountId;
 import com.jcondotta.service.bank_account.FindBankAccountService;
-import com.jcondotta.web.controller.bank_account.BankAccountURIBuilder;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.test.annotation.MockBean;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
@@ -36,6 +36,9 @@ class FindBankAccountControllerErrorIT implements LocalStackTestContainer {
     @Inject
     FindBankAccountService findBankAccountService;
 
+    @Inject
+    BankAccountURIConfiguration bankAccountURIConfig;
+
     @MockBean(FindBankAccountService.class)
     FindBankAccountService findBankAccountService() {
         return Mockito.mock(FindBankAccountService.class);
@@ -44,7 +47,7 @@ class FindBankAccountControllerErrorIT implements LocalStackTestContainer {
     @BeforeEach
     void beforeEach(RequestSpecification requestSpecification) {
         this.requestSpecification = requestSpecification
-                .basePath(BankAccountURIBuilder.BANK_ACCOUNT_API_V1_MAPPING)
+                .basePath(bankAccountURIConfig.bankAccountPath())
                 .contentType(ContentType.JSON);
     }
 

@@ -2,12 +2,12 @@ package com.jcondotta.web.controller;
 
 import com.jcondotta.argument_provider.BlankValuesArgumentProvider;
 import com.jcondotta.argument_provider.InvalidPassportNumberArgumentProvider;
+import com.jcondotta.configuration.BankAccountURIConfiguration;
 import com.jcondotta.container.LocalStackTestContainer;
 import com.jcondotta.helper.TestAccountHolderRequest;
 import com.jcondotta.helper.TestBankAccountId;
 import com.jcondotta.service.dto.AccountHolderDTO;
 import com.jcondotta.service.request.AccountHolderRequest;
-import com.jcondotta.web.controller.bank_account.BankAccountURIBuilder;
 import io.micronaut.context.MessageSource;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.json.JsonMapper;
@@ -62,6 +62,9 @@ class CreateJointAccountHolderControllerIT implements LocalStackTestContainer {
     @Named("exceptionMessageSource")
     MessageSource messageSource;
 
+    @Inject
+    BankAccountURIConfiguration bankAccountURIConfig;
+
     public static Supplier<IllegalArgumentException> messageKeyNotFoundException(String messageKey) {
         return () -> new IllegalArgumentException("Message not found for key: " + messageKey);
     }
@@ -69,7 +72,7 @@ class CreateJointAccountHolderControllerIT implements LocalStackTestContainer {
     @BeforeEach
     void beforeEach(RequestSpecification requestSpecification) {
         this.requestSpecification = requestSpecification
-                .basePath(BankAccountURIBuilder.ACCOUNT_HOLDERS_API_V1_MAPPING)
+                .basePath(bankAccountURIConfig.accountHoldersPath())
                 .contentType(ContentType.JSON);
     }
 
@@ -97,7 +100,7 @@ class CreateJointAccountHolderControllerIT implements LocalStackTestContainer {
             .statusCode(HttpStatus.CREATED.getCode())
                 .extract();
 
-        var expectedLocation = BankAccountURIBuilder.bankAccountURI(BANK_ACCOUNT_ID_BRAZIL);
+        var expectedLocation = BankAccountURIConfiguration.bankAccountURI(BANK_ACCOUNT_ID_BRAZIL);
         assertThat(response.header("location")).isEqualTo(expectedLocation.getRawPath());
 
         var jeffersonAccountHolderDTO = response.as(AccountHolderDTO.class);

@@ -1,5 +1,6 @@
 package com.jcondotta.web.controller.bank_account;
 
+import com.jcondotta.configuration.BankAccountURIConfiguration;
 import com.jcondotta.service.bank_account.CreateJointAccountHolderService;
 import com.jcondotta.service.dto.AccountHolderDTO;
 import com.jcondotta.service.request.AccountHolderRequest;
@@ -24,7 +25,7 @@ import org.slf4j.LoggerFactory;
 import java.util.UUID;
 
 @Validated
-@Controller(value = "${api.v1.bankAccounts.accountHoldersBasePath}")
+@Controller(value = "${api.v1.account-holders-path}")
 public class CreateJointAccountHolderController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CreateJointAccountHolderController.class);
@@ -94,7 +95,7 @@ public class CreateJointAccountHolderController {
         var createJointAccountHolderRequest = new CreateJointAccountHolderRequest(bankAccountId, accountHolderRequest);
         var accountHoldersDTO = createJointAccountHolderService.create(createJointAccountHolderRequest);
 
-        return HttpResponse.created(accountHoldersDTO, BankAccountURIBuilder.bankAccountURI(bankAccountId));
+        return HttpResponse.created(accountHoldersDTO, BankAccountURIConfiguration.bankAccountURI(bankAccountId));
     }
 }
 

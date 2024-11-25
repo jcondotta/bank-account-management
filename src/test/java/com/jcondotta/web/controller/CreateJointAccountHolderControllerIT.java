@@ -100,7 +100,7 @@ class CreateJointAccountHolderControllerIT implements LocalStackTestContainer {
             .statusCode(HttpStatus.CREATED.getCode())
                 .extract();
 
-        var expectedLocation = BankAccountURIConfiguration.bankAccountURI(BANK_ACCOUNT_ID_BRAZIL);
+        var expectedLocation = bankAccountURIConfig.bankAccountURI(BANK_ACCOUNT_ID_BRAZIL);
         assertThat(response.header("location")).isEqualTo(expectedLocation.getRawPath());
 
         var jeffersonAccountHolderDTO = response.as(AccountHolderDTO.class);

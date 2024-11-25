@@ -10,13 +10,10 @@ import java.util.UUID;
 
 @ConfigurationProperties("api.v1")
 public record BankAccountURIConfiguration(String rootPath, String bankAccountPath, String accountHoldersPath)
-{
-    public static final String BASE_PATH_API_V1_MAPPING = "/api/v1/bank-accounts";
-    public static final String BANK_ACCOUNT_API_V1_MAPPING = BASE_PATH_API_V1_MAPPING + "/bank-account-id/{bank-account-id}";
-    public static final String ACCOUNT_HOLDERS_API_V1_MAPPING = BANK_ACCOUNT_API_V1_MAPPING + "/account-holders";
 
-    public static URI bankAccountURI(@NotNull UUID bankAccountId) {
-        return UriBuilder.of(BANK_ACCOUNT_API_V1_MAPPING)
+{
+    public URI bankAccountURI(@NotNull UUID bankAccountId) {
+        return UriBuilder.of(bankAccountPath)
                 .expand(Map.of("bank-account-id", bankAccountId.toString()));
     }
 }

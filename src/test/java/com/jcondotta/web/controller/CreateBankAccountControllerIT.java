@@ -100,7 +100,7 @@ class CreateBankAccountControllerIT implements LocalStackTestContainer {
 
         var createdBankAccountDTO = response.as(BankAccountDTO.class);
 
-        var expectedLocation = BankAccountURIConfiguration.bankAccountURI(createdBankAccountDTO.getBankAccountId());
+        var expectedLocation = bankAccountURIConfiguration.bankAccountURI(createdBankAccountDTO.getBankAccountId());
         assertThat(response.header("location")).isEqualTo(expectedLocation.getRawPath());
 
         var fetchedBankAccountDTO = given()
@@ -146,7 +146,7 @@ class CreateBankAccountControllerIT implements LocalStackTestContainer {
         );
 
         var fetchedBankAccountDTO = given()
-            .spec(requestSpecification.basePath(BankAccountURIConfiguration.BANK_ACCOUNT_API_V1_MAPPING))
+            .spec(requestSpecification.basePath(bankAccountURIConfiguration.bankAccountPath()))
                 .pathParam("bank-account-id", createdBankAccountDTO.getBankAccountId())
         .when()
             .get()

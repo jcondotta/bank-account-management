@@ -42,6 +42,9 @@ class CreateBankAccountLambdaIT implements LocalStackTestContainer {
     @Inject
     ApplicationContext applicationContext;
 
+    @Inject
+    BankAccountURIConfiguration bankAccountURIConfiguration;
+
     @BeforeAll
     void beforeAll() {
         requestEventFunction = new ApiGatewayProxyRequestEventFunction(applicationContext);
@@ -50,7 +53,7 @@ class CreateBankAccountLambdaIT implements LocalStackTestContainer {
     @BeforeEach
     void beforeEach() {
         requestEvent = new APIGatewayProxyRequestEvent()
-                .withPath(BankAccountURIConfiguration.BASE_PATH_API_V1_MAPPING)
+                .withPath(bankAccountURIConfiguration.rootPath())
                 .withHttpMethod(HttpMethod.POST.name())
                 .withHeaders(Map.of(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON));
     }

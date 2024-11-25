@@ -31,10 +31,12 @@ public class CreateJointAccountHolderController {
     private static final Logger LOGGER = LoggerFactory.getLogger(CreateJointAccountHolderController.class);
 
     private final CreateJointAccountHolderService createJointAccountHolderService;
+    private final BankAccountURIConfiguration bankAccountURIConfig;
 
     @Inject
-    public CreateJointAccountHolderController(CreateJointAccountHolderService createJointAccountHolderService) {
+    public CreateJointAccountHolderController(CreateJointAccountHolderService createJointAccountHolderService, BankAccountURIConfiguration bankAccountURIConfig) {
         this.createJointAccountHolderService = createJointAccountHolderService;
+        this.bankAccountURIConfig = bankAccountURIConfig;
     }
 
     @Operation(
@@ -95,7 +97,7 @@ public class CreateJointAccountHolderController {
         var createJointAccountHolderRequest = new CreateJointAccountHolderRequest(bankAccountId, accountHolderRequest);
         var accountHoldersDTO = createJointAccountHolderService.create(createJointAccountHolderRequest);
 
-        return HttpResponse.created(accountHoldersDTO, BankAccountURIConfiguration.bankAccountURI(bankAccountId));
+        return HttpResponse.created(accountHoldersDTO, bankAccountURIConfig.bankAccountURI(bankAccountId));
     }
 }
 

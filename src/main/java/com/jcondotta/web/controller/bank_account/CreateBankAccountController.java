@@ -32,10 +32,12 @@ public class CreateBankAccountController {
     private static final Logger LOGGER = LoggerFactory.getLogger(CreateBankAccountController.class);
 
     private final CreateBankAccountService createBankAccountService;
+    private final BankAccountURIConfiguration bankAccountURIConfig;
 
     @Inject
-    public CreateBankAccountController(CreateBankAccountService createBankAccountService) {
+    public CreateBankAccountController(CreateBankAccountService createBankAccountService, BankAccountURIConfiguration bankAccountURIConfig ) {
         this.createBankAccountService = createBankAccountService;
+        this.bankAccountURIConfig = bankAccountURIConfig;
     }
 
     @Operation(summary = "${operation.createBankAccount.summary}", description = "${operation.createBankAccount.description}",
@@ -73,7 +75,7 @@ public class CreateBankAccountController {
                     .ifPresent(accountHolderDTO -> MDC.put("accountHolderId", accountHolderDTO.getAccountHolderId().toString()));
 
             LOGGER.info("Bank account created successfully");
-            return HttpResponse.created(bankAccountDTO, BankAccountURIConfiguration.bankAccountURI(bankAccountDTO.getBankAccountId()));
+            return HttpResponse.created(bankAccountDTO, bankAccountURIConfig.bankAccountURI(bankAccountDTO.getBankAccountId()));
         }
         finally {
             MDC.clear();

@@ -16,6 +16,7 @@ import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import jakarta.inject.Inject;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -57,7 +58,9 @@ class AccountHolderCreatedSNSTopicIT implements LocalStackTestContainer {
 
     @Inject
     AccountHolderCreatedSQSQueueConfig sqsQueueConfig;
+
     String bankAccountCreatedSQSQueueARN;
+    String sqsQueueSubscriptionARN;
 
     @BeforeEach
     void beforeEach(RequestSpecification requestSpecification) {
@@ -65,13 +68,21 @@ class AccountHolderCreatedSNSTopicIT implements LocalStackTestContainer {
                 .basePath(BankAccountURIBuilder.ACCOUNT_HOLDERS_API_V1_MAPPING)
                 .contentType(ContentType.JSON);
 
-        this.bankAccountCreatedSQSQueueARN = getQueueArn(sqsClient, sqsQueueConfig.queueURL());
-        subscribeTopicWithQueue(snsClient, snsTopicConfig.topicArn(), bankAccountCreatedSQSQueueARN);
+        bankAccountCreatedSQSQueueARN = getQueueArn(sqsClient, sqsQueueConfig.queueURL());
+
+        var subscribeResponse = subscribeTopicWithQueue(snsClient, snsTopicConfig.topicArn(), bankAccountCreatedSQSQueueARN);
+        sqsQueueSubscriptionARN = subscribeResponse.subscriptionArn();
+    }
+
+    @AfterEach
+    void afterEach(){
+        snsClient.unsubscribe(builder -> builder
+                .subscriptionArn(sqsQueueSubscriptionARN)
+                .build());
     }
 
     @Test
     void shouldPublishMessageSuccessfullyToSNSTopic_whenJointAccountHolderIsCreated() throws IOException {
-        sqsClient.purgeQueue(builder -> builder.queueUrl(sqsQueueConfig.queueURL()));
         var bankAccountId = TestBankAccountId.BRAZIL.getBankAccountId();
         var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, DATE_OF_BIRTH_JEFFERSON, PASSPORT_NUMBER_JEFFERSON);
 

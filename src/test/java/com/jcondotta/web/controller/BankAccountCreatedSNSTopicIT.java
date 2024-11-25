@@ -15,6 +15,7 @@ import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import jakarta.inject.Inject;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -57,6 +58,7 @@ class BankAccountCreatedSNSTopicIT implements LocalStackTestContainer {
     @Inject
     AccountHolderCreatedSQSQueueConfig sqsQueueConfig;
     String bankAccountCreatedSQSQueueARN;
+    String sqsQueueSubscriptionARN;
 
     @BeforeEach
     void beforeEach(RequestSpecification requestSpecification) {
@@ -66,6 +68,15 @@ class BankAccountCreatedSNSTopicIT implements LocalStackTestContainer {
 
         this.bankAccountCreatedSQSQueueARN = getQueueArn(sqsClient, sqsQueueConfig.queueURL());
         subscribeTopicWithQueue(snsClient, snsTopicConfig.topicArn(), bankAccountCreatedSQSQueueARN);
+        var subscribeResponse = subscribeTopicWithQueue(snsClient, snsTopicConfig.topicArn(), bankAccountCreatedSQSQueueARN);
+        sqsQueueSubscriptionARN = subscribeResponse.subscriptionArn();
+    }
+
+    @AfterEach
+    void afterEach(){
+        snsClient.unsubscribe(builder -> builder
+                .subscriptionArn(sqsQueueSubscriptionARN)
+                .build());
     }
 
     @Test
@@ -88,8 +99,7 @@ class BankAccountCreatedSNSTopicIT implements LocalStackTestContainer {
                         .build())
                 .messages();
 
-        assertThat(messages)
-                .hasSize(1)
+        assertThat(messages).hasSize(1)
                 .first()
                 .satisfies(message -> {
                     var snsMessageWrapper = jsonMapper.readValue(message.body(), JsonNode.class);

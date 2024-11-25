@@ -52,7 +52,7 @@ resource "aws_iam_role_policy" "lambda_policy" {
             "sns:Publish"
           ],
           Effect   = "Allow",
-          Resource = "arn:aws:sns:us-east-1:470315484552:*"
+          Resource = var.sns_account_holder_created_topic_arn
         }
       ]
     }

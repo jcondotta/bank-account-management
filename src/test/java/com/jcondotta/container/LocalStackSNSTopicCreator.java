@@ -25,12 +25,12 @@ public class LocalStackSNSTopicCreator {
             throw new IllegalStateException("LocalStack container is not running.");
         }
 
-        var snsClient = initializeSNSClient();
+        var snsClient = LocalStackSNSClient.initializeSNSClient();
         return createTopic(snsClient, topicName);
     }
 
     private static String createTopic(SnsClient snsClient, String topicName) {
-        snsClient = Objects.requireNonNullElseGet(snsClient, LocalStackSNSTopicCreator::initializeSNSClient);
+        snsClient = Objects.requireNonNullElseGet(snsClient, LocalStackSNSClient::initializeSNSClient);
 
         var existentTopic = snsClient.listTopics().topics()
                 .stream()
@@ -48,20 +48,5 @@ public class LocalStackSNSTopicCreator {
         LOGGER.info("Topic '{}' created successfully with ARN: {}", topicName, createTopicResponse.topicArn());
 
         return createTopicResponse.topicArn();
-    }
-
-    private static SnsClient initializeSNSClient() {
-        var awsCredentials = AwsBasicCredentials.create(
-                LOCALSTACK_CONTAINER.getAccessKey(),
-                LOCALSTACK_CONTAINER.getSecretKey()
-        );
-        var region = Region.of(LOCALSTACK_CONTAINER.getRegion());
-        var endpoint = LOCALSTACK_CONTAINER.getEndpointOverride(LocalStackContainer.Service.SQS).toString();
-
-        return SnsClient.builder()
-                .region(region)
-                .endpointOverride(URI.create(endpoint))
-                .credentialsProvider(StaticCredentialsProvider.create(awsCredentials))
-                .build();
     }
 }

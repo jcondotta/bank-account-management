@@ -11,7 +11,6 @@ import java.io.IOException;
 @Singleton
 public class SerializationService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SerializationService.class);
     private final JsonMapper jsonMapper;
 
     public SerializationService(JsonMapper jsonMapper) {

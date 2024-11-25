@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 import java.util.UUID;
 
 @Validated
-@Controller(BankAccountURIBuilder.ACCOUNT_HOLDERS_API_V1_MAPPING)
+@Controller(value = "${api.v1.bankAccounts.accountHoldersBasePath}")
 public class CreateJointAccountHolderController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CreateJointAccountHolderController.class);

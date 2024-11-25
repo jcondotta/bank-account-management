@@ -2,14 +2,9 @@ package com.jcondotta.container;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testcontainers.containers.localstack.LocalStackContainer;
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
-import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
-import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.sns.SnsClient;
 import software.amazon.awssdk.services.sns.model.CreateTopicResponse;
 
-import java.net.URI;
 import java.util.Objects;
 
 import static com.jcondotta.container.LocalStackTestContainer.LOCALSTACK_CONTAINER;

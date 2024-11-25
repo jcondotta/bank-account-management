@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 @Validated
-@Controller(BankAccountURIBuilder.BASE_PATH_API_V1_MAPPING)
+@Controller(value = "${api.v1.bankAccounts.basePath}")
 public class CreateBankAccountController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CreateBankAccountController.class);

@@ -33,3 +33,10 @@ aws:
     topics:
       account-holder-created:
         topic-arn: ${AWS_SNS_ACCOUNT_HOLDER_CREATED_TOPIC_ARN}
+
+api:
+  v1:
+    bankAccounts:
+      basePath: /api/v1/bank-accounts
+      bankAccountPath: /api/v1/bank-accounts/bank-account-id/{bank-account-id}
+      accountHoldersBasePath: /api/v1/bank-accounts/bank-account-id/{bank-account-id}/account-holders

@@ -23,7 +23,6 @@ public class SerializationService {
             return jsonMapper.readValue(json, clazz);
         }
         catch (IOException e) {
-            LOGGER.error("Failed to map JSON to class {}: {}", clazz.getSimpleName(), e.getMessage(), e);
             throw new SerializationException("IO error during deserialization for class " + clazz.getSimpleName(), e);
         }
     }
@@ -33,7 +32,6 @@ public class SerializationService {
             return jsonMapper.writeValueAsString(object);
         }
         catch (IOException e) {
-            LOGGER.error("Failed to serialize object of type {}: {}", object.getClass().getSimpleName(), e.getMessage(), e);
             throw new SerializationException("Failed to serialize object of type " + object.getClass().getSimpleName(), e);
         }
     }

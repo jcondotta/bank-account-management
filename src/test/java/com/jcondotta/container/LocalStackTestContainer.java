@@ -11,6 +11,7 @@ import org.testcontainers.utility.DockerImageName;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Testcontainers
 public interface LocalStackTestContainer extends TestPropertyProvider {
@@ -24,30 +25,41 @@ public interface LocalStackTestContainer extends TestPropertyProvider {
             .withServices(Service.DYNAMODB, Service.SNS, Service.SQS)
             .withLogConsumer(outputFrame -> LOGGER.debug(outputFrame.getUtf8StringWithoutLineEnding()));
 
+    AtomicBoolean CONTAINER_STARTED = new AtomicBoolean(false);
+
     String SNS_ACCOUNT_HOLDER_CREATED_TOPIC_NAME = "account-holder-created-topic-test";
     String SNS_ACCOUNT_HOLDER_CREATED_QUEUE_NAME = "account-holder-created-queue-test";
 
+    Map<String, String> CONTAINER_PROPERTIES = new HashMap<>();
+
     @Override
     default Map<String, String> getProperties() {
+        if (CONTAINER_STARTED.compareAndSet(false, true)) {
+            startContainer();
+
+            var snsTopicARN = LocalStackSNSTopicCreator.createTopicWithARNResponse(SNS_ACCOUNT_HOLDER_CREATED_TOPIC_NAME);
+            var sqsQueueURL = LocalStackSQSQueueCreator.createQueueWithURLResponse(SNS_ACCOUNT_HOLDER_CREATED_QUEUE_NAME);
+
+            CONTAINER_PROPERTIES.putAll(getContainerProperties());
+            CONTAINER_PROPERTIES.put("AWS_SNS_ACCOUNT_HOLDER_CREATED_TOPIC_ARN", snsTopicARN);
+            CONTAINER_PROPERTIES.put("AWS_SQS_ACCOUNT_HOLDER_CREATED_QUEUE_URL", sqsQueueURL);
+
+            logContainerConfiguration(CONTAINER_PROPERTIES);
+        }
+        else {
+            LOGGER.warn("getProperties() called multiple times; container already started.");
+        }
+
+        return CONTAINER_PROPERTIES;
+    }
+
+    default void startContainer() {
         try {
             Startables.deepStart(LOCALSTACK_CONTAINER).join();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             LOGGER.error("Failed to start LocalStack container: {}", e.getMessage());
-
             throw new RuntimeException("Failed to start LocalStack container", e);
         }
-
-        var snsTopicARN = LocalStackSNSTopicCreator.createTopicWithARNResponse(SNS_ACCOUNT_HOLDER_CREATED_TOPIC_NAME);
-        var sqsQueueURL = LocalStackSQSQueueCreator.createQueueWithURLResponse(SNS_ACCOUNT_HOLDER_CREATED_QUEUE_NAME);
-
-        Map<String, String> containerProperties = getContainerProperties();
-        containerProperties.put("AWS_SNS_ACCOUNT_HOLDER_CREATED_TOPIC_ARN", snsTopicARN);
-        containerProperties.put("AWS_SQS_ACCOUNT_HOLDER_CREATED_QUEUE_URL", sqsQueueURL);
-
-        logContainerConfiguration(containerProperties);
-
-        return containerProperties;
     }
 
     default Map<String, String> getContainerProperties() {

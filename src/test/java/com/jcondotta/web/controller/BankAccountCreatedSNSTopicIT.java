@@ -10,7 +10,6 @@ import com.jcondotta.service.SerializationService;
 import com.jcondotta.service.dto.BankAccountDTO;
 import com.jcondotta.service.request.AccountHolderRequest;
 import io.micronaut.http.HttpStatus;
-import io.micronaut.json.JsonMapper;
 import io.micronaut.json.tree.JsonNode;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import io.restassured.http.ContentType;
@@ -27,7 +26,6 @@ import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.GetQueueAttributesRequest;
 import software.amazon.awssdk.services.sqs.model.QueueAttributeName;
 
-import java.io.IOException;
 import java.time.LocalDate;
 
 import static io.restassured.RestAssured.given;

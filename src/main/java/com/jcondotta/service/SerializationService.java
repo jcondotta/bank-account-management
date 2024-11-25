@@ -3,8 +3,6 @@ package com.jcondotta.service;
 import com.jcondotta.exception.SerializationException;
 import io.micronaut.json.JsonMapper;
 import jakarta.inject.Singleton;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 

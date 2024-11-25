@@ -1,6 +1,7 @@
 package com.jcondotta.service;
 
 import com.jcondotta.event.AccountHolderCreatedNotification;
+import com.jcondotta.exception.SerializationException;
 import com.jcondotta.helper.TestAccountHolderRequest;
 import com.jcondotta.helper.TestBankAccountId;
 import io.micronaut.json.JsonMapper;
@@ -62,7 +63,7 @@ class SerializationServiceTest {
     void shouldThrowSerializationException_whenJsonIsMalformed() {
         String invalidJson = "{ invalid }";
 
-        assertThrows(RuntimeException.class,
+        assertThrows(SerializationException.class,
                 () -> serializationService.deserialize(invalidJson, AccountHolderCreatedNotification.class)
         );
     }
@@ -77,7 +78,7 @@ class SerializationServiceTest {
                 }
                 """;
 
-        assertThrows(RuntimeException.class,
+        assertThrows(SerializationException.class,
                 () -> serializationService.deserialize(invalidJson, AccountHolderCreatedNotification.class)
         );
     }

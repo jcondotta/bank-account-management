@@ -6,6 +6,7 @@ import com.jcondotta.configuration.BankAccountURIConfiguration;
 import com.jcondotta.container.LocalStackTestContainer;
 import com.jcondotta.event.AccountHolderCreatedNotification;
 import com.jcondotta.helper.TestAccountHolderRequest;
+import com.jcondotta.service.SerializationService;
 import com.jcondotta.service.dto.BankAccountDTO;
 import com.jcondotta.service.request.AccountHolderRequest;
 import io.micronaut.http.HttpStatus;
@@ -41,7 +42,7 @@ class BankAccountCreatedSNSTopicIT implements LocalStackTestContainer {
     private static final LocalDate DATE_OF_BIRTH_JEFFERSON = TestAccountHolderRequest.JEFFERSON.getDateOfBirth();
 
     @Inject
-    JsonMapper jsonMapper;
+    SerializationService serializationService;
 
     @Inject
     RequestSpecification requestSpecification;
@@ -83,12 +84,12 @@ class BankAccountCreatedSNSTopicIT implements LocalStackTestContainer {
     }
 
     @Test
-    void shouldPublishMessageSuccessfullyToSNSTopic_whenBankAccountIsCreated() throws IOException {
+    void shouldPublishMessageSuccessfullyToSNSTopic_whenBankAccountIsCreated() {
         var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, DATE_OF_BIRTH_JEFFERSON, PASSPORT_NUMBER_JEFFERSON);
 
         var bankAccountDTO = given()
             .spec(requestSpecification)
-                .body(jsonMapper.writeValueAsString(accountHolderRequest))
+                .body(serializationService.serialize(accountHolderRequest))
         .when()
             .post()
         .then()
@@ -105,10 +106,10 @@ class BankAccountCreatedSNSTopicIT implements LocalStackTestContainer {
         assertThat(messages).hasSize(1)
                 .first()
                 .satisfies(message -> {
-                    var snsMessageWrapper = jsonMapper.readValue(message.body(), JsonNode.class);
+                    var snsMessageWrapper = serializationService.deserialize(message.body(), JsonNode.class);
                     var rawMessage = snsMessageWrapper.get("Message").getStringValue();
 
-                    var notification = jsonMapper.readValue(rawMessage, AccountHolderCreatedNotification.class);
+                    var notification = serializationService.deserialize(rawMessage, AccountHolderCreatedNotification.class);
                     assertThat(notification.bankAccountId()).isEqualTo(bankAccountDTO.getBankAccountId());
 
                     bankAccountDTO.getPrimaryAccountHolder().ifPresent(accountHolderDTO -> {

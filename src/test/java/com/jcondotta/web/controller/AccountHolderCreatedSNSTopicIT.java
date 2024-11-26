@@ -7,6 +7,7 @@ import com.jcondotta.container.LocalStackTestContainer;
 import com.jcondotta.event.AccountHolderCreatedNotification;
 import com.jcondotta.helper.TestAccountHolderRequest;
 import com.jcondotta.helper.TestBankAccountId;
+import com.jcondotta.service.SNSSubscriptionService;
 import com.jcondotta.service.dto.AccountHolderDTO;
 import com.jcondotta.service.request.AccountHolderRequest;
 import io.micronaut.http.HttpStatus;
@@ -57,6 +58,9 @@ class AccountHolderCreatedSNSTopicIT implements LocalStackTestContainer {
     SqsClient sqsClient;
 
     @Inject
+    SNSSubscriptionService snsSubscriptionService;
+
+    @Inject
     AccountHolderCreatedSQSQueueConfig sqsQueueConfig;
 
     String bankAccountCreatedSQSQueueARN;
@@ -73,7 +77,7 @@ class AccountHolderCreatedSNSTopicIT implements LocalStackTestContainer {
 
         bankAccountCreatedSQSQueueARN = getQueueArn(sqsClient, sqsQueueConfig.queueURL());
 
-        var subscribeResponse = subscribeTopicWithQueue(snsClient, snsTopicConfig.topicArn(), bankAccountCreatedSQSQueueARN);
+        var subscribeResponse = snsSubscriptionService.subscribeQueueToTopic(snsTopicConfig.topicArn(), bankAccountCreatedSQSQueueARN);
         sqsQueueSubscriptionARN = subscribeResponse.subscriptionArn();
     }
 
@@ -119,13 +123,6 @@ class AccountHolderCreatedSNSTopicIT implements LocalStackTestContainer {
                     assertThat(notification.accountHolderName()).isEqualTo(accountHolderDTO.getAccountHolderName());
             }
         );
-    }
-
-    private SubscribeResponse subscribeTopicWithQueue(SnsClient snsClient, String topicARN, String queueARN){
-        return snsClient.subscribe(builder -> builder
-                .topicArn(topicARN)
-                .protocol("sqs")
-                .endpoint(queueARN));
     }
 
     private String getQueueArn(SqsClient sqsClient, String queueUrl) {

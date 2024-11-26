@@ -6,6 +6,7 @@ import com.jcondotta.configuration.BankAccountURIConfiguration;
 import com.jcondotta.container.LocalStackTestContainer;
 import com.jcondotta.event.AccountHolderCreatedNotification;
 import com.jcondotta.helper.TestAccountHolderRequest;
+import com.jcondotta.service.SNSSubscriptionService;
 import com.jcondotta.service.SerializationService;
 import com.jcondotta.service.dto.BankAccountDTO;
 import com.jcondotta.service.request.AccountHolderRequest;
@@ -21,7 +22,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import software.amazon.awssdk.services.sns.SnsClient;
-import software.amazon.awssdk.services.sns.model.SubscribeResponse;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.GetQueueAttributesRequest;
 import software.amazon.awssdk.services.sqs.model.QueueAttributeName;
@@ -52,6 +52,9 @@ class BankAccountCreatedSNSTopicIT implements LocalStackTestContainer {
     AccountHolderCreatedSNSTopicConfig snsTopicConfig;
 
     @Inject
+    SNSSubscriptionService snsSubscriptionService;
+
+    @Inject
     SqsClient sqsClient;
 
     @Inject
@@ -69,8 +72,8 @@ class BankAccountCreatedSNSTopicIT implements LocalStackTestContainer {
                 .contentType(ContentType.JSON);
 
         this.bankAccountCreatedSQSQueueARN = getQueueArn(sqsClient, sqsQueueConfig.queueURL());
-        subscribeTopicWithQueue(snsClient, snsTopicConfig.topicArn(), bankAccountCreatedSQSQueueARN);
-        var subscribeResponse = subscribeTopicWithQueue(snsClient, snsTopicConfig.topicArn(), bankAccountCreatedSQSQueueARN);
+        var subscribeResponse = snsSubscriptionService.subscribeQueueToTopic(snsTopicConfig.topicArn(), bankAccountCreatedSQSQueueARN);
+
         sqsQueueSubscriptionARN = subscribeResponse.subscriptionArn();
     }
 
@@ -115,13 +118,6 @@ class BankAccountCreatedSNSTopicIT implements LocalStackTestContainer {
                         assertThat(notification.accountHolderName()).isEqualTo(accountHolderDTO.getAccountHolderName());
                     });
                 });
-    }
-
-    private SubscribeResponse subscribeTopicWithQueue(SnsClient snsClient, String topicARN, String queueARN){
-        return snsClient.subscribe(builder -> builder
-                .topicArn(topicARN)
-                .protocol("sqs")
-                .endpoint(queueARN));
     }
 
     private String getQueueArn(SqsClient sqsClient, String queueUrl) {

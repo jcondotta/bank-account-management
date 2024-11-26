@@ -92,7 +92,7 @@ public class CreateJointAccountHolderController {
 
             @Body AccountHolderRequest accountHolderRequest) {
 
-        LOGGER.info("Received request to create joint account holders for Bank Account ID: {}", bankAccountId);
+        LOGGER.info("Received request to create a joint account holder for Bank Account ID: {}", bankAccountId);
 
         var createJointAccountHolderRequest = new CreateJointAccountHolderRequest(bankAccountId, accountHolderRequest);
         var accountHoldersDTO = createJointAccountHolderService.create(createJointAccountHolderRequest);

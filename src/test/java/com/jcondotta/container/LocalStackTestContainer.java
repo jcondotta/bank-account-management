@@ -44,7 +44,7 @@ public interface LocalStackTestContainer extends TestPropertyProvider {
             CONTAINER_PROPERTIES.put("AWS_SNS_ACCOUNT_HOLDER_CREATED_TOPIC_ARN", snsTopicARN);
             CONTAINER_PROPERTIES.put("AWS_SQS_ACCOUNT_HOLDER_CREATED_QUEUE_URL", sqsQueueURL);
 
-            logContainerConfiguration(CONTAINER_PROPERTIES);
+            LocalStackLogger.logContainerConfiguration(LOGGER, CONTAINER_PROPERTIES);
         }
         else {
             LOGGER.warn("getProperties() called multiple times; container already started.");
@@ -74,18 +74,5 @@ public interface LocalStackTestContainer extends TestPropertyProvider {
         );
 
         return new HashMap<>(mapContainerProperties);
-    }
-
-    default void logContainerConfiguration(Map<String, String> containerProperties) {
-        var logBuilder = new StringBuilder();
-        logBuilder.append("\n================== Container Configuration ==================\n");
-
-        containerProperties.forEach((key, value) ->
-                logBuilder.append(String.format("  %s : %s%n", key, value))
-        );
-
-        logBuilder.append("=============================================================\n");
-
-        LOGGER.info(logBuilder.toString());
     }
 }

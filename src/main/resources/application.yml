@@ -38,4 +38,4 @@ api:
   v1:
     root-path: '/api/v1/bank-accounts'
     bank-account-path: '/api/v1/bank-accounts/bank-account-id/{bank-account-id}'
-    account-holders-path: /api/v1/bank-accounts/bank-account-id/{bank-account-id}/account-holders
+    account-holders-path: '/api/v1/bank-accounts/bank-account-id/{bank-account-id}/account-holders'

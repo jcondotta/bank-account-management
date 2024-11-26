@@ -56,7 +56,8 @@ public interface LocalStackTestContainer extends TestPropertyProvider {
     default void startContainer() {
         try {
             Startables.deepStart(LOCALSTACK_CONTAINER).join();
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             LOGGER.error("Failed to start LocalStack container: {}", e.getMessage());
             throw new RuntimeException("Failed to start LocalStack container", e);
         }

@@ -11,10 +11,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.IOException;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class SerializationServiceTest {
@@ -33,7 +37,7 @@ class SerializationServiceTest {
     }
 
     @Test
-    void shouldSerializeNotificationToJson_whenNotificationObjectIsValid() {
+    void shouldSerializeNotificationToJson_whenNotificationObjectIsValid() throws IOException {
         var notification = new AccountHolderCreatedNotification(UUID.randomUUID(), ACCOUNT_HOLDER_NAME_JEFFERSON, BANK_ACCOUNT_ID_BRAZIL);
 
         String json = serializationService.serialize(notification);
@@ -94,4 +98,17 @@ class SerializationServiceTest {
         assertThat(deserializedNotification.bankAccountId()).isNull();
     }
 
+    @Test
+    void shouldThrowSerializationException_whenJsonMapperFailsToSerialize() throws IOException {
+        var jsonMapperMock = mock(JsonMapper.class);
+        serializationService = new SerializationService(jsonMapperMock);
+
+        var notification = new AccountHolderCreatedNotification(UUID.randomUUID(), ACCOUNT_HOLDER_NAME_JEFFERSON, BANK_ACCOUNT_ID_BRAZIL);
+
+        when(jsonMapperMock.writeValueAsString(notification)).thenThrow(new IOException("Simulated IO Error"));
+
+        assertThatThrownBy(() -> serializationService.serialize(notification))
+                .isInstanceOf(SerializationException.class)
+                .hasMessage("Failed to serialize object of type AccountHolderCreatedNotification");
+    }
 }

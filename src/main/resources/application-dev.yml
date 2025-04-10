@@ -1,15 +1,5 @@
-micronaut:
-  application:
-    name: bank-accounts-service
-
 aws:
-  access-key-id: 'test'
-  secret-key: 'test'
-  region: 'us-east-1'
   dynamodb:
-    endpoint: 'http://localhost:4566'
-    tables:
-      banking-entities:
-        table-name: 'banking-entities-localstack'
+    endpoint: ${AWS_DYNAMODB_ENDPOINT}
   sns:
-    endpoint: 'http://localhost:4566'
+    endpoint: ${AWS_SNS_ENDPOINT}

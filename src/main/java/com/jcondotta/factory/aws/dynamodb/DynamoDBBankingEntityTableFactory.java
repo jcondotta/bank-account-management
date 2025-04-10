@@ -40,7 +40,8 @@ public class DynamoDBBankingEntityTableFactory {
                         .setter(BankingEntity::setBankAccountId))
                 .addAttribute(String.class, a -> a.name("iban")
                         .getter(BankingEntity::getIban)
-                        .setter(BankingEntity::setIban))
+                        .setter(BankingEntity::setIban)
+                        .tags(StaticAttributeTags.secondaryPartitionKey("bank-account-iban-gsi")))
 
                 // AccountHolder Attributes
                 .addAttribute(UUID.class, a -> a.name("accountHolderId")

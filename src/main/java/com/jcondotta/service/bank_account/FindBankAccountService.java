@@ -37,7 +37,7 @@ public class FindBankAccountService {
         var bankAccount = bankingEntities.stream()
                 .filter(bankingEntity -> bankingEntity.getEntityType().equals(EntityType.BANK_ACCOUNT))
                 .findFirst()
-                .orElseThrow(() -> new BankAccountNotFoundException("bankAccount.notFound", bankAccountId));
+                .orElseThrow(() -> new BankAccountNotFoundException("bankAccount.notFound", bankAccountId.toString()));
 
         var accountHolders = bankingEntities.stream()
                 .filter(bankingEntity -> bankingEntity.getEntityType().equals(EntityType.ACCOUNT_HOLDER))

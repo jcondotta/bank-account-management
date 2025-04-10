@@ -88,7 +88,7 @@ class FindBankAccountServiceTest {
                 .isInstanceOf(BankAccountNotFoundException.class)
                 .hasMessage("bankAccount.notFound")
                 .extracting("bankAccountId")
-                    .isEqualTo(nonExistentBankAccountId);
+                    .isEqualTo(nonExistentBankAccountId.toString());
 
         verify(dynamoDbTable).query(any(QueryConditional.class));
     }

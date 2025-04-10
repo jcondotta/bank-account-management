@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bank-account-management
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bank-account-management
+  template:
+    metadata:
+      labels:
+        app: bank-account-management
+    spec:
+      containers:
+        - name: bank-account-management
+          image: jcondotta/bank-account-management:latest
+          ports:
+            - containerPort: 8090
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bank-account-management
+spec:
+  selector:
+    app: bank-account-management
+  ports:
+    - port: 80
+      targetPort: 8090
+  type: ClusterIP

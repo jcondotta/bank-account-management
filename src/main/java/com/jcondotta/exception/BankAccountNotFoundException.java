@@ -1,17 +1,15 @@
 package com.jcondotta.exception;
 
-import java.util.UUID;
-
 public class BankAccountNotFoundException extends RuntimeException{
 
-    private final UUID bankAccountId;
+    private final String bankAccountId;
 
-    public BankAccountNotFoundException(String message, UUID bankAccountId) {
+    public BankAccountNotFoundException(String message, String bankAccountId) {
         super(message);
         this.bankAccountId = bankAccountId;
     }
 
-    public UUID getBankAccountId() {
+    public String getBankAccountId() {
         return bankAccountId;
     }
 }

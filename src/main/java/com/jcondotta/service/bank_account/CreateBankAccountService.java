@@ -56,6 +56,9 @@ public class CreateBankAccountService {
         var bankAccount = buildBankAccount();
         var accountHolder = buildPrimaryAccountHolder(bankAccount.getBankAccountId(), accountHolderRequest);
 
+        LOGGER.info("Saving to DynamoDB: PK={}, SK={}, EntityType={}",
+                accountHolder.getPartitionKey(), accountHolder.getSortKey(), accountHolder.getEntityType());
+
         createBankAccountRepository.create(bankAccount, accountHolder);
         var bankAccountDTO = new BankAccountDTO(bankAccount, accountHolder);
 

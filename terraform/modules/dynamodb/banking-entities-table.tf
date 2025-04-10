@@ -17,5 +17,18 @@ resource "aws_dynamodb_table" "banking_entities" {
     type = "S"
   }
 
+  attribute {
+    name = "iban"
+    type = "S"
+  }
+
+  global_secondary_index {
+    name               = "bank-account-iban-gsi"
+    hash_key           = "iban"
+    projection_type    = "ALL"
+    read_capacity      = var.banking_entities_read_capacity
+    write_capacity     = var.banking_entities_write_capacity
+  }
+
   tags = var.tags
 }

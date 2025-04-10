@@ -1,13 +1,44 @@
 version: "3.8"
 
 services:
+  app:
+    build:
+      context: .
+      target: runner
+    container_name: bank-account-management
+    ports:
+      - "8090:8090"
+    environment:
+      MICRONAUT_ENVIRONMENTS: dev
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_DYNAMODB_ENDPOINT: http://localstack:4566
+      AWS_SNS_ENDPOINT: http://localstack:4566
+      AWS_DYNAMODB_BANKING_ENTITIES_TABLE_NAME: banking-entities
+      AWS_SNS_ACCOUNT_HOLDER_CREATED_TOPIC_ARN: arn:aws:sns:us-east-1:000000000000:account-holder-created
+    networks:
+      - bank_account_management
+    depends_on:
+      - localstack
+
   localstack:
     container_name: "${LOCALSTACK_DOCKER_NAME:-localstack-main}"
     image: localstack/localstack:3.7.0
     ports:
       - '127.0.0.1:4566:4566'
     environment:
-      SERVICES: dynamodb, iam, sts, lambda, apigateway, cloudwatch, logs, sns
+      SERVICES: dynamodb, sns
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AWS_DEFAULT_REGION: us-east-1
       LS_LOG: ${LS_LOG:-debug}
+    networks:
+      - bank_account_management
     volumes:
       - '/var/run/docker.sock:/var/run/docker.sock'
+      - ./localstack:/etc/localstack/init/ready.d
+
+networks:
+  bank_account_management:
+    name: bank-account-management-network

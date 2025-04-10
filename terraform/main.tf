@@ -24,7 +24,7 @@ module "sns" {
 
   aws_region  = var.aws_region
   environment = var.environment
-  tags        = merge(var.tags, { "environment" = var.environment })
+  tags        = local.common_tags
 
   sns_account_holder_created_topic_name = "account-holder-created-${var.environment}"
   bank_account_lambda_function_arn      = module.lambda.lambda_function_arn

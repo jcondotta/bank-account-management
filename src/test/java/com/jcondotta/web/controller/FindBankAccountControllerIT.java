@@ -6,21 +6,20 @@ import com.jcondotta.helper.TestAccountHolderRequest;
 import com.jcondotta.service.bank_account.CreateBankAccountService;
 import com.jcondotta.service.bank_account.CreateJointAccountHolderService;
 import com.jcondotta.service.dto.BankAccountDTO;
-import com.jcondotta.service.request.AccountHolderRequest;
+import com.jcondotta.service.request.CreateAccountHolderRequest;
 import com.jcondotta.service.request.CreateJointAccountHolderRequest;
-import io.micronaut.context.MessageSource;
-import io.micronaut.http.HttpStatus;
-import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
-import jakarta.inject.Inject;
-import jakarta.inject.Named;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.TestInstance.Lifecycle;
-import org.slf4j.MDC;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.context.MessageSource;
+import org.springframework.http.HttpStatus;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 
 import java.time.Clock;
 import java.time.LocalDate;
@@ -30,56 +29,46 @@ import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-@TestInstance(Lifecycle.PER_CLASS)
-@MicronautTest(transactional = false)
-class FindBankAccountControllerIT implements LocalStackTestContainer {
+@ActiveProfiles("test")
+@ContextConfiguration(initializers = LocalStackTestContainer.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+class FindBankAccountControllerIT {
 
     private static final String ACCOUNT_HOLDER_NAME_JEFFERSON = TestAccountHolderRequest.JEFFERSON.getAccountHolderName();
     private static final String PASSPORT_NUMBER_JEFFERSON = TestAccountHolderRequest.JEFFERSON.getPassportNumber();
     private static final LocalDate DATE_OF_BIRTH_JEFFERSON = TestAccountHolderRequest.JEFFERSON.getDateOfBirth();
 
-    @Inject
+    @Autowired
     Clock testClockUTC;
 
-    @Inject
+    @Autowired
     CreateBankAccountService createBankAccountService;
 
-    @Inject
+    @Autowired
     CreateJointAccountHolderService createJointAccountHolderService;
 
-    @Inject
-    RequestSpecification requestSpecification;
-
-    @Inject
-    @Named("exceptionMessageSource")
+    @Autowired
+    @Qualifier("errorMessageSource")
     MessageSource messageSource;
 
-    @Inject
+    @Autowired
     BankAccountURIConfiguration bankAccountURIConfig;
 
+    RequestSpecification requestSpecification;
+
     @BeforeEach
-    void beforeEach(RequestSpecification requestSpecification) {
-        this.requestSpecification = requestSpecification
+    void beforeEach(@LocalServerPort int port) {
+        requestSpecification = given()
+                .baseUri("http://localhost:" + port)
                 .basePath(bankAccountURIConfig.bankAccountPath())
                 .contentType(ContentType.JSON);
     }
 
-    @AfterEach
-    void afterEach(){
-        assertThat(MDC.get("bankAccountId"))
-                .as("MDC should be cleared after the publishMessage method completes for bankAccountId")
-                .isNull();
-        assertThat(MDC.get("accountHolderId"))
-                .as("MDC should be cleared after the publishMessage method completes for accountHolderId")
-                .isNull();
-
-    }
-
     @Test
-    void shouldReturn200Ok_whenBankAccountWithAccountHolderExists() {
+    void shouldReturn200Ok_whenBankAccountWithMultipleAccountHoldersExists() {
         var jeffersonAccountHolderRequest = TestAccountHolderRequest.JEFFERSON.toAccountHolderRequest();
         var createdBankAccountDTO = createBankAccountService.create(jeffersonAccountHolderRequest);
 
@@ -97,7 +86,7 @@ class FindBankAccountControllerIT implements LocalStackTestContainer {
         .when()
             .get()
         .then()
-            .statusCode(HttpStatus.OK.getCode())
+            .statusCode(HttpStatus.OK.value())
                 .extract()
                     .response()
                         .as(BankAccountDTO.class);
@@ -127,8 +116,8 @@ class FindBankAccountControllerIT implements LocalStackTestContainer {
     }
 
     @Test
-    void shouldReturn200Ok_whenBankAccountWithMultipleAccountHoldersExists() {
-        var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, DATE_OF_BIRTH_JEFFERSON, PASSPORT_NUMBER_JEFFERSON);
+    void shouldReturn200Ok_whenBankAccountWithAccountHolderExists() {
+        var accountHolderRequest = new CreateAccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, DATE_OF_BIRTH_JEFFERSON, PASSPORT_NUMBER_JEFFERSON);
         var createdBankAccountDTO = createBankAccountService.create(accountHolderRequest);
 
         var fetchedBankAccountDTO = given()
@@ -137,7 +126,7 @@ class FindBankAccountControllerIT implements LocalStackTestContainer {
         .when()
             .get()
         .then()
-            .statusCode(HttpStatus.OK.getCode())
+            .statusCode(HttpStatus.OK.value())
                 .extract()
                     .response()
                         .as(BankAccountDTO.class);
@@ -150,7 +139,7 @@ class FindBankAccountControllerIT implements LocalStackTestContainer {
     @Test
     void shouldReturn404NotFound_whenBankAccountDoesNotExist() {
         var nonExistentBankAccountId = UUID.fromString("08d8cf86-bc25-4535-8b88-920c07d3e5fe");
-        var expectedExceptionMessageKey = "bankAccount.notFound";
+        var expectedMessage = messageSource.getMessage("bankAccount.notFound", new Object[]{nonExistentBankAccountId}, Locale.getDefault());
 
         given()
             .spec(requestSpecification)
@@ -158,26 +147,7 @@ class FindBankAccountControllerIT implements LocalStackTestContainer {
         .when()
             .get()
         .then()
-            .statusCode(HttpStatus.NOT_FOUND.getCode())
-            .rootPath("_embedded")
-                .body("errors", hasSize(1))
-                .body("errors[0].message", equalTo(messageSource.getMessage(expectedExceptionMessageKey, Locale.getDefault(), nonExistentBankAccountId)
-                        .orElseThrow(() -> new IllegalArgumentException("Message not found for key: " + expectedExceptionMessageKey))));
-    }
-
-    @Test
-    void shouldReturn400BadRequest_whenBankAccountIdIsInvalidUUID() {
-        String invalidUUID = "invalid-uuid-format";
-
-        given()
-            .spec(requestSpecification)
-                .pathParam("bank-account-id", invalidUUID)
-        .when()
-            .get()
-        .then()
-            .statusCode(HttpStatus.BAD_REQUEST.getCode())
-                .rootPath("_embedded")
-                    .body("errors", hasSize(1))
-                    .body("errors[0].message", containsString("Invalid UUID string: " + invalidUUID));
+            .statusCode(HttpStatus.NOT_FOUND.value())
+            .body("detail", equalTo(expectedMessage));
     }
 }

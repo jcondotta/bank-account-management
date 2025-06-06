@@ -1,6 +1,9 @@
 package com.jcondotta.domain;
 
-import io.micronaut.serde.annotation.Serdeable;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbAttribute;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
@@ -10,8 +13,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Serdeable
+@Setter
 @DynamoDbBean
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder(toBuilder = true)
 public class BankingEntity {
 
     public static final String BANK_ACCOUNT_PK_TEMPLATE = "BANK_ACCOUNT#%s";
@@ -23,36 +29,25 @@ public class BankingEntity {
     private String partitionKey;
     private String sortKey;
     private EntityType entityType;
-
     private UUID bankAccountId;
     private String iban;
-
     private UUID accountHolderId;
     private String accountHolderName;
     private String passportNumber;
     private LocalDate dateOfBirth;
     private AccountHolderType accountHolderType;
-
     private LocalDateTime createdAt;
 
     @DynamoDbPartitionKey
-    @DynamoDbAttribute("PK")
+    @DynamoDbAttribute("partitionKey")
     public String getPartitionKey() {
         return partitionKey;
     }
 
-    public void setPartitionKey(String partitionKey) {
-        this.partitionKey = partitionKey;
-    }
-
     @DynamoDbSortKey
-    @DynamoDbAttribute("SK")
+    @DynamoDbAttribute("sortKey")
     public String getSortKey() {
         return sortKey;
-    }
-
-    public void setSortKey(String sortKey) {
-        this.sortKey = sortKey;
     }
 
     @DynamoDbAttribute("entityType")
@@ -60,17 +55,9 @@ public class BankingEntity {
         return entityType;
     }
 
-    public void setEntityType(EntityType entityType) {
-        this.entityType = entityType;
-    }
-
     @DynamoDbAttribute("bankAccountId")
     public UUID getBankAccountId() {
         return bankAccountId;
-    }
-
-    public void setBankAccountId(UUID bankAccountId) {
-        this.bankAccountId = bankAccountId;
     }
 
     @DynamoDbAttribute("iban")
@@ -78,17 +65,9 @@ public class BankingEntity {
         return iban;
     }
 
-    public void setIban(String iban) {
-        this.iban = iban;
-    }
-
     @DynamoDbAttribute("accountHolderId")
     public UUID getAccountHolderId() {
         return accountHolderId;
-    }
-
-    public void setAccountHolderId(UUID accountHolderId) {
-        this.accountHolderId = accountHolderId;
     }
 
     @DynamoDbAttribute("accountHolderName")
@@ -96,17 +75,9 @@ public class BankingEntity {
         return accountHolderName;
     }
 
-    public void setAccountHolderName(String accountHolderName) {
-        this.accountHolderName = accountHolderName;
-    }
-
     @DynamoDbAttribute("passportNumber")
     public String getPassportNumber() {
         return passportNumber;
-    }
-
-    public void setPassportNumber(String passportNumber) {
-        this.passportNumber = passportNumber;
     }
 
     @DynamoDbAttribute("dateOfBirth")
@@ -114,17 +85,9 @@ public class BankingEntity {
         return dateOfBirth;
     }
 
-    public void setDateOfBirth(LocalDate dateOfBirth) {
-        this.dateOfBirth = dateOfBirth;
-    }
-
     @DynamoDbAttribute("accountHolderType")
     public AccountHolderType getAccountHolderType() {
         return accountHolderType;
-    }
-
-    public void setAccountHolderType(AccountHolderType accountHolderType) {
-        this.accountHolderType = accountHolderType;
     }
 
     @DynamoDbAttribute("createdAt")
@@ -132,47 +95,15 @@ public class BankingEntity {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public static BankingEntity buildBankAccount(UUID bankAccountId, String iban, LocalDateTime createdAt) {
-        BankingEntity entity = new BankingEntity();
-        entity.setPartitionKey(BANK_ACCOUNT_PK_TEMPLATE.formatted(bankAccountId));
-        entity.setSortKey(BANK_ACCOUNT_SK_TEMPLATE.formatted(bankAccountId));
-        entity.setEntityType(EntityType.BANK_ACCOUNT);
-        entity.setBankAccountId(bankAccountId);
-        entity.setIban(iban);
-        entity.setCreatedAt(createdAt);
-        return entity;
-    }
-
-    public static BankingEntity buildAccountHolder(UUID accountHolderId, String accountHolderName, String passportNumber,
-                                                   LocalDate dateOfBirth, AccountHolderType accountHolderType, LocalDateTime createdAt,
-                                                   UUID bankAccountId) {
-        BankingEntity entity = new BankingEntity();
-        entity.setPartitionKey(ACCOUNT_HOLDER_PK_TEMPLATE.formatted(bankAccountId));
-        entity.setSortKey(ACCOUNT_HOLDER_SK_TEMPLATE.formatted(accountHolderId));
-        entity.setEntityType(EntityType.ACCOUNT_HOLDER);
-        entity.setAccountHolderId(accountHolderId);
-        entity.setAccountHolderName(accountHolderName);
-        entity.setPassportNumber(passportNumber);
-        entity.setDateOfBirth(dateOfBirth);
-        entity.setAccountHolderType(accountHolderType);
-        entity.setCreatedAt(createdAt);
-        entity.setBankAccountId(bankAccountId);
-        return entity;
-    }
-
     @Override
     public String toString() {
         return "BankingEntity{" +
-                "PK='" + partitionKey + '\'' +
-                ", SK='" + sortKey + '\'' +
+                "partitionKey='" + partitionKey + '\'' +
+                ", sortKey='" + sortKey + '\'' +
                 ", entityType=" + entityType +
                 ", bankAccountId=" + bankAccountId +
                 ", iban='" + iban + '\'' +
-                ", dateOfOpening=" + createdAt +
+                ", createdAt=" + createdAt +
                 ", accountHolderId=" + accountHolderId +
                 ", accountHolderName='" + accountHolderName + '\'' +
                 ", passportNumber='" + passportNumber + '\'' +

@@ -1,9 +1,11 @@
 package com.jcondotta.configuration;
 
-import io.micronaut.context.annotation.ConfigurationProperties;
 import jakarta.validation.constraints.NotBlank;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.validation.annotation.Validated;
 
-@ConfigurationProperties("aws.sns.topics.account-holder-created")
+@Validated
+@ConfigurationProperties(prefix = "aws.sns.topics.account-holder-created")
 public record AccountHolderCreatedSNSTopicConfig(@NotBlank String topicArn) {
 
 }

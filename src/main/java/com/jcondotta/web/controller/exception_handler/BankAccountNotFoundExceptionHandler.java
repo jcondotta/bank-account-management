@@ -1,50 +1,53 @@
-package com.jcondotta.web.controller.exception_handler;
+package com.jcondotta.adapter.in.web.exception_handler;
 
-import com.jcondotta.exception.BankAccountNotFoundException;
-import io.micronaut.context.MessageSource;
-import io.micronaut.context.annotation.Requires;
-import io.micronaut.http.HttpRequest;
-import io.micronaut.http.HttpResponse;
-import io.micronaut.http.HttpStatus;
-import io.micronaut.http.annotation.Produces;
-import io.micronaut.http.annotation.Status;
-import io.micronaut.http.server.exceptions.ExceptionHandler;
-import io.micronaut.http.server.exceptions.response.ErrorContext;
-import io.micronaut.http.server.exceptions.response.ErrorResponseProcessor;
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
+import com.jcondotta.exception.ResourceNotFoundException;
+import com.jcondotta.web.controller.exception_handler.LocaleResolverPort;
+import com.jcondotta.web.controller.exception_handler.MessageResolverPort;
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.zalando.problem.Problem;
+import org.zalando.problem.Status;
 
-import java.util.Locale;
+import java.time.Clock;
+import java.time.Instant;
 
-@Produces
-@Singleton
-@Requires(classes = { BankAccountNotFoundException.class })
-public class BankAccountNotFoundExceptionHandler implements ExceptionHandler<BankAccountNotFoundException, HttpResponse<?>> {
+@ControllerAdvice
+public class BankAccountNotFoundExceptionHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BankAccountNotFoundExceptionHandler.class);
 
-    private final MessageSource messageSource;
-    private final ErrorResponseProcessor<?> errorResponseProcessor;
+    private final LocaleResolverPort localeResolverPort;
+    private final MessageResolverPort messageResolverPort;
+    private final Clock clock;
 
-    @Inject
-    public BankAccountNotFoundExceptionHandler(MessageSource messageSource, ErrorResponseProcessor<?> errorResponseProcessor) {
-        this.messageSource = messageSource;
-        this.errorResponseProcessor = errorResponseProcessor;
+    public BankAccountNotFoundExceptionHandler(@Qualifier("httpRequestLocaleResolver") LocaleResolverPort localeResolverPort,
+                                               MessageResolverPort messageResolverPort,
+                                               Clock clock) {
+        this.localeResolverPort = localeResolverPort;
+        this.messageResolverPort = messageResolverPort;
+        this.clock = clock;
     }
 
-    @Override
-    @Status(value = HttpStatus.NOT_FOUND)
-    public HttpResponse<?> handle(HttpRequest request, BankAccountNotFoundException exception) {
-        var errorMessage = messageSource.getMessage(exception.getMessage(), Locale.getDefault(), exception.getBankAccountId())
-                .orElse(exception.getMessage());
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<Problem> handleBankAccountNotFound(ResourceNotFoundException ex, HttpServletRequest request) {
+        LOGGER.warn("Bank account not found: {}", ex.getMessage());
 
-        LOGGER.error(errorMessage);
+        var locale = localeResolverPort.resolveLocale();
+        var messageArgs = new Object[]{ex.getIdentifier()};
+        var message = messageResolverPort.resolveMessage(ex.getMessage(), messageArgs, locale);
 
-        return errorResponseProcessor.processResponse(ErrorContext.builder(request)
-                .cause(exception)
-                .errorMessage(errorMessage)
-                .build(), HttpResponse.notFound());
+        var problem = Problem.builder()
+                .withStatus(Status.NOT_FOUND)
+                .withTitle("Bank Account Not Found")
+                .withDetail(message)
+                .with("timestamp", Instant.now(clock))
+                .build();
+
+        return ResponseEntity.status(Status.NOT_FOUND.getStatusCode()).body(problem);
     }
 }

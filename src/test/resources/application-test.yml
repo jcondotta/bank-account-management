@@ -1,24 +1,26 @@
-micronaut:
-  server:
-    port: 8190
-
-  jms:
-    sqs:
-      enabled: true
+server:
+  port: 8190
 
 aws:
   access-key-id: 'test'
   secret-key: 'test'
-  region: 'us-east-1'
+  region: ${AWS_DEFAULT_REGION}
   dynamodb:
     endpoint: ${AWS_DYNAMODB_ENDPOINT}
     tables:
       banking-entities:
-        table-name: 'bank-entities-test'
+        table-name: 'banking-entities'
+        global-secondary-indexes:
+          bank-accounts-by-iban:
+            name: 'bank-accounts-by-iban-gsi'
   sns:
     endpoint: ${AWS_SNS_ENDPOINT}
-  sqs:
-    endpoint: ${AWS_SQS_ENDPOINT}
-    queues:
+    topics:
       account-holder-created:
-        queue-url: ${AWS_SQS_ACCOUNT_HOLDER_CREATED_QUEUE_URL}
+        topic-arn: 'arn:aws:sns:us-east-1:000000000000:account-holder-created'
+#${AWS_SNS_ACCOUNT_HOLDER_CREATED_TOPIC_ARN}
+#  sqs:
+#    endpoint: ${AWS_SQS_ENDPOINT}
+#    queues:
+#      account-holder-created:
+#        queue-url: ${AWS_SQS_ACCOUNT_HOLDER_CREATED_QUEUE_URL}

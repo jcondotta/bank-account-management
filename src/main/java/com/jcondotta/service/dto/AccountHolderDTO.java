@@ -2,11 +2,12 @@ package com.jcondotta.service.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.jcondotta.domain.AccountHolderType;
-import com.jcondotta.domain.BankingEntity;
-import io.micronaut.serde.annotation.Serdeable;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -14,8 +15,9 @@ import java.util.UUID;
 
 import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
 
-
-@Serdeable
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder(toBuilder = true)
 @Schema(name = "AccountHolderDTO", description = "Represents the details of an account holder.")
 public class AccountHolderDTO {
 
@@ -69,45 +71,18 @@ public class AccountHolderDTO {
     private AccountHolderType accountHolderType;
 
     @NotNull
-    @Schema(description = "Date and time when the account holder was created.",
+    @Schema(
+            description = "Date and time when the account holder was created.",
             example = "2023-08-23T14:55:00Z",
-            requiredMode = RequiredMode.REQUIRED)
+            requiredMode = RequiredMode.REQUIRED
+    )
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
     private LocalDateTime createdAt;
-
-    public AccountHolderDTO() {}
-
-    public AccountHolderDTO(UUID accountHolderId,
-                            String accountHolderName,
-                            LocalDate dateOfBirth,
-                            String passportNumber,
-                            AccountHolderType accountHolderType,
-                            LocalDateTime createdAt,
-                            UUID bankAccountId) {
-        this.accountHolderId = accountHolderId;
-        this.accountHolderName = accountHolderName;
-        this.dateOfBirth = dateOfBirth;
-        this.passportNumber = passportNumber;
-        this.accountHolderType = accountHolderType;
-        this.createdAt = createdAt;
-        this.bankAccountId = bankAccountId;
-    }
-
-    public AccountHolderDTO(BankingEntity accountHolder) {
-        this(
-                accountHolder.getAccountHolderId(),
-                accountHolder.getAccountHolderName(),
-                accountHolder.getDateOfBirth(),
-                accountHolder.getPassportNumber(),
-                accountHolder.getAccountHolderType(),
-                accountHolder.getCreatedAt(),
-                accountHolder.getBankAccountId()
-        );
-    }
 
     public UUID getAccountHolderId() {
         return accountHolderId;
     }
+
     public void setAccountHolderId(UUID accountHolderId) {
         this.accountHolderId = accountHolderId;
     }
@@ -115,6 +90,7 @@ public class AccountHolderDTO {
     public UUID getBankAccountId() {
         return bankAccountId;
     }
+
     public void setBankAccountId(UUID bankAccountId) {
         this.bankAccountId = bankAccountId;
     }
@@ -122,6 +98,7 @@ public class AccountHolderDTO {
     public String getAccountHolderName() {
         return accountHolderName;
     }
+
     public void setAccountHolderName(String accountHolderName) {
         this.accountHolderName = accountHolderName;
     }
@@ -129,6 +106,7 @@ public class AccountHolderDTO {
     public LocalDate getDateOfBirth() {
         return dateOfBirth;
     }
+
     public void setDateOfBirth(LocalDate dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
     }
@@ -136,6 +114,7 @@ public class AccountHolderDTO {
     public String getPassportNumber() {
         return passportNumber;
     }
+
     public void setPassportNumber(String passportNumber) {
         this.passportNumber = passportNumber;
     }
@@ -143,6 +122,7 @@ public class AccountHolderDTO {
     public AccountHolderType getAccountHolderType() {
         return accountHolderType;
     }
+
     public void setAccountHolderType(AccountHolderType accountHolderType) {
         this.accountHolderType = accountHolderType;
     }
@@ -150,6 +130,7 @@ public class AccountHolderDTO {
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
+
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }

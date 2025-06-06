@@ -1,18 +1,16 @@
 package com.jcondotta.repository;
 
 import com.jcondotta.domain.BankingEntity;
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
+import org.springframework.stereotype.Repository;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.model.TransactWriteItemsEnhancedRequest;
 
 import java.util.Objects;
 
-@Singleton
+@Repository
 public class CreateBankAccountRepository {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CreateBankAccountRepository.class);
@@ -20,7 +18,6 @@ public class CreateBankAccountRepository {
     private final DynamoDbEnhancedClient dynamoDbEnhancedClient;
     private final DynamoDbTable<BankingEntity> bankingEntityDynamoDbTable;
 
-    @Inject
     public CreateBankAccountRepository(DynamoDbEnhancedClient dynamoDbEnhancedClient, DynamoDbTable<BankingEntity> bankingEntityDynamoDbTable){
         this.dynamoDbEnhancedClient = dynamoDbEnhancedClient;
         this.bankingEntityDynamoDbTable = bankingEntityDynamoDbTable;
@@ -30,23 +27,23 @@ public class CreateBankAccountRepository {
         Objects.requireNonNull(bankAccount, "bankAccount.notNull");
         Objects.requireNonNull(accountHolder, "accountHolder.notNull");
 
-        try {
-            MDC.put("bankAccountId", bankAccount.getBankAccountId().toString());
-            MDC.put("accountHolderId", accountHolder.getAccountHolderId().toString());
+        LOGGER.atInfo()
+                .setMessage("Initiating transaction to create bank account and account holder.")
+                .addKeyValue("bankAccountId", bankAccount.getBankAccountId().toString())
+                .addKeyValue("accountHolderId", accountHolder.getAccountHolderId().toString())
+                .log();
 
-            LOGGER.debug("Initiating transaction to create bank account and account holder.");
+        var transactWriteRequest = TransactWriteItemsEnhancedRequest.builder()
+                .addPutItem(bankingEntityDynamoDbTable, bankAccount)
+                .addPutItem(bankingEntityDynamoDbTable, accountHolder)
+                .build();
 
-            var transactWriteRequest = TransactWriteItemsEnhancedRequest.builder()
-                    .addPutItem(bankingEntityDynamoDbTable, bankAccount)
-                    .addPutItem(bankingEntityDynamoDbTable, accountHolder)
-                    .build();
+        dynamoDbEnhancedClient.transactWriteItems(transactWriteRequest);
 
-            dynamoDbEnhancedClient.transactWriteItems(transactWriteRequest);
-
-            LOGGER.info("Successfully saved bank account and primary account holder to DB.");
-        }
-        finally {
-            MDC.clear();
-        }
+        LOGGER.atInfo()
+                .setMessage("Initiating transaction to create bank account and account holder.")
+                .addKeyValue("bankAccountId", bankAccount.getBankAccountId().toString())
+                .addKeyValue("accountHolderId", accountHolder.getAccountHolderId().toString())
+                .log();
     }
 }

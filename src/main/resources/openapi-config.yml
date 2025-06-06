@@ -1,0 +1,35 @@
+openapi:
+  version: 1.0
+  title: Bank Account Management API Specification
+  description: >
+    This service provides a robust platform for managing bank accounts efficiently and securely.
+    It enables the creation, retrieval, update, and closure of bank accounts, as well as balance inquiries.
+    Features include detailed account information, integration with related services, transaction history,
+    and robust security for all account operations.
+  contact:
+    name: Jefferson Condotta
+    email: jefferson.condotta@gmail.com
+    url: https://jcondotta.io
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  terms-of-service: https://jcondotta.io/terms
+  server-urls:
+    - url: http://localhost:8090
+      description: Local Development Server
+    - url: https://api.jcondotta.io
+      description: Production API Server
+  tags:
+    - name: create bank accounts
+      description: Manage bank accounts and their details
+    - name: Transactions
+      description: Access and manage account transaction history
+    - name: Users
+      description: Handle user profiles, authentication, and associated accounts
+  security:
+    type: bearer
+    scheme: JWT
+    description: "Authenticate requests using a JWT token."
+  rate-limits:
+    free-tier: "1000 requests per hour"
+    premium-tier: "Unlimited"

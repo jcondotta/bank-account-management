@@ -1,5 +1,14 @@
 aws:
+  access-key-id: ${AWS_ACCESS_KEY_ID:test}
+  secret-key: ${AWS_SECRET_ACCESS_KEY:test}
+  region: ${AWS_DEFAULT_REGION:us-east-1}
   dynamodb:
-    endpoint: ${AWS_DYNAMODB_ENDPOINT}
+    endpoint: ${AWS_DYNAMODB_ENDPOINT:http://localstack:4566}
   sns:
-    endpoint: ${AWS_SNS_ENDPOINT}
+    endpoint: ${AWS_SNS_ENDPOINT:http://localstack:4566}
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true

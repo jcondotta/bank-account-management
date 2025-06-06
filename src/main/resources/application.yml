@@ -1,34 +1,19 @@
-micronaut:
-  server:
-    port: 8090
-  router:
-    static-resources:
-      swagger:
-        paths: classpath:META-INF/swagger
-        mapping: /swagger/**
-      swagger-ui:
-        paths: classpath:META-INF/swagger/views/swagger-ui
-        mapping: /swagger-ui/**
-  openapi:
-    enabled: true
-    url: /openapi
-    filename: bank-accounts-swagger-spec
-    info:
-      title: "Bank Accounts API"
-      version: "1.0.0"
-      description: "API documentation for the Bank Accounts microservice."
-    swagger:
-      ui:
-        path: /swagger-ui
+spring:
+  application:
+    name: bank-account-management
+
+server:
+  port: 8090
 
 aws:
-  access-key-id: ${AWS_ACCESS_KEY_ID}
-  secret-key: ${AWS_SECRET_ACCESS_KEY}
   region: ${AWS_DEFAULT_REGION}
   dynamodb:
     tables:
       banking-entities:
         table-name: ${AWS_DYNAMODB_BANKING_ENTITIES_TABLE_NAME}
+        global-secondary-indexes:
+          bank-accounts-by-iban:
+            name: 'bank-accounts-by-iban-gsi'
   sns:
     topics:
       account-holder-created:
@@ -40,3 +25,46 @@ api:
     bank-account-path: '/api/v1/bank-accounts/{bank-account-id}'
     bank-account-iban-path: '/api/v1/bank-accounts/iban/{iban}'
     account-holders-path: '/api/v1/bank-accounts/{bank-account-id}/account-holders'
+
+#api:
+#  v1:
+#    base-path: '/api/v1'
+#    bank-accounts:
+#      root-path: '/bank-accounts'
+#      by-id-path: '/bank-accounts/{bank-account-id}'
+#      by-iban-path: '/bank-accounts/iban/{iban}'
+#      account-holders-path: '/bank-accounts/{bank-account-id}/account-holders'
+
+
+#  router:
+#    static-resources:
+#      swagger:
+#        paths: classpath:META-INF/swagger
+#        mapping: /swagger/**
+#      swagger-ui:
+#        paths: classpath:META-INF/swagger/views/swagger-ui
+#        mapping: /swagger-ui/**
+#  openapi:
+#    enabled: true
+#    url: /openapi
+#    filename: bank-accounts-swagger-spec
+#    info:
+#      title: "Bank Accounts API"
+#      version: "1.0.0"
+#      description: "API documentation for the Bank Accounts microservice."
+#    swagger:
+#      ui:
+#        path: /swagger-ui
+#
+#aws:
+#  access-key-id: ${AWS_ACCESS_KEY_ID}
+#  secret-key: ${AWS_SECRET_ACCESS_KEY}
+#  region: ${AWS_DEFAULT_REGION}
+#  dynamodb:
+#    tables:
+#      banking-entities:
+#        table-name: ${AWS_DYNAMODB_BANKING_ENTITIES_TABLE_NAME}
+#  sns:
+#    topics:
+#      account-holder-created:
+#        topic-arn: ${AWS_SNS_ACCOUNT_HOLDER_CREATED_TOPIC_ARN}

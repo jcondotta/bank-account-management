@@ -1,10 +1,10 @@
 package com.jcondotta.argument_provider;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
-import org.testcontainers.shaded.org.apache.commons.lang3.StringUtils;
 
 import java.util.stream.Stream;
 

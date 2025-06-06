@@ -1,75 +1,49 @@
 package com.jcondotta.service.bank_account;
 
-import com.jcondotta.domain.AccountHolderType;
-import com.jcondotta.domain.BankingEntity;
-import com.jcondotta.event.AccountHolderCreatedSNSTopicPublisher;
+import com.jcondotta.domain.BankingEntityMapper;
 import com.jcondotta.repository.CreateJointAccountHolderRepository;
 import com.jcondotta.service.dto.AccountHolderDTO;
-import com.jcondotta.service.request.AccountHolderRequest;
 import com.jcondotta.service.request.CreateJointAccountHolderRequest;
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
-import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import java.time.Clock;
-import java.time.LocalDateTime;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
-@Singleton
+@Service
 public class CreateJointAccountHolderService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CreateJointAccountHolderService.class);
 
     private final CreateJointAccountHolderRepository repository;
-    private final AccountHolderCreatedSNSTopicPublisher snsTopicPublisher;
-    private final Clock currentInstant;
+    private final Clock currentClock;
     private final Validator validator;
+    private final BankingEntityMapper bankingEntityMapper;
 
-    @Inject
-    public CreateJointAccountHolderService(CreateJointAccountHolderRepository repository, AccountHolderCreatedSNSTopicPublisher snsTopicPublisher,
-                                           Clock currentInstant, Validator validator) {
+    public CreateJointAccountHolderService(CreateJointAccountHolderRepository repository, Clock currentClock, Validator validator, BankingEntityMapper bankingEntityMapper) {
         this.repository = repository;
-        this.snsTopicPublisher = snsTopicPublisher;
-        this.currentInstant = currentInstant;
+        this.currentClock = currentClock;
         this.validator = validator;
+        this.bankingEntityMapper = bankingEntityMapper;
     }
 
-    public AccountHolderDTO create(CreateJointAccountHolderRequest createJointAccountHolderRequest) {
+    public AccountHolderDTO create(CreateJointAccountHolderRequest request) {
         LOGGER.debug("Starting the creation process for a new account holder.");
 
-        var constraintViolations = validator.validate(createJointAccountHolderRequest);
-        if (!constraintViolations.isEmpty()) {
-            if (LOGGER.isWarnEnabled()) {
-                var validationMessages = constraintViolations.stream()
-                        .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
-                        .collect(Collectors.joining(", "));
-                LOGGER.warn("Validation errors: {}", validationMessages);
-            }
-            throw new ConstraintViolationException(constraintViolations);
-        }
+        request.validateWith(validator);
 
-        var jointAccountHolder = buildJointAccountHolder(createJointAccountHolderRequest.bankAccountId(), createJointAccountHolderRequest.accountHolderRequest());
+        var jointAccountHolder = bankingEntityMapper.toJointAccountHolder(
+                request.bankAccountId(),
+                request.accountHolderRequest(),
+                currentClock
+        );
+
         repository.create(jointAccountHolder);
 
-        var accountHolderDTO = new AccountHolderDTO(jointAccountHolder);
-        snsTopicPublisher.publishMessage(accountHolderDTO);
+        var accountHolderDTO = bankingEntityMapper.toAccountHolderDto(jointAccountHolder);
 
+        LOGGER.info("Account holder created successfully with ID: {}", jointAccountHolder.getPartitionKey());
         return accountHolderDTO;
-    }
-
-    private BankingEntity buildJointAccountHolder(UUID bankAccountId, AccountHolderRequest accountHolderRequest) {
-            return BankingEntity.buildAccountHolder(
-                    UUID.randomUUID(),
-                    accountHolderRequest.accountHolderName(),
-                    accountHolderRequest.passportNumber(),
-                    accountHolderRequest.dateOfBirth(),
-                    AccountHolderType.JOINT,
-                    LocalDateTime.now(currentInstant),
-                    bankAccountId
-                );
     }
 }

@@ -1,88 +1,50 @@
 package com.jcondotta.service.bank_account;
 
-import com.jcondotta.domain.AccountHolderType;
-import com.jcondotta.domain.BankingEntity;
-import com.jcondotta.event.AccountHolderCreatedSNSTopicPublisher;
+import com.jcondotta.domain.BankingEntityMapper;
 import com.jcondotta.repository.CreateBankAccountRepository;
 import com.jcondotta.service.dto.BankAccountDTO;
-import com.jcondotta.service.request.AccountHolderRequest;
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
-import jakarta.validation.ConstraintViolationException;
+import com.jcondotta.service.request.CreateAccountHolderRequest;
 import jakarta.validation.Validator;
 import jakarta.validation.constraints.NotNull;
-import net.datafaker.Faker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import java.time.Clock;
-import java.time.LocalDateTime;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
-@Singleton
+@Service
 public class CreateBankAccountService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CreateBankAccountService.class);
 
     private final CreateBankAccountRepository createBankAccountRepository;
-    private final AccountHolderCreatedSNSTopicPublisher snsTopicPublisher;
-    private final Clock currentInstant;
+    private final Clock currentClock;
     private final Validator validator;
+    private final BankingEntityMapper bankingEntityMapper;
 
-    @Inject
-    public CreateBankAccountService(CreateBankAccountRepository createBankAccountRepository, AccountHolderCreatedSNSTopicPublisher snsTopicPublisher,
-                                    Clock currentClock, Validator validator) {
+    public CreateBankAccountService(CreateBankAccountRepository createBankAccountRepository,
+                                    Clock currentClock, Validator validator, BankingEntityMapper bankingEntityMapper) {
         this.createBankAccountRepository = createBankAccountRepository;
-        this.snsTopicPublisher = snsTopicPublisher;
-        this.currentInstant = currentClock;
+        this.currentClock = currentClock;
         this.validator = validator;
+        this.bankingEntityMapper = bankingEntityMapper;
     }
 
-    public BankAccountDTO create(@NotNull AccountHolderRequest accountHolderRequest) {
+    public BankAccountDTO create(@NotNull CreateAccountHolderRequest createAccountHolderRequest) {
         LOGGER.debug("Starting the creation process for a new bank account and its primary account holder.");
 
-        var constraintViolations = validator.validate(accountHolderRequest);
-        if (!constraintViolations.isEmpty()) {
-            if (LOGGER.isWarnEnabled()) {
-                var validationMessages = constraintViolations.stream()
-                        .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
-                        .collect(Collectors.joining(", "));
-                LOGGER.warn("Validation errors: {}", validationMessages);
-            }
-            throw new ConstraintViolationException(constraintViolations);
-        }
+        createAccountHolderRequest.validateWith(validator);
 
-        var bankAccount = buildBankAccount();
-        var accountHolder = buildPrimaryAccountHolder(bankAccount.getBankAccountId(), accountHolderRequest);
+        var bankAccount = bankingEntityMapper.toBankAccount(currentClock);
+        var accountHolder = bankingEntityMapper.toPrimaryAccountHolder(bankAccount.getBankAccountId(), createAccountHolderRequest, currentClock);
 
         LOGGER.info("Saving to DynamoDB: PK={}, SK={}, EntityType={}",
                 accountHolder.getPartitionKey(), accountHolder.getSortKey(), accountHolder.getEntityType());
 
         createBankAccountRepository.create(bankAccount, accountHolder);
-        var bankAccountDTO = new BankAccountDTO(bankAccount, accountHolder);
+        var bankAccountDTO = bankingEntityMapper.toDto(bankAccount, accountHolder);
 
-        snsTopicPublisher.publishMessage(bankAccountDTO.getPrimaryAccountHolder()
-                .orElseThrow(() -> new IllegalStateException("Primary account holder was not found for the created bank account: "
-                        + bankAccountDTO.getBankAccountId())));
-
+        LOGGER.debug("Bank account and primary account holder created successfully.");
         return bankAccountDTO;
-    }
-
-    private BankingEntity buildPrimaryAccountHolder(UUID bankAccountId, AccountHolderRequest accountHolderRequest) {
-        return BankingEntity.buildAccountHolder(
-                UUID.randomUUID(),
-                accountHolderRequest.accountHolderName(),
-                accountHolderRequest.passportNumber(),
-                accountHolderRequest.dateOfBirth(),
-                AccountHolderType.PRIMARY,
-                LocalDateTime.now(currentInstant),
-                bankAccountId
-        );
-    }
-
-    private BankingEntity buildBankAccount() {
-        var generatedIban = new Faker().finance().iban();
-        return BankingEntity.buildBankAccount(UUID.randomUUID(), generatedIban, LocalDateTime.now(currentInstant));
     }
 }

@@ -1,24 +1,28 @@
 package com.jcondotta.configuration;
 
-import io.micronaut.context.annotation.ConfigurationProperties;
-import io.micronaut.http.uri.UriBuilder;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.validation.annotation.Validated;
 
 import java.net.URI;
-import java.util.Map;
 import java.util.UUID;
 
-@ConfigurationProperties("api.v1")
-public record BankAccountURIConfiguration(String rootPath, String bankAccountPath, String bankAccountIbanPath, String accountHoldersPath)
+@Validated
+@ConfigurationProperties(prefix = "api.v1")
+public record BankAccountURIConfiguration(
+        @NotBlank String rootPath,
+        @NotBlank String bankAccountPath,
+        @NotBlank String bankAccountIbanPath,
+        @NotBlank String accountHoldersPath
+) {
 
-{
-    public URI bankAccountURI(@NotNull UUID bankAccountId) {
-        return UriBuilder.of(bankAccountPath)
-                .expand(Map.of("bank-account-id", bankAccountId.toString()));
+    public URI bankAccountURI(UUID bankAccountId) {
+        String expanded = bankAccountPath.replace("{bank-account-id}", bankAccountId.toString());
+        return URI.create(expanded);
     }
 
-    public URI bankAccountByIbanURI(@NotNull String bankAccountIban) {
-        return UriBuilder.of(bankAccountPath)
-                .expand(Map.of("bankAccountIban", bankAccountIban));
+    public URI bankAccountByIbanURI(String bankAccountIban) {
+        String expanded = bankAccountIbanPath.replace("{iban}", bankAccountIban);
+        return URI.create(expanded);
     }
 }

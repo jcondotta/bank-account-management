@@ -1,5 +1,6 @@
 package com.jcondotta.web.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jcondotta.argument_provider.BlankValuesArgumentProvider;
 import com.jcondotta.argument_provider.InvalidPassportNumberArgumentProvider;
 import com.jcondotta.configuration.BankAccountURIConfiguration;
@@ -7,30 +8,29 @@ import com.jcondotta.container.LocalStackTestContainer;
 import com.jcondotta.helper.TestAccountHolderRequest;
 import com.jcondotta.service.dto.AccountHolderDTO;
 import com.jcondotta.service.dto.BankAccountDTO;
-import com.jcondotta.service.request.AccountHolderRequest;
-import io.micronaut.context.MessageSource;
-import io.micronaut.http.HttpStatus;
-import io.micronaut.json.JsonMapper;
-import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
+import com.jcondotta.service.request.CreateAccountHolderRequest;
+import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
-import jakarta.inject.Inject;
-import jakarta.inject.Named;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
-import org.slf4j.MDC;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.context.MessageSource;
+import org.springframework.http.HttpStatus;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 
 import java.io.IOException;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Locale;
-import java.util.function.Supplier;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -39,62 +39,54 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-@TestInstance(Lifecycle.PER_CLASS)
-@MicronautTest(transactional = false)
-class CreateBankAccountControllerIT implements LocalStackTestContainer {
+@ActiveProfiles("test")
+@ContextConfiguration(initializers = LocalStackTestContainer.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+class CreateBankAccountControllerIT {
 
     private static final String ACCOUNT_HOLDER_NAME_JEFFERSON = TestAccountHolderRequest.JEFFERSON.getAccountHolderName();
     private static final String PASSPORT_NUMBER_JEFFERSON = TestAccountHolderRequest.JEFFERSON.getPassportNumber();
     private static final LocalDate DATE_OF_BIRTH_JEFFERSON = TestAccountHolderRequest.JEFFERSON.getDateOfBirth();
 
-    @Inject
+    @Autowired
     Clock testClockUTC;
 
-    @Inject
-    JsonMapper jsonMapper;
+    @Autowired
+    ObjectMapper objectMapper;
 
-    @Inject
-    RequestSpecification requestSpecification;
-
-    @Inject
-    @Named("exceptionMessageSource")
+    @Autowired
+    @Qualifier("errorMessageSource")
     MessageSource messageSource;
 
-    @Inject
+    @Autowired
     BankAccountURIConfiguration bankAccountURIConfiguration;
 
-    public static Supplier<IllegalArgumentException> messageKeyNotFoundException(String messageKey) {
-        return () -> new IllegalArgumentException("Message not found for key: " + messageKey);
+    RequestSpecification requestSpecification;
+
+    @BeforeAll
+    static void beforeAll(){
+        RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
     }
 
     @BeforeEach
-    void beforeEach(RequestSpecification requestSpecification) {
-        this.requestSpecification = requestSpecification
+    void beforeEach(@LocalServerPort int port) {
+        requestSpecification = given()
+                .baseUri("http://localhost:" + port)
                 .basePath(bankAccountURIConfiguration.rootPath())
                 .contentType(ContentType.JSON);
     }
 
-    @AfterEach
-    void afterEach(){
-        assertThat(MDC.get("bankAccountId"))
-                .as("MDC should be cleared after the publishMessage method completes for bankAccountId")
-                .isNull();
-        assertThat(MDC.get("accountHolderId"))
-                .as("MDC should be cleared after the publishMessage method completes for accountHolderId")
-                .isNull();
-    }
-
     @Test
     void shouldReturn201CreatedWithValidLocationHeader_whenRequestIsValid() throws IOException {
-        var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, DATE_OF_BIRTH_JEFFERSON, PASSPORT_NUMBER_JEFFERSON);
+        var accountHolderRequest = TestAccountHolderRequest.JEFFERSON.toAccountHolderRequest();
 
         var response = given()
             .spec(requestSpecification)
-                .body(jsonMapper.writeValueAsString(accountHolderRequest))
+                .body(objectMapper.writeValueAsString(accountHolderRequest))
         .when()
             .post()
         .then()
-            .statusCode(HttpStatus.CREATED.getCode())
+            .statusCode(HttpStatus.CREATED.value())
                 .extract()
                     .response();
 
@@ -108,7 +100,7 @@ class CreateBankAccountControllerIT implements LocalStackTestContainer {
         .when()
             .get()
         .then()
-            .statusCode(HttpStatus.OK.getCode())
+            .statusCode(HttpStatus.OK.value())
                 .extract()
                     .response()
                         .as(BankAccountDTO.class);
@@ -120,15 +112,15 @@ class CreateBankAccountControllerIT implements LocalStackTestContainer {
 
     @Test
     void shouldReturn201CreatedWithValidBody_whenRequestIsValid() throws IOException {
-        var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, DATE_OF_BIRTH_JEFFERSON, PASSPORT_NUMBER_JEFFERSON);
+        var accountHolderRequest = TestAccountHolderRequest.JEFFERSON.toAccountHolderRequest();
 
         var createdBankAccountDTO = given()
             .spec(requestSpecification)
-                .body(jsonMapper.writeValueAsString(accountHolderRequest))
+                .body(objectMapper.writeValueAsString(accountHolderRequest))
         .when()
             .post()
         .then()
-            .statusCode(HttpStatus.CREATED.getCode())
+            .statusCode(HttpStatus.CREATED.value())
                 .extract()
                     .response()
                         .as(BankAccountDTO.class);
@@ -151,7 +143,7 @@ class CreateBankAccountControllerIT implements LocalStackTestContainer {
         .when()
             .get()
         .then()
-            .statusCode(HttpStatus.OK.getCode())
+            .statusCode(HttpStatus.OK.value())
                 .extract()
                     .response()
                         .as(BankAccountDTO.class);
@@ -161,141 +153,134 @@ class CreateBankAccountControllerIT implements LocalStackTestContainer {
                 .isEqualTo(fetchedBankAccountDTO);
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "Blank value test: {index} - Input: [{0}]")
     @ArgumentsSource(BlankValuesArgumentProvider.class)
     void shouldReturn400BadRequest_whenAccountHolderNameIsBlank(String blankAccountHolderName) throws IOException {
-        var accountHolderRequest = new AccountHolderRequest(blankAccountHolderName, DATE_OF_BIRTH_JEFFERSON, PASSPORT_NUMBER_JEFFERSON);
-
-        var expectedExceptionMessageKey = "accountHolder.accountHolderName.notBlank";
+        var accountHolderRequest = new CreateAccountHolderRequest(blankAccountHolderName, DATE_OF_BIRTH_JEFFERSON, PASSPORT_NUMBER_JEFFERSON);
+        var expectedMessage = messageSource.getMessage("accountHolder.accountHolderName.notBlank", null, Locale.getDefault());
 
         given()
             .spec(requestSpecification)
-                .body(jsonMapper.writeValueAsString(accountHolderRequest))
+                .body(objectMapper.writeValueAsString(accountHolderRequest))
         .when()
             .post()
         .then()
-            .statusCode(HttpStatus.BAD_REQUEST.getCode())
-            .rootPath("_embedded")
-                .body("errors", hasSize(1))
-                .body("errors[0].message", equalTo(messageSource.getMessage(expectedExceptionMessageKey, Locale.getDefault())
-                        .orElseThrow(messageKeyNotFoundException(expectedExceptionMessageKey))));
+            .statusCode(HttpStatus.BAD_REQUEST.value())
+            .body("errors", hasSize(1))
+            .body("errors[0].field", equalTo("accountHolderName"))
+            .body("errors[0].messages", hasSize(1))
+            .body("errors[0].messages[0]", equalTo(expectedMessage));
     }
 
     @Test
     void shouldReturn400BadRequest_whenAccountHolderNameIsLongerThan255Characters() throws IOException {
-        final var veryLongAccountHolderName = "J".repeat(256);
-        var accountHolderRequest = new AccountHolderRequest(veryLongAccountHolderName, DATE_OF_BIRTH_JEFFERSON, PASSPORT_NUMBER_JEFFERSON);
-
-        var expectedExceptionMessageKey = "accountHolder.accountHolderName.tooLong";
+        var veryLongAccountHolderName = "J".repeat(256);
+        var accountHolderRequest = new CreateAccountHolderRequest(veryLongAccountHolderName, DATE_OF_BIRTH_JEFFERSON, PASSPORT_NUMBER_JEFFERSON);
+        var expectedMessage = messageSource.getMessage("accountHolder.accountHolderName.tooLong", null, Locale.getDefault());
 
         given()
             .spec(requestSpecification)
-                .body(jsonMapper.writeValueAsString(accountHolderRequest))
+                .body(objectMapper.writeValueAsString(accountHolderRequest))
         .when()
             .post()
         .then()
-            .statusCode(HttpStatus.BAD_REQUEST.getCode())
-            .rootPath("_embedded")
-                .body("errors", hasSize(1))
-                .body("errors[0].message", equalTo(messageSource.getMessage(expectedExceptionMessageKey, Locale.getDefault())
-                        .orElseThrow(messageKeyNotFoundException(expectedExceptionMessageKey))));
+            .statusCode(HttpStatus.BAD_REQUEST.value())
+            .body("errors", hasSize(1))
+            .body("errors[0].field", equalTo("accountHolderName"))
+            .body("errors[0].messages", hasSize(1))
+            .body("errors[0].messages[0]", equalTo(expectedMessage));
     }
 
     @Test
     void shouldReturn400BadRequest_whenDateOfBirthIsNull() throws IOException {
-        var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, null, PASSPORT_NUMBER_JEFFERSON);
-
-        var expectedExceptionMessageKey = "accountHolder.dateOfBirth.notNull";
+        var accountHolderRequest = new CreateAccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, null, PASSPORT_NUMBER_JEFFERSON);
+        var expectedMessage = messageSource.getMessage("accountHolder.dateOfBirth.notNull", null, Locale.getDefault());
 
         given()
             .spec(requestSpecification)
-                .body(jsonMapper.writeValueAsString(accountHolderRequest))
+                .body(objectMapper.writeValueAsString(accountHolderRequest))
         .when()
             .post()
         .then()
-            .statusCode(HttpStatus.BAD_REQUEST.getCode())
-            .rootPath("_embedded")
-                .body("errors", hasSize(1))
-                .body("errors[0].message", equalTo(messageSource.getMessage(expectedExceptionMessageKey, Locale.getDefault())
-                        .orElseThrow(messageKeyNotFoundException(expectedExceptionMessageKey))));
+            .statusCode(HttpStatus.BAD_REQUEST.value())
+            .body("errors", hasSize(1))
+            .body("errors[0].field", equalTo("dateOfBirth"))
+            .body("errors[0].messages", hasSize(1))
+            .body("errors[0].messages[0]", equalTo(expectedMessage));
     }
 
     @Test
     void shouldReturn400BadRequest_whenDateOfBirthIsInFuture() throws IOException {
-        LocalDate futureDate = LocalDate.now().plusDays(1);
-        var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, futureDate, PASSPORT_NUMBER_JEFFERSON);
-
-        var expectedExceptionMessageKey = "accountHolder.dateOfBirth.past";
+        var futureDate = LocalDate.now().plusDays(1);
+        var accountHolderRequest = new CreateAccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, futureDate, PASSPORT_NUMBER_JEFFERSON);
+        var expectedMessage = messageSource.getMessage("accountHolder.dateOfBirth.past", null, Locale.getDefault());
 
         given()
             .spec(requestSpecification)
-                .body(jsonMapper.writeValueAsString(accountHolderRequest))
+                .body(objectMapper.writeValueAsString(accountHolderRequest))
         .when()
             .post()
         .then()
-            .statusCode(HttpStatus.BAD_REQUEST.getCode())
-            .rootPath("_embedded")
-                .body("errors", hasSize(1))
-                .body("errors[0].message", equalTo(messageSource.getMessage(expectedExceptionMessageKey, Locale.getDefault())
-                        .orElseThrow(messageKeyNotFoundException(expectedExceptionMessageKey))));
+            .statusCode(HttpStatus.BAD_REQUEST.value())
+            .body("errors", hasSize(1))
+            .body("errors[0].field", equalTo("dateOfBirth"))
+            .body("errors[0].messages", hasSize(1))
+            .body("errors[0].messages[0]", equalTo(expectedMessage));
     }
 
     @Test
     void shouldReturn400BadRequest_whenDateOfBirthIsToday() throws IOException {
-        LocalDate today = LocalDate.now();
-        var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, today, PASSPORT_NUMBER_JEFFERSON);
-
-        var expectedExceptionMessageKey = "accountHolder.dateOfBirth.past";
+        var todayDate = LocalDate.now();
+        var accountHolderRequest = new CreateAccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, todayDate, PASSPORT_NUMBER_JEFFERSON);
+        var expectedMessage = messageSource.getMessage("accountHolder.dateOfBirth.past", null, Locale.getDefault());
 
         given()
             .spec(requestSpecification)
-                .body(jsonMapper.writeValueAsString(accountHolderRequest))
+                .body(objectMapper.writeValueAsString(accountHolderRequest))
         .when()
             .post()
         .then()
-            .statusCode(HttpStatus.BAD_REQUEST.getCode())
-            .rootPath("_embedded")
-                .body("errors", hasSize(1))
-                .body("errors[0].message", equalTo(messageSource.getMessage(expectedExceptionMessageKey, Locale.getDefault())
-                        .orElseThrow(messageKeyNotFoundException(expectedExceptionMessageKey))));
+            .statusCode(HttpStatus.BAD_REQUEST.value())
+            .body("errors", hasSize(1))
+            .body("errors[0].field", equalTo("dateOfBirth"))
+            .body("errors[0].messages", hasSize(1))
+            .body("errors[0].messages[0]", equalTo(expectedMessage));
     }
 
     @Test
     void shouldReturn400BadRequest_whenPassportNumberIsNull() throws IOException {
-        var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, DATE_OF_BIRTH_JEFFERSON, null);
-
-        var expectedExceptionMessageKey = "accountHolder.passportNumber.notNull";
+        var accountHolderRequest = new CreateAccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, DATE_OF_BIRTH_JEFFERSON, null);
+        var expectedMessage = messageSource.getMessage("accountHolder.passportNumber.notNull", null, Locale.getDefault());
 
         given()
             .spec(requestSpecification)
-                .body(jsonMapper.writeValueAsString(accountHolderRequest))
+                .body(objectMapper.writeValueAsString(accountHolderRequest))
         .when()
             .post()
         .then()
-            .statusCode(HttpStatus.BAD_REQUEST.getCode())
-            .rootPath("_embedded")
-                .body("errors", hasSize(1))
-                .body("errors[0].message", equalTo(messageSource.getMessage(expectedExceptionMessageKey, Locale.getDefault())
-                        .orElseThrow(messageKeyNotFoundException(expectedExceptionMessageKey))));
+            .statusCode(HttpStatus.BAD_REQUEST.value())
+            .body("errors", hasSize(1))
+            .body("errors[0].field", equalTo("passportNumber"))
+            .body("errors[0].messages", hasSize(1))
+            .body("errors[0].messages[0]", equalTo(expectedMessage));
     }
 
     @ParameterizedTest
     @ArgumentsSource(InvalidPassportNumberArgumentProvider.class)
     void shouldReturn400BadRequest_whenPassportNumberIsNot8CharactersLong(String invalidLengthPassportNumber) throws IOException {
-        var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, DATE_OF_BIRTH_JEFFERSON, invalidLengthPassportNumber);
-
-        var expectedExceptionMessageKey = "accountHolder.passportNumber.invalidLength";
+        var accountHolderRequest = new CreateAccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, DATE_OF_BIRTH_JEFFERSON, invalidLengthPassportNumber);
+        var expectedMessage = messageSource.getMessage("accountHolder.passportNumber.invalidLength", null, Locale.getDefault());
 
         given()
             .spec(requestSpecification)
-                .body(jsonMapper.writeValueAsString(accountHolderRequest))
+                .body(objectMapper.writeValueAsString(accountHolderRequest))
         .when()
             .post()
         .then()
-            .statusCode(HttpStatus.BAD_REQUEST.getCode())
-            .rootPath("_embedded")
-                .body("errors", hasSize(1))
-                .body("errors[0].message", equalTo(messageSource.getMessage(expectedExceptionMessageKey, Locale.getDefault())
-                        .orElseThrow(messageKeyNotFoundException(expectedExceptionMessageKey))));
+            .statusCode(HttpStatus.BAD_REQUEST.value())
+            .body("errors", hasSize(1))
+            .body("errors[0].field", equalTo("passportNumber"))
+            .body("errors[0].messages", hasSize(1))
+            .body("errors[0].messages[0]", equalTo(expectedMessage));
     }
 }

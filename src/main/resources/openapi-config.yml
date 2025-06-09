@@ -1,11 +1,10 @@
 openapi:
   version: 1.0
-  title: Bank Account Management API Specification
+  title: Bank Accounts API Specification
   description: >
-    This service provides a robust platform for managing bank accounts efficiently and securely.
-    It enables the creation, retrieval, update, and closure of bank accounts, as well as balance inquiries.
-    Features include detailed account information, integration with related services, transaction history,
-    and robust security for all account operations.
+    This project is part of a microservice architecture responsible for managing bank accounts.
+    It provides RESTful APIs for creating and managing bank account data and integrates seamlessly
+    with other services in the ecosystem.
   contact:
     name: Jefferson Condotta
     email: jefferson.condotta@gmail.com
@@ -20,7 +19,7 @@ openapi:
     - url: https://api.jcondotta.io
       description: Production API Server
   tags:
-    - name: create bank accounts
+    - name: Bank Accounts
       description: Manage bank accounts and their details
     - name: Transactions
       description: Access and manage account transaction history
@@ -33,3 +32,67 @@ openapi:
   rate-limits:
     free-tier: "1000 requests per hour"
     premium-tier: "Unlimited"
+  # Operation metadata
+  operation:
+    createBankAccount:
+      summary: Create a new bank account
+      description: Creates a new bank account with the provided account holder information.
+    findBankAccount:
+      summary: Retrieve bank account details
+      description: Fetch details of a bank account by its unique ID.
+    createJointAccountHolder:
+      summary: Create joint account holders
+      description: Adds joint account holders to an existing bank account using the provided details.
+  # Parameter metadata
+  parameter:
+    findBankAccount:
+      bankAccountId:
+        description: Unique identifier of the bank account
+    createJointAccountHolder:
+      bankAccountId:
+        description: Unique identifier of the bank account
+  # Request body metadata
+  requestBody:
+    createBankAccount:
+      description: Primary account holder details
+    createJointAccountHolder:
+      description: Details of joint account holders to be added
+  # Response metadata
+  response:
+    createBankAccount:
+      '201':
+        description: Bank account successfully created.
+        header:
+          Location:
+            description: URI of the newly created bank account
+            example: /api/v1/bank-accounts/01920bff-1338-7efd-ade6-e9128debe5d4
+      '200':
+        description: Bank account already exists, returning the existing data.
+      '400':
+        description: Invalid request data. Check the provided bank account details.
+      '500':
+        description: Internal server error. Unable to process the request at this time.
+    createJointAccountHolder:
+      '201':
+        description: Joint account holders successfully added.
+        header:
+          Location:
+            description: URI of the associated bank account
+            example: /api/v1/bank-accounts/01920bff-1338-7efd-ade6-e9128debe5d4
+      '400':
+        description: Invalid request data. Check the provided joint account holder details.
+      '500':
+        description: Internal server error. Unable to process the request at this time.
+    findBankAccount:
+      '200':
+        description: Bank account successfully retrieved.
+      '404':
+        description: Bank account hasn't been found for the provided ID.
+      '400':
+        description: Invalid request data. The provided bank account ID is malformed.
+      '500':
+        description: Internal server error. Unable to process the request at this time.
+  # UI & tool config (if used by your tooling)
+  swagger-ui:
+    enabled: true
+    theme: DARK

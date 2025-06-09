@@ -29,7 +29,9 @@ public class CreateJointAccountHolderService {
     }
 
     public AccountHolderDTO create(CreateJointAccountHolderRequest request) {
-        LOGGER.debug("Starting the creation process for a new account holder.");
+        LOGGER.atDebug()
+                .setMessage("Starting creation process for a new joint account holder")
+                .log();
 
         request.validateWith(validator);
 
@@ -43,7 +45,13 @@ public class CreateJointAccountHolderService {
 
         var accountHolderDTO = bankingEntityMapper.toAccountHolderDto(jointAccountHolder);
 
-        LOGGER.info("Account holder created successfully with ID: {}", jointAccountHolder.getPartitionKey());
+        LOGGER.atInfo()
+                .setMessage("Joint account holder was successfully created in the specified bank account: {}")
+                .addArgument(jointAccountHolder.getBankAccountId())
+                .addKeyValue("bankAccountId", jointAccountHolder.getBankAccountId())
+                .addKeyValue("accountHolderId", jointAccountHolder.getAccountHolderId())
+                .log();
+
         return accountHolderDTO;
     }
 }

@@ -1,11 +1,21 @@
 aws:
-  access-key-id: ${AWS_ACCESS_KEY_ID:test}
-  secret-key: ${AWS_SECRET_ACCESS_KEY:test}
-  region: ${AWS_DEFAULT_REGION:us-east-1}
+  access-key-id: test
+  secret-key: test
+  region: us-east-1
   dynamodb:
-    endpoint: ${AWS_DYNAMODB_ENDPOINT:http://localstack:4566}
+    endpoint: 'http://localhost:4566'
+    tables:
+      banking-entities:
+        table-name: 'banking-entities'
   sns:
-    endpoint: ${AWS_SNS_ENDPOINT:http://localstack:4566}
+    endpoint: 'http://localhost:4566'
+    topics:
+      account-holder-created:
+        topic-arn: 'arn:aws:sns:us-east-1:000000000000:account-holder-created'
+
+spring:
+  config:
+    import: openapi-config.yml
 
 springdoc:
   api-docs:

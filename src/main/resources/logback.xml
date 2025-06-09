@@ -1,13 +1,30 @@
 <configuration>
+
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-            <pattern>
-                {"timestamp":"%date{ISO8601}","level":"%level","thread":"%thread","logger":"%logger","message":"%msg","bankAccountId":"%X{bankAccountId:-}","accountHolderId":"%X{accountHolderId:-}"}%n
-            </pattern>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <includeContext>true</includeContext>
+            <includeMdc>true</includeMdc>
+            <includeStructuredArguments>true</includeStructuredArguments>
+
+            <customFields>{"appName":"bank-account-management"}</customFields>
         </encoder>
     </appender>
 
-    <root level="INFO">
-        <appender-ref ref="CONSOLE" />
+    <root level="info">
+        <appender-ref ref="CONSOLE"/>
     </root>
 </configuration>
+<!--<configuration>-->
+
+<!--    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">-->
+<!--        <encoder>-->
+<!--            <pattern>%cyan(%d{HH:mm:ss.SSS}) %white([%thread]) %highlight(%-5level) %magenta(%logger{36}) - %msg%n</pattern>-->
+<!--        </encoder>-->
+<!--    </appender>-->
+
+<!--    <root level="info">-->
+<!--        <appender-ref ref="STDOUT" />-->
+<!--    </root>-->
+
+<!--&lt;!&ndash;    <logger name="com.jcondotta.bank_account_transfers" level="debug" />&ndash;&gt;-->
+<!--</configuration>-->

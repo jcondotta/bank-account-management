@@ -23,7 +23,7 @@ import java.util.UUID;
 
 @Validated
 @RestController
-@RequestMapping("${api.v1.root-path}")
+@RequestMapping("${api.v1.bank-account-path}")
 public class FindBankAccountController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FindBankAccountController.class);
@@ -49,16 +49,20 @@ public class FindBankAccountController {
             @ApiResponse(responseCode = "400", description = "${response.findBankAccount.400.description}"),
             @ApiResponse(responseCode = "500", description = "${response.findBankAccount.500.description}")
     })
-    @GetMapping(value = "/{bank-account-id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<BankAccountDTO> findBankAccount(
             @Parameter(
                     description = "${parameter.findBankAccount.bankAccountId.description}",
                     required = true,
                     example = "01920bff-1338-7efd-ade6-e9128debe5d4"
             )
-            @PathVariable("bank-account-id") @NotNull UUID bankAccountId) {
+            @PathVariable("bank-account-id") UUID bankAccountId) {
 
-        LOGGER.info("Received request to fetch bank account with ID: {}", bankAccountId);
+        LOGGER.atInfo()
+                .setMessage("Received request to fetch bank account with ID: {}")
+                .addArgument(bankAccountId)
+                .addKeyValue("bankAccountId", bankAccountId)
+                .log();
 
         BankAccountDTO dto = findBankAccountUseCase.findBankAccountById(bankAccountId);
         return ResponseEntity.ok(dto);

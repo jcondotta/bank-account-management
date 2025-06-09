@@ -86,7 +86,10 @@ public class CreateJointAccountHolderController {
             @PathVariable("bank-account-id") UUID bankAccountId,
             @Valid @RequestBody CreateAccountHolderRequest request) {
 
-        LOGGER.info("Received request to create a joint account holder for Bank Account ID: {}", bankAccountId);
+        LOGGER.atInfo()
+                .setMessage("Received request to create a joint account holder for Bank Account ID")
+                .addKeyValue("bankAccountId", bankAccountId)
+                .log();
 
         var createJointAccountHolderRequest = new CreateJointAccountHolderRequest(bankAccountId, request);
         var accountHolderDTO = createJointAccountHolderService.create(createJointAccountHolderRequest);

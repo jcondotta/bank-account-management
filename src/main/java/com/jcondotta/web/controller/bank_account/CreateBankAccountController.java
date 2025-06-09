@@ -66,17 +66,13 @@ public class CreateBankAccountController {
 
         var bankAccountDTO = createBankAccountUseCase.createBankAccount(request);
 
-//        bankAccountDTO.getPrimaryAccountHolder()
-//                .ifPresent(holder -> MDC.put("accountHolderId", holder.getAccountHolderId().toString()));
-
-        LOGGER.info("Bank account created successfully");
         LOGGER.atInfo()
                 .setMessage("Bank account created successfully")
                 .addKeyValue("bankAccountId", bankAccountDTO.getBankAccountId().toString())
-//                .addKeyValue("accountHolderId", bankAccountDTO.getAccountHolderId().toString())
                 .log();
 
-//        return ResponseEntity.created(URI.create("asd")).build();//created(bankAccountDTO, bankAccountURIConfig.bankAccountURI(bankAccountDTO.getBankAccountId()));
-        return ResponseEntity.created(bankAccountURIConfig.bankAccountURI(bankAccountDTO.getBankAccountId())).body(bankAccountDTO);
+        return ResponseEntity
+                .created(bankAccountURIConfig.bankAccountURI(bankAccountDTO.getBankAccountId()))
+                .body(bankAccountDTO);
     }
 }

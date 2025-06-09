@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -18,6 +19,7 @@ import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
+@ToString
 @Schema(name = "AccountHolderDTO", description = "Represents the details of an account holder.")
 public class AccountHolderDTO {
 

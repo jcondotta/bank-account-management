@@ -36,28 +36,31 @@ public class CreateBankAccountController {
     }
 
     @Operation(
-            summary = "${operation.createBankAccount.summary}",
-            description = "${operation.createBankAccount.description}",
-            tags = {"Bank Accounts"},
+            tags = {"Bank accounts"},
+            summary = "${createBankAccount.operation.summary}",
+            description = "${createBankAccount.operation.description}",
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    description = "${requestBody.createBankAccount.description}",
+                    description = "${createBankAccount.requestBody.description}",
                     required = true,
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CreateAccountHolderRequest.class)))
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = CreateAccountHolderRequest.class)
+                    )
+            )
     )
     @ApiResponses(value = {
             @ApiResponse(
-                    responseCode = "201", description = "${response.createBankAccount.201.description}",
+                    responseCode = "201", description = "${createBankAccount.response.201.description}",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BankAccountDTO.class)),
                     headers = {
-                            @Header(name = "Location", description = "${response.createBankAccount.201.header.Location.description}",
+                            @Header(name = "Location", description = "URI of the newly created bank account",
                                     schema = @Schema(type = "string", format = "uri",
-                                            example = "${response.createBankAccount.201.header.Location.example}"
+                                            example = "/api/v1/bank-accounts/01920bff-1338-7efd-ade6-e9128debe5d4"
                                     )
                             )
                     }
             ),
-            @ApiResponse(responseCode = "400", description = "${response.createBankAccount.400.description}"),
-            @ApiResponse(responseCode = "500", description = "${response.createBankAccount.500.description}")
+            @ApiResponse(responseCode = "400", description = "${createBankAccount.response.400.description}"),
+            @ApiResponse(responseCode = "500", description = "${createBankAccount.response.500.description}")
     })
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)

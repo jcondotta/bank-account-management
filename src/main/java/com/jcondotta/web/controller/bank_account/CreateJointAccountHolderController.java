@@ -40,11 +40,11 @@ public class CreateJointAccountHolderController {
     }
 
     @Operation(
-            summary = "${operation.createJointAccountHolder.summary}",
-            description = "${operation.createJointAccountHolder.description}",
+            summary = "${createJointAccountHolder.operation.summary}",
+            description = "${createJointAccountHolder.operation.description}",
             tags = {"joint account holders"},
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    description = "${requestBody.createJointAccountHolder.description}",
+                    description = "${createJointAccountHolder.requestBody.description}",
                     required = true,
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -55,7 +55,7 @@ public class CreateJointAccountHolderController {
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "201",
-                    description = "${response.createJointAccountHolder.201.description}",
+                    description = "${createJointAccountHolder.response.201.description}",
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CreateAccountHolderRequest.class)
@@ -63,23 +63,23 @@ public class CreateJointAccountHolderController {
                     headers = {
                             @Header(
                                     name = "Location",
-                                    description = "${response.createJointAccountHolder.201.header.Location.description}",
+                                    description = "${createJointAccountHolder.response.201.header.Location.description}",
                                     schema = @Schema(
                                             type = "string",
                                             format = "uri",
-                                            example = "${response.createJointAccountHolder.201.header.Location.example}"
+                                            example = "${createJointAccountHolder.response.201.header.Location.example}"
                                     )
                             )
                     }
             ),
-            @ApiResponse(responseCode = "400", description = "${response.createJointAccountHolder.400.description}"),
-            @ApiResponse(responseCode = "500", description = "${response.createJointAccountHolder.500.description}")
+            @ApiResponse(responseCode = "400", description = "${createJointAccountHolder.response.400.description}"),
+            @ApiResponse(responseCode = "500", description = "${createJointAccountHolder.response.500.description}")
     })
     @PostMapping(value = "/account-holders", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<AccountHolderDTO> createJointAccountHolder(
             @Parameter(
-                    description = "${parameter.createJointAccountHolder.bankAccountId.description}",
+                    description = "${createJointAccountHolder.parameter.bankAccountId.description}",
                     required = true,
                     example = "01920bff-1338-7efd-ade6-e9128debe5d4"
             )

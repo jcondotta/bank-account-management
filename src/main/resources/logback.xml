@@ -13,6 +13,8 @@
     <root level="info">
         <appender-ref ref="CONSOLE"/>
     </root>
+
+    <logger name="com.jcondotta" level="debug" />
 </configuration>
 <!--<configuration>-->
 

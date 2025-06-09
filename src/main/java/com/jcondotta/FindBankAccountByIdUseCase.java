@@ -1,28 +1,35 @@
 package com.jcondotta;
 
+import com.jcondotta.cache.CacheStore;
 import com.jcondotta.service.bank_account.FindBankAccountService;
 import com.jcondotta.service.dto.BankAccountDTO;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Component
 public class FindBankAccountByIdUseCase {
 
     private final FindBankAccountService findBankAccountService;
-    // Aws SNS Handler =D
 
-    public FindBankAccountByIdUseCase(FindBankAccountService findBankAccountService) {
+    @Qualifier("bankAccountCacheService")
+    private final CacheStore<String, BankAccountDTO> bankAccountCacheService;
+
+    public FindBankAccountByIdUseCase(FindBankAccountService findBankAccountService, CacheStore<String, BankAccountDTO> bankAccountCacheService) {
         this.findBankAccountService = findBankAccountService;
+        this.bankAccountCacheService = bankAccountCacheService;
     }
 
     public BankAccountDTO findBankAccountById(UUID bankAccountId) {
-        return findBankAccountService.findBankAccountById(bankAccountId);
-
-        //Create bank account logic + send message to SNS topic
-
-        //        snsTopicPublisher.publishMessage(bankAccountDTO.getPrimaryAccountHolder()
-//                .orElseThrow(() -> new IllegalStateException("Primary account holder was not found for the created bank account: "
-//                        + bankAccountDTO.getBankAccountId())));
+        var cacheKey = bankAccountId.toString();
+        return bankAccountCacheService.getIfPresent(cacheKey)
+                .orElseGet(() -> {
+                    BankAccountDTO bankAccountDTO = findBankAccountService.findBankAccountById(bankAccountId);
+                    bankAccountCacheService.put(cacheKey, bankAccountDTO);
+                    return bankAccountDTO;
+                });
     }
 }

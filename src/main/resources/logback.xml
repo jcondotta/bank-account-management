@@ -1,32 +1,33 @@
-<configuration>
-
-    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-            <includeContext>true</includeContext>
-            <includeMdc>true</includeMdc>
-            <includeStructuredArguments>true</includeStructuredArguments>
-
-            <customFields>{"appName":"bank-account-management"}</customFields>
-        </encoder>
-    </appender>
-
-    <root level="info">
-        <appender-ref ref="CONSOLE"/>
-    </root>
-
-    <logger name="com.jcondotta" level="debug" />
-</configuration>
 <!--<configuration>-->
 
-<!--    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">-->
-<!--        <encoder>-->
-<!--            <pattern>%cyan(%d{HH:mm:ss.SSS}) %white([%thread]) %highlight(%-5level) %magenta(%logger{36}) - %msg%n</pattern>-->
+<!--    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">-->
+<!--        <encoder class="net.logstash.logback.encoder.LogstashEncoder">-->
+<!--            <includeContext>true</includeContext>-->
+<!--            <includeMdc>true</includeMdc>-->
+<!--            <includeStructuredArguments>true</includeStructuredArguments>-->
+
+<!--            <customFields>{"appName":"bank-account-management"}</customFields>-->
 <!--        </encoder>-->
 <!--    </appender>-->
 
 <!--    <root level="info">-->
-<!--        <appender-ref ref="STDOUT" />-->
+<!--        <appender-ref ref="CONSOLE"/>-->
 <!--    </root>-->
 
-<!--&lt;!&ndash;    <logger name="com.jcondotta.bank_account_transfers" level="debug" />&ndash;&gt;-->
+<!--    <logger name="com.jcondotta" level="debug" />-->
 <!--</configuration>-->
+
+<configuration>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%cyan(%d{HH:mm:ss.SSS}) %white([%thread]) %highlight(%-5level) %magenta(%logger{36}) - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="info">
+        <appender-ref ref="STDOUT" />
+    </root>
+
+    <logger name="com.jcondotta" level="debug" />
+</configuration>

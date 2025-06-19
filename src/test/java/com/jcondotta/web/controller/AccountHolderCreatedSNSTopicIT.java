@@ -57,12 +57,12 @@ class AccountHolderCreatedSNSTopicIT  {
 //    @Test
 //    void shouldPublishMessageSuccessfullyToSNSTopic_whenJointAccountHolderIsCreated() throws IOException {
 //        var bankAccountId = TestBankAccountId.BRAZIL.getBankAccountId();
-//        var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, DATE_OF_BIRTH_JEFFERSON, PASSPORT_NUMBER_JEFFERSON);
+//        var accountHolderDetails = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, DATE_OF_BIRTH_JEFFERSON, PASSPORT_NUMBER_JEFFERSON);
 //
 //        var accountHolderDTO = given()
 //            .spec(requestSpecification)
 //                .pathParam("bank-account-id", bankAccountId)
-//                .body(jsonMapper.writeValueAsString(accountHolderRequest))
+//                .body(jsonMapper.writeValueAsString(accountHolderDetails))
 //        .when()
 //            .post()
 //        .then()

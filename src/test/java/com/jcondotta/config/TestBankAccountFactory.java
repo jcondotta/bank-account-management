@@ -1,7 +1,10 @@
 package com.jcondotta.config;
 
-import com.jcondotta.domain.BankingEntity;
-import com.jcondotta.domain.BankingEntityMapper;
+import com.jcondotta.application.mapper.BankingEntityMapper;
+import com.jcondotta.domain.model.AccountType;
+import com.jcondotta.domain.model.BankAccountStatus;
+import com.jcondotta.domain.model.BankingEntity;
+import com.jcondotta.domain.model.Currency;
 import net.datafaker.Faker;
 
 import java.time.Clock;
@@ -14,7 +17,7 @@ public class TestBankAccountFactory {
     private static final BankingEntityMapper BANKING_ENTITY_MAPPER = BankingEntityMapper.INSTANCE;
 
     public static BankingEntity create(UUID bankAccountId, String iban, Clock currentClock) {
-        return BANKING_ENTITY_MAPPER.toBankAccount(bankAccountId, iban, currentClock);
+        return BANKING_ENTITY_MAPPER.toBankAccountEntity(bankAccountId, AccountType.CHECKING, Currency.EUR, iban, BankAccountStatus.PENDING, currentClock);
     }
 
     public static BankingEntity create(UUID bankAccountId) {

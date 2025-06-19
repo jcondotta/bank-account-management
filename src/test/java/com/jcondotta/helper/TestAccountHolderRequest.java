@@ -1,6 +1,6 @@
 package com.jcondotta.helper;
 
-import com.jcondotta.service.request.CreateAccountHolderRequest;
+import com.jcondotta.application.dto.AccountHolderDetailsRequest;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -19,7 +19,7 @@ public enum TestAccountHolderRequest {
     private final String passportNumber;
     private final LocalDate dateOfBirth;
 
-    public CreateAccountHolderRequest toAccountHolderRequest() {
-        return new CreateAccountHolderRequest(accountHolderName, dateOfBirth, passportNumber);
+    public AccountHolderDetailsRequest toAccountHolderRequest() {
+        return new AccountHolderDetailsRequest(accountHolderName, dateOfBirth, passportNumber);
     }
 }

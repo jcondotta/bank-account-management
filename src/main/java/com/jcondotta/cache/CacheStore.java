@@ -1,7 +1,6 @@
 package com.jcondotta.cache;
 
 import java.util.Objects;
-import java.util.function.Supplier;
 
 public interface CacheStore<K, V> extends ReadCacheStore<K, V>, WriteCacheStore<K, V> {
 
@@ -11,9 +10,5 @@ public interface CacheStore<K, V> extends ReadCacheStore<K, V>, WriteCacheStore<
 
     default void validateCacheValue(V cacheValue) {
         Objects.requireNonNull(cacheValue, CacheErrorMessages.VALUE_MUST_NOT_BE_NULL);
-    }
-
-    default void validateValueSupplier(Supplier<V> valueSupplier) {
-        Objects.requireNonNull(valueSupplier, CacheErrorMessages.VALUE_SUPPLIER_MUST_NOT_BE_NULL);
     }
 }

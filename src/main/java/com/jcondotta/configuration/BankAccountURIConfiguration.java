@@ -12,8 +12,8 @@ import java.util.UUID;
 public record BankAccountURIConfiguration(
         @NotBlank String rootPath,
         @NotBlank String bankAccountPath,
-        @NotBlank String bankAccountIbanPath,
-        @NotBlank String accountHoldersPath
+        @NotBlank String accountHoldersPath,
+        @NotBlank String accountHolderPath
 ) {
 
     public URI bankAccountURI(UUID bankAccountId) {
@@ -21,8 +21,10 @@ public record BankAccountURIConfiguration(
         return URI.create(expanded);
     }
 
-    public URI bankAccountByIbanURI(String bankAccountIban) {
-        String expanded = bankAccountIbanPath.replace("{iban}", bankAccountIban);
+    public URI accountHolderURI(UUID bankAccountId, UUID accountHolderId) {
+        String expanded = accountHolderPath
+            .replace("{bank-account-id}", bankAccountId.toString())
+            .replace("{account-holder-id}", accountHolderId.toString());
         return URI.create(expanded);
     }
 }

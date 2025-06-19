@@ -9,23 +9,10 @@ awslocal dynamodb create-table \
   --attribute-definitions \
     AttributeName=partitionKey,AttributeType=S \
     AttributeName=sortKey,AttributeType=S \
-    AttributeName=iban,AttributeType=S \
   --key-schema \
     AttributeName=partitionKey,KeyType=HASH \
     AttributeName=sortKey,KeyType=RANGE \
-  --billing-mode PAY_PER_REQUEST \
-  --global-secondary-indexes \
-    '[
-      {
-        "IndexName": "bank-account-iban-gsi",
-        "KeySchema": [
-          { "AttributeName": "iban", "KeyType": "HASH" }
-        ],
-        "Projection": {
-          "ProjectionType": "ALL"
-        }
-      }
-    ]'
+  --billing-mode PAY_PER_REQUEST
 
 echo "✅ DynamoDB table created with GSI: banking-entities"
 

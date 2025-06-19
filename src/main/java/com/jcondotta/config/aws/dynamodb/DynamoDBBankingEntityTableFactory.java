@@ -1,7 +1,7 @@
 package com.jcondotta.config.aws.dynamodb;
 
 import com.jcondotta.configuration.BankingEntitiesDynamoDBTableConfig;
-import com.jcondotta.domain.BankingEntity;
+import com.jcondotta.domain.model.BankingEntity;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
@@ -13,10 +13,10 @@ public class DynamoDBBankingEntityTableFactory {
 
     @Bean
     public DynamoDbTable<BankingEntity> bankingEntityTable(
-            DynamoDbEnhancedClient enhancedClient,
+            DynamoDbEnhancedClient dynamoDbClient,
             BankingEntitiesDynamoDBTableConfig dynamoDBTableConfig) {
 
         var schema = TableSchema.fromBean(BankingEntity.class);
-        return enhancedClient.table(dynamoDBTableConfig.tableName(), schema);
+        return dynamoDbClient.table(dynamoDBTableConfig.tableName(), schema);
     }
 }

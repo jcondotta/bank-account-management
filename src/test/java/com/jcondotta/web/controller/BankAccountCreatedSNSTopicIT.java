@@ -55,11 +55,11 @@ class BankAccountCreatedSNSTopicIT  {
 //
 //    @Test
 //    void shouldPublishMessageSuccessfullyToSNSTopic_whenBankAccountIsCreated() {
-//        var accountHolderRequest = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, DATE_OF_BIRTH_JEFFERSON, PASSPORT_NUMBER_JEFFERSON);
+//        var accountHolderDetails = new AccountHolderRequest(ACCOUNT_HOLDER_NAME_JEFFERSON, DATE_OF_BIRTH_JEFFERSON, PASSPORT_NUMBER_JEFFERSON);
 //
 //        var bankAccountDTO = given()
 //            .spec(requestSpecification)
-//                .body(serializationService.serialize(accountHolderRequest))
+//                .body(serializationService.serialize(accountHolderDetails))
 //        .when()
 //            .post()
 //        .then()

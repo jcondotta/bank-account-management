@@ -1,10 +1,10 @@
 package com.jcondotta.config;
 
-import com.jcondotta.domain.AccountHolderType;
-import com.jcondotta.domain.BankingEntity;
-import com.jcondotta.domain.BankingEntityMapper;
+import com.jcondotta.application.dto.AccountHolderDetailsRequest;
+import com.jcondotta.application.mapper.BankingEntityMapper;
+import com.jcondotta.domain.model.AccountHolderType;
+import com.jcondotta.domain.model.BankingEntity;
 import com.jcondotta.helper.TestAccountHolderRequest;
-import com.jcondotta.service.request.CreateAccountHolderRequest;
 
 import java.time.Clock;
 import java.time.LocalDate;
@@ -18,11 +18,18 @@ public class TestAccountHolderFactory {
 
     protected static BankingEntity create(String accountHolderName, String passportNumber, LocalDate dateOfBirth,
                                           AccountHolderType accountHolderType, UUID bankAccountId) {
-        var createAccountHolderRequest = new CreateAccountHolderRequest(
+        var accountHolderId = UUID.randomUUID();
+        var createAccountHolderRequest = new AccountHolderDetailsRequest(
                 accountHolderName, dateOfBirth, passportNumber
         );
 
-        return BANKING_ENTITY_MAPPER.toAccountHolder(bankAccountId, createAccountHolderRequest, accountHolderType, TEST_CLOCK_FIXED_INSTANT);
+        return BANKING_ENTITY_MAPPER.toAccountHolderEntity(
+            accountHolderId,
+            bankAccountId,
+            createAccountHolderRequest,
+            accountHolderType,
+            TEST_CLOCK_FIXED_INSTANT
+        );
     }
 
     public static BankingEntity create(TestAccountHolderRequest testAccountHolderRequest,

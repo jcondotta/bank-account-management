@@ -22,3 +22,4 @@ springdoc:
     enabled: true
   swagger-ui:
     enabled: true
+    filter: true

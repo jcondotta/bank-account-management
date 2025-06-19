@@ -1,7 +1,7 @@
 package com.jcondotta.cache;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
-import com.jcondotta.service.dto.BankAccountDTO;
+import com.jcondotta.application.dto.lookup.BankAccountLookupResponse;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.Cache;
@@ -11,8 +11,6 @@ import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.time.Clock;
-import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 @Configuration
@@ -33,7 +31,7 @@ public class CacheManagerConfig {
 
     @Bean
     @Qualifier("bankAccountCacheService")
-    public CacheStore<String, BankAccountDTO> bankAccountCacheService(CacheManager cacheManager) {
+    public CacheStore<String, BankAccountLookupResponse> bankAccountCacheService(CacheManager cacheManager) {
         Cache springCache = cacheManager.getCache(bankAccountsCacheName);
         return new CaffeineCacheStore<>(springCache);
     }

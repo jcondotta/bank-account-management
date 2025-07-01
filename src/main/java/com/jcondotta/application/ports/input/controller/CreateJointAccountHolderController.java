@@ -1,7 +1,7 @@
 package com.jcondotta.application.ports.input.controller;
 
-import com.jcondotta.application.dto.create.CreateJointAccountHolderRequest;
-import com.jcondotta.application.dto.create.CreateJointAccountHolderResponse;
+import com.jcondotta.interfaces.rest.accountholder.CreateJointAccountHolderRequest;
+import com.jcondotta.interfaces.rest.accountholder.CreateJointAccountHolderResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.headers.Header;

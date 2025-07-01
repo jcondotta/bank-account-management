@@ -1,9 +1,8 @@
 package com.jcondotta.config;
 
-import com.jcondotta.application.dto.AccountHolderDetailsRequest;
-import com.jcondotta.application.mapper.BankingEntityMapper;
-import com.jcondotta.domain.model.AccountHolderType;
-import com.jcondotta.domain.model.BankingEntity;
+import com.jcondotta.interfaces.rest.AccountHolderDetailsRequest;
+import com.jcondotta.domain.accountholder.enums.AccountHolderType;
+import com.jcondotta.infrastructure.adapters.persistence.entity.BankingEntity;
 import com.jcondotta.helper.TestAccountHolderRequest;
 
 import java.time.Clock;
@@ -14,7 +13,7 @@ public class TestAccountHolderFactory {
 
     private static final Clock TEST_CLOCK_FIXED_INSTANT = TestClockConfig.testClockFixedInstant;
 
-    private static final BankingEntityMapper BANKING_ENTITY_MAPPER = BankingEntityMapper.INSTANCE;
+//    private static final BankingEntityMapper BANKING_ENTITY_MAPPER = BankingEntityMapper.INSTANCE;
 
     protected static BankingEntity create(String accountHolderName, String passportNumber, LocalDate dateOfBirth,
                                           AccountHolderType accountHolderType, UUID bankAccountId) {
@@ -23,13 +22,14 @@ public class TestAccountHolderFactory {
                 accountHolderName, dateOfBirth, passportNumber
         );
 
-        return BANKING_ENTITY_MAPPER.toAccountHolderEntity(
-            accountHolderId,
-            bankAccountId,
-            createAccountHolderRequest,
-            accountHolderType,
-            TEST_CLOCK_FIXED_INSTANT
-        );
+//        return BANKING_ENTITY_MAPPER.toAccountHolderEntity(
+//            accountHolderId,
+//            bankAccountId,
+//            createAccountHolderRequest,
+//            accountHolderType,
+//            TEST_CLOCK_FIXED_INSTANT
+//        );
+        return null;
     }
 
     public static BankingEntity create(TestAccountHolderRequest testAccountHolderRequest,

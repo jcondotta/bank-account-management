@@ -1,13 +1,14 @@
 package com.jcondotta.application.dto.create;
 
-import com.jcondotta.application.dto.AccountHolderDetailsRequest;
+import com.jcondotta.interfaces.rest.AccountHolderDetailsRequest;
 import com.jcondotta.argument_provider.BankAccountTypeAndCurrencyArgumentsProvider;
 import com.jcondotta.argument_provider.BlankValuesArgumentProvider;
 import com.jcondotta.argument_provider.InvalidPassportNumberArgumentProvider;
 import com.jcondotta.config.ValidatorTestFactory;
-import com.jcondotta.domain.model.AccountType;
-import com.jcondotta.domain.model.Currency;
+import com.jcondotta.domain.bankaccount.enums.AccountType;
+import com.jcondotta.domain.shared.enums.Currency;
 import com.jcondotta.helper.TestAccountHolderRequest;
+import com.jcondotta.interfaces.rest.bankaccount.CreateBankAccountRequest;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.Test;

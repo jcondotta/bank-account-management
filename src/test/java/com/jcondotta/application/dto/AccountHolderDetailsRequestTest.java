@@ -1,6 +1,7 @@
 package com.jcondotta.application.dto;
 
-import com.jcondotta.application.dto.create.CreateJointAccountHolderRequest;
+import com.jcondotta.interfaces.rest.AccountHolderDetailsRequest;
+import com.jcondotta.interfaces.rest.accountholder.CreateJointAccountHolderRequest;
 import com.jcondotta.argument_provider.BlankValuesArgumentProvider;
 import com.jcondotta.argument_provider.InvalidPassportNumberArgumentProvider;
 import com.jcondotta.config.ValidatorTestFactory;

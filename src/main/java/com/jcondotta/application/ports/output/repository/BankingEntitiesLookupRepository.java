@@ -1,7 +1,5 @@
 package com.jcondotta.application.ports.output.repository;
 
-import com.jcondotta.domain.model.BankingEntity;
-
 import java.util.Optional;
 
 /**
@@ -10,7 +8,7 @@ import java.util.Optional;
  *
  * @param <I> the type of the request used to look up the banking entity
  */
-interface BankingEntitiesLookupRepository<I> {
+interface BankingEntitiesLookupRepository<I, O> {
 
     /**
      * Looks up a banking entity based on the provided request.
@@ -18,5 +16,5 @@ interface BankingEntitiesLookupRepository<I> {
      * @param request the request containing the criteria for looking up the banking entity
      * @return the banking entity that matches the criteria, or null if not found
      */
-    Optional<BankingEntity> lookup(I request);
+    Optional<O> lookup(I request);
 }

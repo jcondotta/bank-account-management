@@ -16,6 +16,13 @@ aws:
 spring:
   config:
     import: openapi-config.yml
+  grpc:
+    server:
+      address: '0.0.0.0:9090'
+      reflection:
+        enabled: true
+
+
 
 springdoc:
   api-docs:

@@ -1,8 +1,6 @@
 package com.jcondotta.application.ports.output.repository;
 
-import com.jcondotta.domain.model.BankingEntity;
-
-import java.util.List;
+import com.jcondotta.domain.bankaccount.model.BankAccount;
 
 /**
  * Repository interface for querying banking entities.
@@ -11,18 +9,9 @@ import java.util.List;
 public interface CreateBankAccountRepository {
 
     /**
-     * Creates a bank account with a single account holder.
+     * Saves a BankAccount and its associated account holders to the repository.
      *
-     * @param bankAccount the bank account to be created
-     * @param accountHolder the account holder associated with the bank account
+     * @param bankAccount the BankAccount to be saved
      */
-    void createBankAccount(BankingEntity bankAccount, BankingEntity accountHolder);
-
-    /**
-     * Creates a bank account with multiple account holders.
-     *
-     * @param bankAccount the bank account to be created
-     * @param accountHolders the list of account holders associated with the bank account
-     */
-    void createBankAccount(BankingEntity bankAccount, List<BankingEntity> accountHolders);
+    void save(BankAccount bankAccount);
 }

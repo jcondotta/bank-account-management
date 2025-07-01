@@ -1,6 +1,6 @@
 package com.jcondotta.application.ports.input.controller;
 
-import com.jcondotta.application.dto.lookup.AccountHolderLookupResponse;
+import com.jcondotta.interfaces.rest.lookup.AccountHolderLookupResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;

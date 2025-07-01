@@ -1,7 +1,7 @@
 package com.jcondotta.argument_provider;
 
-import com.jcondotta.domain.model.AccountType;
-import com.jcondotta.domain.model.Currency;
+import com.jcondotta.domain.bankaccount.enums.AccountType;
+import com.jcondotta.domain.shared.enums.Currency;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;

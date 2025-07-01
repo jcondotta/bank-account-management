@@ -1,13 +1,15 @@
 package com.jcondotta.application.ports.output.repository;
 
-import com.jcondotta.domain.model.BankingEntity;
+import com.jcondotta.domain.accountholder.model.AccountHolder;
+import com.jcondotta.domain.bankaccount.valueobjects.BankAccountId;
 
 public interface CreateJointAccountHolderRepository {
 
     /**
-     * Creates a joint account holder in the repository.
+     * Saves a joint account holder associated with a bank account.
      *
-     * @param jointAccountHolder the banking entity representing the joint account holder to be created
+     * @param bankAccountId the ID of the bank account to which the joint account holder is associated
+     * @param accountHolder the joint account holder to be saved
      */
-    void createJointAccountHolder(BankingEntity jointAccountHolder);
+    void save(BankAccountId bankAccountId, AccountHolder accountHolder);
 }

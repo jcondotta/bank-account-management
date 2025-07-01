@@ -1,10 +1,11 @@
 package com.jcondotta.application.dto.create;
 
-import com.jcondotta.application.dto.AccountHolderDetailsRequest;
+import com.jcondotta.interfaces.rest.AccountHolderDetailsRequest;
 import com.jcondotta.argument_provider.BlankValuesArgumentProvider;
 import com.jcondotta.argument_provider.InvalidPassportNumberArgumentProvider;
 import com.jcondotta.config.ValidatorTestFactory;
 import com.jcondotta.helper.TestAccountHolderRequest;
+import com.jcondotta.interfaces.rest.accountholder.CreateJointAccountHolderRequest;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.Test;

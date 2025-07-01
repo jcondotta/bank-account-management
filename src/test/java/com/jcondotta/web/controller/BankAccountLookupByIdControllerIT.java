@@ -1,37 +1,14 @@
 package com.jcondotta.web.controller;
 
-import com.jcondotta.application.dto.create.CreateBankAccountRequest;
-import com.jcondotta.application.dto.create.CreateBankAccountResponse;
-import com.jcondotta.application.dto.create.CreateJointAccountHolderRequest;
-import com.jcondotta.application.dto.lookup.BankAccountLookupResponse;
-import com.jcondotta.application.ports.input.service.CreateBankAccountService;
-import com.jcondotta.application.ports.input.service.CreateJointAccountHolderService;
-import com.jcondotta.configuration.BankAccountURIConfiguration;
 import com.jcondotta.container.LocalStackTestContainer;
-import com.jcondotta.domain.model.AccountType;
-import com.jcondotta.domain.model.Currency;
-import com.jcondotta.helper.TestAccountHolderRequest;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import com.jcondotta.domain.bankaccount.enums.AccountType;
+import com.jcondotta.domain.shared.enums.Currency;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.context.MessageSource;
-import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
-import java.time.Clock;
-import java.time.LocalDateTime;
-import java.util.Locale;
-import java.util.UUID;
-
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 @ActiveProfiles("test")

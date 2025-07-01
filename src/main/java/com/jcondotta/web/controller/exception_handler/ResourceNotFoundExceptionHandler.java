@@ -1,17 +1,14 @@
 package com.jcondotta.web.controller.exception_handler;
 
-import com.jcondotta.domain.exception.ResourceNotFoundException;
-import com.jcondotta.web.controller.exception_handler.LocaleResolverPort;
-import com.jcondotta.web.controller.exception_handler.MessageResolverPort;
+import com.jcondotta.domain.shared.exceptions.ResourceNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.zalando.problem.Problem;
-import org.zalando.problem.Status;
 
 import java.time.Clock;
 import java.time.Instant;
@@ -34,21 +31,22 @@ public class ResourceNotFoundExceptionHandler {
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<Problem> handleBankAccountNotFound(ResourceNotFoundException ex, HttpServletRequest request) {
+    public ResponseEntity<ProblemDetails> handleBankAccountNotFound(ResourceNotFoundException ex, HttpServletRequest request) {
         var locale = localeResolverPort.resolveLocale();
         var message = messageResolverPort.resolveMessage(ex.getMessage(), ex.getIdentifiers(), locale);
 
         LOGGER.warn(message);
 
-        var problem = Problem.builder()
-                .withStatus(Status.NOT_FOUND)
-                .withTitle("Resource Not Found")
-                .withDetail(message)
-                .with("timestamp", Instant.now(clock))
-                .build();
+        var problem = new ProblemDetails(
+                HttpStatus.NOT_FOUND.value(),
+                HttpStatus.NOT_FOUND.getReasonPhrase(),
+                Instant.now(clock),
+                request.getRequestURI(),
+                null
+        );
 
         return ResponseEntity
-            .status(Status.NOT_FOUND.getStatusCode())
+            .status(HttpStatus.NOT_FOUND.value())
             .body(problem);
     }
 }

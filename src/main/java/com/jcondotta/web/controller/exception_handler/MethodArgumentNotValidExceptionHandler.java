@@ -10,11 +10,10 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.zalando.problem.Problem;
-import org.zalando.problem.Status;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
@@ -32,7 +31,7 @@ public class MethodArgumentNotValidExceptionHandler {
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Problem> handleValidationException(MethodArgumentNotValidException ex, HttpServletRequest request) {
+    public ResponseEntity<ProblemDetails> handleValidationException(MethodArgumentNotValidException ex, HttpServletRequest request) {
         var errors = validationErrorMapper.apply(ex.getBindingResult().getFieldErrors());
 
         LOGGER.warn("Validation error for request: {}, Errors: [{}]",
@@ -42,14 +41,12 @@ public class MethodArgumentNotValidExceptionHandler {
                         .collect(Collectors.joining(", "))
         );
 
-        var problem = Problem.builder()
-                .withStatus(Status.BAD_REQUEST)
-                .withTitle(Status.BAD_REQUEST.getReasonPhrase())
-                .with("timestamp", Instant.now(clock))
-                .with("path", request.getRequestURI())
-                .with("errors", errors)
-                .build();
-
+        var problem = new ProblemDetails(
+                HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                Instant.now(clock),
+                request.getRequestURI(), errors
+        );
         return ResponseEntity.badRequest().body(problem);
     }
 }

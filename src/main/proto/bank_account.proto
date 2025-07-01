@@ -1,0 +1,46 @@
+syntax = "proto3";
+package bankaccount;
+
+option java_package = "com.jcondotta.grpc";
+option java_multiple_files = true;
+
+service BankAccountService {
+  rpc Lookup (BankAccountLookupGPRCRequest) returns (BankAccountLookupGPRCResponse);
+}
+
+service AccountHolderService {
+  rpc Lookup (AccountHolderLookupRequest) returns (AccountHolderLookupResponse);
+}
+
+message BankAccountLookupGPRCRequest {
+  string bank_account_id = 1;
+}
+
+message AccountHolder {
+  string id = 1;
+  string name = 2;
+  string date_of_birth = 3;
+  string passport_number = 4;
+  string account_holder_type = 5;
+  string created_at = 6;
+  string bank_account_id = 7;
+}
+
+message BankAccountLookupGPRCResponse {
+  string bank_account_id = 1;
+  string account_type = 2;
+  string currency = 3;
+  string iban = 4;
+  string date_of_opening = 5;
+  string status = 6;
+  repeated AccountHolder account_holders = 7;
+}
+
+message AccountHolderLookupRequest {
+  string bank_account_id = 1;
+  string account_holder_id = 2;
+}
+
+message AccountHolderLookupResponse {
+  AccountHolder account_holder = 1;
+}

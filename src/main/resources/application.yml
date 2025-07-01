@@ -1,9 +1,19 @@
+server:
+  port: 8090
+
 spring:
   application:
     name: bank-account-management
 
-server:
-  port: 8090
+  cache:
+    type: redis
+    cache-names: bankAccounts
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+
 
 aws:
   region: ${AWS_DEFAULT_REGION}
@@ -22,6 +32,8 @@ api:
     bank-account-path: '/api/v1/bank-accounts/{bank-account-id}'
     account-holders-path: '/api/v1/bank-accounts/{bank-account-id}/account-holders'
     account-holder-path: '/api/v1/bank-accounts/{bank-account-id}/account-holders/{account-holder-id}'
+
+
 
 caches:
   bank-accounts-by-id:

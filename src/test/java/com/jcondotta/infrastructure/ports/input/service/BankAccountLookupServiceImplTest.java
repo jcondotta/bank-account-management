@@ -1,36 +1,21 @@
 package com.jcondotta.infrastructure.ports.input.service;
 
-import com.jcondotta.application.dto.lookup.BankAccountLookupResponse;
-import com.jcondotta.application.mapper.BankingEntityMapper;
-import com.jcondotta.config.TestAccountHolderFactory;
-import com.jcondotta.config.TestBankAccountFactory;
-import com.jcondotta.config.TestClockConfig;
-import com.jcondotta.domain.exception.BankAccountNotFoundException;
-import com.jcondotta.helper.TestAccountHolderRequest;
 import com.jcondotta.helper.TestBankAccountId;
-import com.jcondotta.infrastructure.ports.output.repository.BankAccountQueryDynamoDBRepository;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class BankAccountLookupServiceImplTest {
 
     private static final UUID BANK_ACCOUNT_ID_BRAZIL = TestBankAccountId.BRAZIL.getBankAccountId();
-    private static final BankingEntityMapper BANKING_ENTITY_MAPPER = BankingEntityMapper.INSTANCE;
+//    private static final BankingEntityMapper BANKING_ENTITY_MAPPER = BankingEntityMapper.INSTANCE;
 
 //    private BankingEntityLookupService<UUID, BankAccountLookupResponse> bankAccountLookupByIdService;
 //

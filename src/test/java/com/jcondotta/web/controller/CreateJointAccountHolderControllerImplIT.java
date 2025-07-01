@@ -2,8 +2,8 @@ package com.jcondotta.web.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jcondotta.application.dto.AccountHolderDetailsRequest;
-import com.jcondotta.application.dto.create.CreateJointAccountHolderRequest;
+import com.jcondotta.interfaces.rest.AccountHolderDetailsRequest;
+import com.jcondotta.interfaces.rest.accountholder.CreateJointAccountHolderRequest;
 import com.jcondotta.argument_provider.BlankValuesArgumentProvider;
 import com.jcondotta.argument_provider.InvalidPassportNumberArgumentProvider;
 import com.jcondotta.configuration.BankAccountURIConfiguration;

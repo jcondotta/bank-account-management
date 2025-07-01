@@ -1,6 +1,6 @@
 package com.jcondotta.helper;
 
-import com.jcondotta.application.dto.AccountHolderDetailsRequest;
+import com.jcondotta.interfaces.rest.AccountHolderDetailsRequest;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

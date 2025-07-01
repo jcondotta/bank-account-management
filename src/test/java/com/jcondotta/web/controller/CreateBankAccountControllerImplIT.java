@@ -1,43 +1,27 @@
 package com.jcondotta.web.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jcondotta.application.dto.AccountHolderDetailsRequest;
-import com.jcondotta.application.dto.create.CreateBankAccountRequest;
-import com.jcondotta.application.dto.create.CreateBankAccountResponse;
-import com.jcondotta.application.dto.lookup.BankAccountLookupResponse;
-import com.jcondotta.argument_provider.BankAccountTypeAndCurrencyArgumentsProvider;
-import com.jcondotta.argument_provider.BlankValuesArgumentProvider;
-import com.jcondotta.argument_provider.InvalidPassportNumberArgumentProvider;
 import com.jcondotta.configuration.BankAccountURIConfiguration;
 import com.jcondotta.container.LocalStackTestContainer;
-import com.jcondotta.domain.model.AccountType;
-import com.jcondotta.domain.model.Currency;
 import com.jcondotta.helper.TestAccountHolderRequest;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.MessageSource;
-import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
-import java.io.IOException;
 import java.time.Clock;
 import java.time.LocalDate;
-import java.util.Locale;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertAll;
 

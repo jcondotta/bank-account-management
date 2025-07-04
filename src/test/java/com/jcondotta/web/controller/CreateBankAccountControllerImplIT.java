@@ -1,7 +1,7 @@
 package com.jcondotta.web.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jcondotta.configuration.BankAccountURIConfiguration;
+import com.jcondotta.infrastructure.properties.BankAccountURIConfiguration;
 import com.jcondotta.container.LocalStackTestContainer;
 import com.jcondotta.helper.TestAccountHolderRequest;
 import io.restassured.RestAssured;
@@ -21,9 +21,6 @@ import java.time.Clock;
 import java.time.LocalDate;
 
 import static io.restassured.RestAssured.given;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
 @ActiveProfiles("test")
 @ContextConfiguration(initializers = LocalStackTestContainer.class)
@@ -109,7 +106,7 @@ class CreateBankAccountControllerImplIT {
 //        );
 //    }
 //
-//    @ParameterizedTest(name = "Blank value test: {index} - Input: [{0}]")
+//    @ParameterizedTest(accountHolderName = "Blank value test: {index} - Input: [{0}]")
 //    @ArgumentsSource(BlankValuesArgumentProvider.class)
 //    void shouldReturn400BadRequest_whenAccountHolderNameIsBlank(String blankAccountHolderName) throws IOException {
 //        var request = CreateBankAccountRequest.builder()

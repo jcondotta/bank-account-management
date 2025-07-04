@@ -1,7 +1,5 @@
 package com.jcondotta.application.ports.output.cache;
 
-import com.jcondotta.cache.CacheErrorMessages;
-
 import java.util.Objects;
 
 public interface CacheStore<V> extends ReadCacheStore<String, V>, WriteCacheStore<String, V> {

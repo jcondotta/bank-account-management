@@ -2,15 +2,16 @@ package com.jcondotta.domain.bankaccount.exceptions;
 
 import com.jcondotta.domain.bankaccount.valueobjects.BankAccountId;
 import com.jcondotta.domain.shared.DomainErrorMessages;
-import lombok.Getter;
+import com.jcondotta.domain.shared.exceptions.BusinessRuleException;
 
-@Getter
-public class AccountHolderAlreadyExistsException extends RuntimeException {
-
-    private final BankAccountId bankAccountId;
+public class AccountHolderAlreadyExistsException extends BusinessRuleException {
 
     public AccountHolderAlreadyExistsException(BankAccountId bankAccountId) {
         super(DomainErrorMessages.ACCOUNT_HOLDER_ALREADY_EXISTS);
-        this.bankAccountId = bankAccountId;
+    }
+
+    @Override
+    public String getType() {
+        return "/problems/account-holder-already-exists";
     }
 }

@@ -1,6 +1,6 @@
 <!--<configuration>-->
 
-<!--    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">-->
+<!--    <appender accountHolderName="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">-->
 <!--        <encoder class="net.logstash.logback.encoder.LogstashEncoder">-->
 <!--            <includeContext>true</includeContext>-->
 <!--            <includeMdc>true</includeMdc>-->
@@ -14,7 +14,7 @@
 <!--        <appender-ref ref="CONSOLE"/>-->
 <!--    </root>-->
 
-<!--    <logger name="com.jcondotta" level="debug" />-->
+<!--    <logger accountHolderName="com.jcondotta" level="debug" />-->
 <!--</configuration>-->
 
 <configuration>

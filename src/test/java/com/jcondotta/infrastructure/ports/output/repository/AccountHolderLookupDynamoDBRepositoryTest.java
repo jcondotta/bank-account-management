@@ -1,8 +1,7 @@
 package com.jcondotta.infrastructure.ports.output.repository;
 
-import com.jcondotta.application.ports.output.repository.AccountHolderLookupRepository;
-import com.jcondotta.infrastructure.adapters.persistence.entity.BankingEntity;
 import com.jcondotta.helper.TestBankAccountId;
+import com.jcondotta.infrastructure.adapters.persistence.entity.BankingEntity;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -12,25 +11,21 @@ import software.amazon.awssdk.enhanced.dynamodb.model.PageIterable;
 
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-
 @ExtendWith(MockitoExtension.class)
 class AccountHolderLookupDynamoDBRepositoryTest {
 
     private static final UUID BANK_ACCOUNT_ID_BRAZIL = TestBankAccountId.BRAZIL.getBankAccountId();
 
-    @Mock
-    private DynamoDbTable<BankingEntity> bankingEntitiesTable;
-
-    @Mock
-    private PageIterable<BankingEntity> pageIterable;
-
-    @Mock
-    private SdkIterable<BankingEntity> sdkIterable;
-
-    private AccountHolderLookupRepository repository;
+//    @Mock
+//    private DynamoDbTable<BankingEntity> bankingEntitiesTable;
+//
+//    @Mock
+//    private PageIterable<BankingEntity> pageIterable;
+//
+//    @Mock
+//    private SdkIterable<BankingEntity> sdkIterable;
+//
+//    private AccountHolderLookupRepository repository;
 
 //    @BeforeEach
 //    void beforeEach() {

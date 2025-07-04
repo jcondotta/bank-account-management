@@ -34,12 +34,12 @@ public class OpenAPIConfig {
                         .description(properties.getDescription())
                         .termsOfService(properties.getTermsOfService())
 //                        .contact(new Contact()
-//                                .name(properties.getContact().get("name"))
+//                                .accountHolderName(properties.getContact().get("accountHolderName"))
 //                                .email(properties.getContact().get("email"))
 //                                .url(properties.getContact().get("url"))
 //                        )
 //                        .license(new License()
-//                                .name(properties.getLicense().get("name"))
+//                                .accountHolderName(properties.getLicense().get("accountHolderName"))
 //                                .url(properties.getLicense().get("url"))
 //                        )
                 );
@@ -65,7 +65,7 @@ public class OpenAPIConfig {
 
     private List<Tag> loadTags() {
         return properties.getTags().stream()
-                .map(tag -> new Tag().name(tag.get("name")).description(tag.get("description")))
+                .map(tag -> new Tag().name(tag.get("accountHolderName")).description(tag.get("description")))
                 .collect(Collectors.toList());
     }
 }

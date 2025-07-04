@@ -14,11 +14,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.Clock;
 import java.time.LocalDate;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-
 @ExtendWith(MockitoExtension.class)
 class CreateBankAccountCommandHandlerImplTest {
 
@@ -38,7 +33,7 @@ class CreateBankAccountCommandHandlerImplTest {
 //    @Mock
 //    private BankAccountIbanGeneratorService bankAccountIbanGeneratorService;
 
-    private CreateBankAccountCommandHandler createBankAccountCommandHandler;
+//    private CreateBankAccountCommandHandler createBankAccountCommandHandler;
 
 //    @BeforeEach
 //    void beforeEach() {
@@ -69,15 +64,15 @@ class CreateBankAccountCommandHandlerImplTest {
 //        verify(createBankAccountRepository).createBankAccount(bankAccountCaptor.capture(), accountHolderCaptor.capture());
 //
 //        assertThat(bankAccountCaptor.getValue())
-//                .satisfies(bankAccount -> assertAll(
-//                        () -> assertThat(bankAccount.getBankAccountId()).isNotNull(),
-//                        () -> assertThat(bankAccount.isEntityTypeBankAccount()).isTrue(),
-//                        () -> assertThat(bankAccount.getIban()).isNotNull(),
-//                        () -> assertThat(bankAccount.getCreatedAt()).isEqualTo(LocalDateTime.now(TEST_CLOCK_FIXED_INSTANT)),
-//                        () -> assertThat(bankAccount.getAccountHolderId()).isNull(),
-//                        () -> assertThat(bankAccount.getAccountHolderName()).isNull(),
-//                        () -> assertThat(bankAccount.getPassportNumber()).isNull(),
-//                        () -> assertThat(bankAccount.getDateOfBirth()).isNull()
+//                .satisfies(bankAccountDetails -> assertAll(
+//                        () -> assertThat(bankAccountDetails.getBankAccountId()).isNotNull(),
+//                        () -> assertThat(bankAccountDetails.isEntityTypeBankAccount()).isTrue(),
+//                        () -> assertThat(bankAccountDetails.getIban()).isNotNull(),
+//                        () -> assertThat(bankAccountDetails.getCreatedAt()).isEqualTo(LocalDateTime.now(TEST_CLOCK_FIXED_INSTANT)),
+//                        () -> assertThat(bankAccountDetails.getAccountHolderId()).isNull(),
+//                        () -> assertThat(bankAccountDetails.getAccountHolderName()).isNull(),
+//                        () -> assertThat(bankAccountDetails.getPassportNumber()).isNull(),
+//                        () -> assertThat(bankAccountDetails.getDateOfBirth()).isNull()
 //                ));
 //
 //        assertThat(accountHolderCaptor.getValue())
@@ -249,7 +244,7 @@ class CreateBankAccountCommandHandlerImplTest {
 //    }
 //
 //    @ParameterizedTest
-//    @ValueSource(strings = {"bankAccount.notNull", "accountHolder.notNull"})
+//    @ValueSource(strings = {"bankAccountDetails.notNull", "accountHolder.notNull"})
 //    void shouldThrowNullPointerException_whenRepositoryThrowsNullPointerException(String exceptionMessage) {
 //        var request = CreateBankAccountRequest.builder()
 //            .accountType(AccountType.CHECKING)

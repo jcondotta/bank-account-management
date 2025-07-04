@@ -6,11 +6,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.mockito.Mockito.verify;
-
 @ExtendWith(MockitoExtension.class)
 class BankAccountLookupServiceImplTest {
 
@@ -94,7 +89,7 @@ class BankAccountLookupServiceImplTest {
 //
 //        assertThatThrownBy(() -> bankAccountLookupByIdService.lookup(BANK_ACCOUNT_ID_BRAZIL))
 //                .isInstanceOf(BankAccountNotFoundException.class)
-//                .hasMessage("bankAccount.notFound")
+//                .hasMessage("bankAccountDetails.notFound")
 //                .extracting("identifier")
 //                    .isEqualTo(BANK_ACCOUNT_ID_BRAZIL);
 //

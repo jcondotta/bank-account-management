@@ -5,6 +5,7 @@ import com.jcondotta.domain.bankaccount.model.BankAccount;
 import com.jcondotta.infrastructure.adapters.persistence.entity.BankingEntity;
 import com.jcondotta.infrastructure.adapters.persistence.mapper.AccountHolderEntityMapper;
 import com.jcondotta.infrastructure.adapters.persistence.mapper.BankAccountEntityMapper;
+import com.jcondotta.infrastructure.adapters.persistence.mapper.BankingEntityAssemblerMapper;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,13 +23,13 @@ public class UpdateBankAccountDynamoDBRepository implements UpdateBankAccountRep
     private final DynamoDbEnhancedClient dynamoDbEnhancedClient;
     private final DynamoDbTable<BankingEntity> bankingEntityDynamoDbTable;
     private final BankAccountEntityMapper mapper;
-    private final AccountHolderEntityMapper accountHolderEntityMapper;
+    private final BankingEntityAssemblerMapper bankingEntityAssemblerMapper;
 
     @Override
     public void update(BankAccount bankAccount) {
         LOGGER.info("Updating bank account and holders for ID: {}", bankAccount.bankAccountId());
 
-        var entities = mapper.toBankingEntities(bankAccount, accountHolderEntityMapper);
+        var entities = bankingEntityAssemblerMapper.toEntities(bankAccount);
 
         var txBuilder = TransactWriteItemsEnhancedRequest.builder();
 

@@ -1,13 +1,13 @@
 package com.jcondotta.infrastructure.adapters.persistence.mapper;
 
+import com.jcondotta.domain.bankaccount.model.BankAccount;
 import com.jcondotta.domain.bankaccount.valueobjects.AccountStatusValue;
 import com.jcondotta.domain.bankaccount.valueobjects.AccountTypeValue;
 import com.jcondotta.domain.bankaccount.valueobjects.BankAccountId;
-import com.jcondotta.domain.bankaccount.model.BankAccount;
 import com.jcondotta.domain.bankaccount.valueobjects.Iban;
 import com.jcondotta.domain.shared.enums.EntityType;
-import com.jcondotta.domain.shared.valueobjects.CurrencyValue;
 import com.jcondotta.domain.shared.valueobjects.CreatedAt;
+import com.jcondotta.domain.shared.valueobjects.CurrencyValue;
 import com.jcondotta.infrastructure.adapters.persistence.entity.BankAccountKey;
 import com.jcondotta.infrastructure.adapters.persistence.entity.BankingEntity;
 import org.mapstruct.Context;
@@ -17,14 +17,13 @@ import org.slf4j.LoggerFactory;
 
 import java.time.Clock;
 import java.util.List;
-import java.util.stream.Stream;
 
 @Mapper(componentModel = "spring")
 public interface BankAccountEntityMapper {
 
     Logger LOGGER = LoggerFactory.getLogger(BankAccountEntityMapper.class);
 
-    default BankingEntity toBankAccountEntity(BankAccount bankAccount) {
+    default BankingEntity toEntity(BankAccount bankAccount) {
         return BankingEntity.builder()
             .partitionKey(BankAccountKey.partitionKey(bankAccount.bankAccountId()))
             .sortKey(BankAccountKey.sortKey(bankAccount.bankAccountId()))
@@ -38,30 +37,20 @@ public interface BankAccountEntityMapper {
             .build();
     }
 
-    default BankAccount toBankAccount(BankingEntity bankAccountEntity,
-                                      List<BankingEntity> accountHolderEntities,
-                                      @Context AccountHolderEntityMapper accountHolderEntityMapper,
-                                      @Context Clock clock) {
+    default BankAccount toDomain(BankingEntity entity,
+                                 List<BankingEntity> holderEntities,
+                                 @Context AccountHolderEntityMapper holderMapper,
+                                 @Context Clock clock) {
         return new BankAccount(
-            BankAccountId.of(bankAccountEntity.getBankAccountId()),
-            AccountTypeValue.of(bankAccountEntity.getAccountType()),
-            CurrencyValue.of(bankAccountEntity.getCurrency()),
-            Iban.of(bankAccountEntity.getIban()),
-            AccountStatusValue.of(bankAccountEntity.getStatus()),
-            CreatedAt.of(bankAccountEntity.getCreatedAt(), clock),
-            accountHolderEntities
-                .stream()
-                .map(accountHolderEntity -> accountHolderEntityMapper.toDomain(accountHolderEntity, clock))
-                .toList());
-    }
-
-    default List<BankingEntity> toBankingEntities(BankAccount bankAccount, @Context AccountHolderEntityMapper accountHolderEntityMapper) {
-        List<BankingEntity> accountHolders = bankAccount.accountHolders().stream()
-            .map(holder -> accountHolderEntityMapper.toEntity(bankAccount.bankAccountId(), holder))
-            .toList();
-
-        BankingEntity bankAccountEntity = toBankAccountEntity(bankAccount);
-
-        return Stream.concat(Stream.of(bankAccountEntity), accountHolders.stream()).toList();
+            BankAccountId.of(entity.getBankAccountId()),
+            AccountTypeValue.of(entity.getAccountType()),
+            CurrencyValue.of(entity.getCurrency()),
+            Iban.of(entity.getIban()),
+            AccountStatusValue.of(entity.getStatus()),
+            CreatedAt.of(entity.getCreatedAt()),
+            holderEntities.stream()
+                .map(holderMapper::toDomain)
+                .toList()
+        );
     }
 }

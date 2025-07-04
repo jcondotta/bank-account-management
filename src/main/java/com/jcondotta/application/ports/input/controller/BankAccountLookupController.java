@@ -1,6 +1,6 @@
 package com.jcondotta.application.ports.input.controller;
 
-import com.jcondotta.interfaces.rest.lookup.BankAccountLookupResponse;
+import com.jcondotta.interfaces.rest.lookupbankaccount.model.BankAccountLookupRestResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -27,7 +27,7 @@ public interface BankAccountLookupController {
                 responseCode = "200",
                 description = "Bank account details successfully retrieved.",
                 content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                        schema = @Schema(implementation = BankAccountLookupResponse.class)
+                        schema = @Schema(implementation = BankAccountLookupRestResponse.class)
                 )
         ),
         @ApiResponse(
@@ -66,7 +66,7 @@ public interface BankAccountLookupController {
         )
     })
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<BankAccountLookupResponse> findBankAccount(
+    ResponseEntity<BankAccountLookupRestResponse> findBankAccount(
         @Parameter(
                 description = "Unique identifier of the bank account",
                 required = true,

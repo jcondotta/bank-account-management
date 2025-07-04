@@ -1,9 +1,9 @@
 package com.jcondotta.domain.accountholder.valueobjects;
 
+import com.jcondotta.domain.shared.ValidationErrors;
+
 import java.util.Objects;
 import java.util.UUID;
-
-import com.jcondotta.domain.shared.ValidationErrors;
 
 public record AccountHolderId(UUID value) {
 
@@ -13,6 +13,14 @@ public record AccountHolderId(UUID value) {
 
     public static AccountHolderId of(UUID value) {
         return new AccountHolderId(value);
+    }
+
+    public static AccountHolderId newId() {
+        return new AccountHolderId(UUID.randomUUID());
+    }
+
+    public boolean is(UUID other) {
+        return value.equals(other);
     }
 
     @Override

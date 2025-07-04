@@ -3,8 +3,7 @@ package com.jcondotta.infrastructure.adapters.persistence.repository;
 import com.jcondotta.application.ports.output.repository.CreateBankAccountRepository;
 import com.jcondotta.domain.bankaccount.model.BankAccount;
 import com.jcondotta.infrastructure.adapters.persistence.entity.BankingEntity;
-import com.jcondotta.infrastructure.adapters.persistence.mapper.AccountHolderEntityMapper;
-import com.jcondotta.infrastructure.adapters.persistence.mapper.BankAccountEntityMapper;
+import com.jcondotta.infrastructure.adapters.persistence.mapper.BankingEntityAssemblerMapper;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,18 +20,16 @@ public class CreateBankAccountDynamoDBRepository implements CreateBankAccountRep
 
     private final DynamoDbEnhancedClient dynamoDbEnhancedClient;
     private final DynamoDbTable<BankingEntity> bankingEntityDynamoDbTable;
-    private final BankAccountEntityMapper mapper;
-    private final AccountHolderEntityMapper accountHolderEntityMapper;
+    private final BankingEntityAssemblerMapper bankingEntityAssemblerMapper;
 
     @Override
     public void save(BankAccount bankAccount) {
         LOGGER.atInfo()
-            .setMessage("Initiating transaction to save bank account and account holder(s).")
-            .addKeyValue("bankAccountId", bankAccount.bankAccountId().toString())
+            .setMessage("Starting transaction to save bank account.")
             .log();
 
         TransactWriteItemsEnhancedRequest.Builder builder = TransactWriteItemsEnhancedRequest.builder();
-        mapper.toBankingEntities(bankAccount, accountHolderEntityMapper)
+        bankingEntityAssemblerMapper.toEntities(bankAccount)
             .forEach(bankingEntity -> builder
                 .addPutItem(bankingEntityDynamoDbTable, bankingEntity)
             );
@@ -40,8 +37,7 @@ public class CreateBankAccountDynamoDBRepository implements CreateBankAccountRep
         dynamoDbEnhancedClient.transactWriteItems(builder.build());
 
         LOGGER.atInfo()
-            .setMessage("Bank account and account holder(s) created successfully")
-            .addKeyValue("bankAccountId", bankAccount.bankAccountId().toString())
+            .setMessage("Bank account and primary account holder created successfully.")
             .log();
     }
 }

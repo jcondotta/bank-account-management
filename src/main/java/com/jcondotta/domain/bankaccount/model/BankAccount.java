@@ -3,8 +3,11 @@ package com.jcondotta.domain.bankaccount.model;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.jcondotta.domain.accountholder.model.AccountHolder;
+import com.jcondotta.domain.accountholder.valueobjects.AccountHolderId;
 import com.jcondotta.domain.bankaccount.exceptions.AccountHolderAlreadyExistsException;
+import com.jcondotta.domain.bankaccount.exceptions.EmptyAccountHolderListException;
 import com.jcondotta.domain.bankaccount.exceptions.MaxJointAccountHoldersExceededException;
+import com.jcondotta.domain.bankaccount.exceptions.RemovePrimaryAccountHolderException;
 import com.jcondotta.domain.bankaccount.valueobjects.AccountStatusValue;
 import com.jcondotta.domain.bankaccount.valueobjects.AccountTypeValue;
 import com.jcondotta.domain.bankaccount.valueobjects.BankAccountId;
@@ -12,13 +15,12 @@ import com.jcondotta.domain.bankaccount.valueobjects.Iban;
 import com.jcondotta.domain.shared.valueobjects.CreatedAt;
 import com.jcondotta.domain.shared.valueobjects.CurrencyValue;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import java.util.Collections;
-import java.util.Objects;
+import java.util.*;
+import java.util.function.Predicate;
 
 public final class BankAccount {
+
+    private static final int MAX_JOINT_ACCOUNT_HOLDERS = 3;
 
     private final BankAccountId bankAccountId;
     private final AccountTypeValue accountType;
@@ -46,7 +48,11 @@ public final class BankAccount {
         this.createdAt = Objects.requireNonNull(createdAt, "createdAt must not be null");
 
         if (accountHolders == null || accountHolders.isEmpty()) {
-            throw new IllegalArgumentException("Bank account must have at least one account holder");
+            throw new EmptyAccountHolderListException();
+        }
+
+        if (accountHolders.stream().noneMatch(AccountHolder::isPrimary)) {
+            throw new IllegalArgumentException("accountHolders must not contain null elements");
         }
 
         this.accountHolders = new ArrayList<>(accountHolders);
@@ -86,9 +92,38 @@ public final class BankAccount {
         if (accountHolders.contains(accountHolder)) {
             throw new AccountHolderAlreadyExistsException(bankAccountId);
         }
-        if (accountHolders.size() >= 3) {
-            throw new MaxJointAccountHoldersExceededException(3);
+
+        var jointAccountHoldersCount = accountHolders.stream()
+            .filter(Predicate.not(AccountHolder::isPrimary))
+            .count();
+
+        if (jointAccountHoldersCount >= MAX_JOINT_ACCOUNT_HOLDERS) {
+            throw new MaxJointAccountHoldersExceededException(MAX_JOINT_ACCOUNT_HOLDERS, (int) jointAccountHoldersCount);
         }
         accountHolders.add(accountHolder);
+    }
+
+    public void removeJointAccountHolder(AccountHolder accountHolder) {
+        Objects.requireNonNull(accountHolder, "bankAccount.accountHolder.notNull");
+
+        if (!accountHolder.isPrimary()) {
+            accountHolders.remove(accountHolder);
+        }
+    }
+
+    public Optional<AccountHolder> findAccountHolder(AccountHolderId accountHolderId) {
+        return accountHolders.stream()
+            .filter(accountHolder -> accountHolder.accountHolderId().equals(accountHolderId))
+            .findFirst();
+    }
+
+    public void removeJointAccountHolder(AccountHolderId accountHolderId) {
+        findAccountHolder(accountHolderId)
+            .ifPresent(accountHolder -> {
+                if(accountHolder.isPrimary()) {
+                    throw new RemovePrimaryAccountHolderException();
+                }
+                accountHolders.remove(accountHolder);
+            });
     }
 }

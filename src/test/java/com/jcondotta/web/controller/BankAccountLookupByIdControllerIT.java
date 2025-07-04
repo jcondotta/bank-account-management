@@ -7,10 +7,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
-import static io.restassured.RestAssured.given;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
-
 @ActiveProfiles("test")
 @ContextConfiguration(initializers = LocalStackTestContainer.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -95,7 +91,7 @@ class BankAccountLookupByIdControllerIT {
 //    @Test
 //    void shouldReturn404NotFound_whenBankAccountDoesNotExist() {
 //        var nonExistentBankAccountId = UUID.fromString("08d8cf86-bc25-4535-8b88-920c07d3e5fe");
-//        var expectedMessage = messageSource.getMessage("bankAccount.notFound",
+//        var expectedMessage = messageSource.getMessage("bankAccountDetails.notFound",
 //            new Object[]{ nonExistentBankAccountId }, Locale.getDefault());
 //
 //        given()

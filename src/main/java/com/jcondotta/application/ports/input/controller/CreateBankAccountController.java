@@ -1,7 +1,7 @@
 package com.jcondotta.application.ports.input.controller;
 
-import com.jcondotta.interfaces.rest.bankaccount.CreateBankAccountRequest;
-import com.jcondotta.interfaces.rest.bankaccount.CreateBankAccountResponse;
+import com.jcondotta.interfaces.rest.createbankaccount.model.CreateBankAccountRestRequest;
+import com.jcondotta.interfaces.rest.createbankaccount.model.CreateBankAccountRestResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -14,7 +14,10 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 @RequestMapping("${api.v1.root-path}")
 @Tag(name = "Bank accounts", description = "Operations related to bank accounts")
@@ -27,7 +30,7 @@ public interface CreateBankAccountController {
                     description = "Bank account and primary account holder request details",
                     required = true,
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = CreateBankAccountRequest.class)
+                            schema = @Schema(implementation = CreateBankAccountRestRequest.class)
                     )
             )
     )
@@ -35,7 +38,7 @@ public interface CreateBankAccountController {
             @ApiResponse(
                     responseCode = "201", description = "Bank account successfully created",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                        schema = @Schema(implementation = CreateBankAccountResponse.class)
+                        schema = @Schema(implementation = CreateBankAccountRestResponse.class)
                     ),
                     headers = {
                             @Header(
@@ -98,5 +101,5 @@ public interface CreateBankAccountController {
     })
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    ResponseEntity<CreateBankAccountResponse> createBankAccount(@Valid @RequestBody CreateBankAccountRequest request);
+    ResponseEntity<CreateBankAccountRestResponse> createBankAccount(@Valid @RequestBody CreateBankAccountRestRequest request);
 }

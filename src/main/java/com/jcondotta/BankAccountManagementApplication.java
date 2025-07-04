@@ -1,7 +1,7 @@
 package com.jcondotta;
 
-import com.jcondotta.configuration.BankAccountURIConfiguration;
-import com.jcondotta.configuration.BankingEntitiesDynamoDBTableConfig;
+import com.jcondotta.infrastructure.properties.BankAccountURIConfiguration;
+import com.jcondotta.infrastructure.properties.BankingEntitiesDynamoDBTableConfig;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Contact;
 import io.swagger.v3.oas.annotations.info.Info;
@@ -16,7 +16,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 				version = "${api.version}",
 				description = "${api.description}",
 				contact = @Contact(
-						name = "${api.contact.name}",
+						name = "${api.contact.accountHolderName}",
 						email = "${api.contact.email}",
 						url = "${api.contact.url}"
 				)

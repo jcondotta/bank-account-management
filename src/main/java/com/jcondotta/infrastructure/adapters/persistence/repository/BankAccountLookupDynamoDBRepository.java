@@ -5,8 +5,7 @@ import com.jcondotta.domain.bankaccount.model.BankAccount;
 import com.jcondotta.domain.bankaccount.valueobjects.BankAccountId;
 import com.jcondotta.infrastructure.adapters.persistence.entity.BankAccountKey;
 import com.jcondotta.infrastructure.adapters.persistence.entity.BankingEntity;
-import com.jcondotta.infrastructure.adapters.persistence.mapper.AccountHolderEntityMapper;
-import com.jcondotta.infrastructure.adapters.persistence.mapper.BankAccountEntityMapper;
+import com.jcondotta.infrastructure.adapters.persistence.mapper.BankingEntityAssemblerMapper;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,8 +25,7 @@ public class BankAccountLookupDynamoDBRepository implements BankAccountLookupRep
     private static final Logger LOGGER = LoggerFactory.getLogger(BankAccountLookupDynamoDBRepository.class);
 
     private final DynamoDbTable<BankingEntity> bankingEntityDynamoDbTable;
-    private final BankAccountEntityMapper bankAccountEntityMapper;
-    private final AccountHolderEntityMapper accountHolderEntityMapper;
+    private final BankingEntityAssemblerMapper bankingEntityAssemblerMapper;
     private final Clock clock;
 
     @Override
@@ -49,7 +47,7 @@ public class BankAccountLookupDynamoDBRepository implements BankAccountLookupRep
         return Optional.ofNullable(findBankAccountEntity(bankingEntities))
             .map(bankAccountEntity -> {
                 var accountHolderEntities = findAccountHolderEntities(bankingEntities);
-                return bankAccountEntityMapper.toBankAccount(bankAccountEntity, accountHolderEntities, accountHolderEntityMapper, clock);
+                return bankingEntityAssemblerMapper.toBankAccount(bankAccountEntity, accountHolderEntities, clock);
             });
     }
 

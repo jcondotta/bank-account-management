@@ -7,20 +7,23 @@ public interface ValidationErrors {
 
     interface AccountHolder {
         String ID_NOT_NULL = "accountHolder.accountHolderId.notNull";
-        String NAME_BLANK = "accountHolder.accountHolderName.notBlank";
+        String NAME_NOT_BLANK = "accountHolder.accountHolderName.notBlank";
         String NAME_TOO_LONG = "accountHolder.accountHolderName.tooLong";
-        String DOCUMENT_INVALID = "accountHolder.documentNumber.invalid";
+        String PASSPORT_NUMBER_INVALID_LENGTH = "accountHolder.passportNumber.invalidLength";
+        String PASSPORT_NUMBER_NOT_NULL = "accountHolder.passportNumber.notNull";
         String DATE_OF_BIRTH_NOT_NULL = "accountHolder.dateOfBirth.notNull";
-        String DATE_OF_BIRTH_IN_FUTURE = "accountHolder.dateOfBirth.inFuture";
+        String DATE_OF_BIRTH_NOT_IN_PAST = "accountHolder.dateOfBirth.notInPast";
         String ACCOUNT_HOLDER_TYPE_NOT_NULL = "accountHolder.accountHolderType.notNull";
     }
 
     interface BankAccount {
         String ID_NOT_NULL = "bankAccount.bankAccountId.notNull";
-        String IBAN_NOT_BLANK = "bankAccount.iban.notBlank";
-        String IBAN_INVALID_FORMAT = "bankAccount.iban.invalidFormat";
+        String IBAN_NOT_BLANK = "bankAccountDetails.iban.notBlank";
+        String IBAN_INVALID_FORMAT = "bankAccountDetails.iban.invalidFormat";
         String ACCOUNT_TYPE_NOT_NULL = "bankAccount.accountType.notNull";
         String STATUS_NOT_NULL = "bankAccount.status.notNull";
         String CURRENCY_NOT_NULL = "bankAccount.currency.notNull";
+        String CURRENCY_INVALID = "bankAccount.currency.invalid";
+        String ACCOUNT_HOLDER_NOT_NULL = "bankAccount.accountHolder.notNull";
     }
 }

@@ -15,6 +15,14 @@ public record BankAccountId(UUID value) {
         return new BankAccountId(value);
     }
 
+    public static BankAccountId newId() {
+        return new BankAccountId(UUID.randomUUID());
+    }
+
+    public boolean is(UUID other) {
+        return value.equals(other);
+    }
+
     @Override
     public String toString() {
         return value.toString();

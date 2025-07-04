@@ -1,5 +1,15 @@
 package com.jcondotta.domain.shared.enums;
 
 public enum Currency {
-    USD, EUR
+    EUR("€"), USD("$");
+
+    private final String symbol;
+
+    Currency(String symbol) {
+        this.symbol = symbol;
+    }
+
+    public String symbol() {
+        return symbol;
+    }
 }

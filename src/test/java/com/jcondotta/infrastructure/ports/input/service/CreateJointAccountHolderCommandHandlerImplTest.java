@@ -4,11 +4,6 @@ package com.jcondotta.infrastructure.ports.input.service;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.verify;
-
 @ExtendWith(MockitoExtension.class)
 class CreateJointAccountHolderCommandHandlerImplTest {
 
@@ -66,7 +61,7 @@ class CreateJointAccountHolderCommandHandlerImplTest {
 //                createJointAccountHolderCommandHandler.handle(null, createJointAccountHoldersRequest)
 //        );
 //
-//        assertThat(exception.getMessage()).isEqualTo("bankAccount.bankAccountId.notNull");
+//        assertThat(exception.getMessage()).isEqualTo("bankAccountDetails.bankAccountId.notNull");
 //    }
 //
 //    @ParameterizedTest

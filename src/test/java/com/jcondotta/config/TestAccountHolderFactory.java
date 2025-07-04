@@ -1,9 +1,9 @@
 package com.jcondotta.config;
 
-import com.jcondotta.interfaces.rest.AccountHolderDetailsRequest;
 import com.jcondotta.domain.accountholder.enums.AccountHolderType;
-import com.jcondotta.infrastructure.adapters.persistence.entity.BankingEntity;
 import com.jcondotta.helper.TestAccountHolderRequest;
+import com.jcondotta.infrastructure.adapters.persistence.entity.BankingEntity;
+import com.jcondotta.interfaces.rest.shared.CreateAccountHolderRestRequest;
 
 import java.time.Clock;
 import java.time.LocalDate;
@@ -18,7 +18,7 @@ public class TestAccountHolderFactory {
     protected static BankingEntity create(String accountHolderName, String passportNumber, LocalDate dateOfBirth,
                                           AccountHolderType accountHolderType, UUID bankAccountId) {
         var accountHolderId = UUID.randomUUID();
-        var createAccountHolderRequest = new AccountHolderDetailsRequest(
+        var createAccountHolderRequest = new CreateAccountHolderRestRequest(
                 accountHolderName, dateOfBirth, passportNumber
         );
 

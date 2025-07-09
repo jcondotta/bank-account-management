@@ -2,7 +2,7 @@ package com.jcondotta.web.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jcondotta.container.LocalStackTestContainer;
-import com.jcondotta.helper.TestAccountHolderRequest;
+import com.jcondotta.application.usecase.shared.helper.TestCreateAccountHolderData;
 import com.jcondotta.infrastructure.properties.BankAccountURIConfiguration;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -26,10 +26,6 @@ import static io.restassured.RestAssured.given;
 @ContextConfiguration(initializers = LocalStackTestContainer.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class CreateBankAccountControllerImplIT {
-
-    private static final String ACCOUNT_HOLDER_NAME_JEFFERSON = TestAccountHolderRequest.JEFFERSON.getAccountHolderName();
-    private static final String PASSPORT_NUMBER_JEFFERSON = TestAccountHolderRequest.JEFFERSON.getPassportNumber();
-    private static final LocalDate DATE_OF_BIRTH_JEFFERSON = TestAccountHolderRequest.JEFFERSON.getDateOfBirth();
 
     @Autowired
     Clock testClockUTC;

@@ -90,6 +90,16 @@ public record AccountHolder(
         );
     }
 
+    public static AccountHolder create(CreateAccountHolderData createAccountHolderData, AccountHolderType type, Clock clock) {
+        return create(
+            createAccountHolderData.accountHolderName(),
+            createAccountHolderData.passportNumber(),
+            createAccountHolderData.dateOfBirth(),
+            type,
+            CreatedAt.now(clock)
+        );
+    }
+
     public static AccountHolder create(AccountHolderName name, PassportNumber passportNumber, DateOfBirth dateOfBirth, AccountHolderType type, CreatedAt createdAt) {
         return new AccountHolder(
             AccountHolderId.newId(),

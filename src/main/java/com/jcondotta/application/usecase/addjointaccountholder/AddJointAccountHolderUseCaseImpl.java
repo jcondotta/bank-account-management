@@ -1,7 +1,7 @@
 package com.jcondotta.application.usecase.addjointaccountholder;
 
 import com.jcondotta.application.ports.output.cache.CacheStore;
-import com.jcondotta.application.ports.output.repository.BankAccountLookupRepository;
+import com.jcondotta.application.ports.output.repository.LookupBankAccountRepository;
 import com.jcondotta.application.ports.output.repository.UpdateBankAccountRepository;
 import com.jcondotta.application.usecase.addjointaccountholder.mapper.AddJointAccountHolderResultMapper;
 import com.jcondotta.application.usecase.addjointaccountholder.model.AddJointAccountHolderCommand;
@@ -24,7 +24,7 @@ class AddJointAccountHolderUseCaseImpl implements AddJointAccountHolderUseCase {
     private static final Logger LOGGER = LoggerFactory.getLogger(AddJointAccountHolderUseCaseImpl.class);
 
     private final UpdateBankAccountRepository updateBankAccountRepository;
-    private final BankAccountLookupRepository bankAccountLookupRepository;
+    private final LookupBankAccountRepository lookupBankAccountRepository;
     private final CacheStore<BankAccount> cacheStore;
     private final AddJointAccountHolderResultMapper resultMapper;
     private final Clock clock;
@@ -35,7 +35,7 @@ class AddJointAccountHolderUseCaseImpl implements AddJointAccountHolderUseCase {
             .setMessage("Initiating joint account holder creation process.")
             .log();
 
-        return bankAccountLookupRepository.lookup(command.bankAccountId())
+        return lookupBankAccountRepository.lookup(command.bankAccountId())
             .map(bankAccount -> {
                 var jointAccountHolder = AccountHolder.createJoint(command.createAccountHolderData(), clock);
 

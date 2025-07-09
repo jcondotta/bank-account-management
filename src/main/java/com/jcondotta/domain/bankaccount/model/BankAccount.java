@@ -3,22 +3,19 @@ package com.jcondotta.domain.bankaccount.model;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.jcondotta.domain.accountholder.exceptions.AccountHolderNotFoundException;
 import com.jcondotta.domain.accountholder.model.AccountHolder;
 import com.jcondotta.domain.accountholder.valueobjects.AccountHolderId;
 import com.jcondotta.domain.bankaccount.enums.AccountStatus;
 import com.jcondotta.domain.bankaccount.enums.AccountType;
+import com.jcondotta.domain.bankaccount.enums.Currency;
 import com.jcondotta.domain.bankaccount.exceptions.EmptyAccountHolderListException;
 import com.jcondotta.domain.bankaccount.exceptions.MaxJointAccountHoldersExceededException;
-import com.jcondotta.domain.bankaccount.exceptions.PrimaryAccountHolderRemovalNotAllowedException;
 import com.jcondotta.domain.bankaccount.valueobjects.BankAccountId;
 import com.jcondotta.domain.bankaccount.valueobjects.Iban;
 import com.jcondotta.domain.shared.ValidationErrors;
-import com.jcondotta.domain.bankaccount.enums.Currency;
 import com.jcondotta.domain.shared.valueobjects.CreatedAt;
 
 import java.time.Clock;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -135,22 +132,6 @@ public final class BankAccount {
         return accountHolders.stream()
             .filter(Predicate.not(AccountHolder::isPrimary))
             .toList();
-    }
-
-    public void removeJointAccountHolder(AccountHolderId accountHolderId) {
-        findAccountHolder(accountHolderId)
-        .ifPresentOrElse(accountHolder -> {
-            if(accountHolder.isPrimary()) {
-                throw new PrimaryAccountHolderRemovalNotAllowedException();
-            }
-            accountHolders.remove(accountHolder);
-        }, () -> {
-            throw new AccountHolderNotFoundException(bankAccountId, accountHolderId);
-        });
-    }
-
-    public static BankAccount openBankAccount(AccountType accountType, Currency currency, Iban iban, AccountHolder primaryAccountHolder){
-        return new BankAccount(BankAccountId.newId(), accountType, currency, iban, AccountStatus.PENDING, CreatedAt.now(ZoneId.systemDefault()), List.of(primaryAccountHolder));
     }
 
     public static BankAccount openBankAccount(AccountType accountType, Currency currency, Iban iban, AccountHolder primaryAccountHolder, Clock clock){

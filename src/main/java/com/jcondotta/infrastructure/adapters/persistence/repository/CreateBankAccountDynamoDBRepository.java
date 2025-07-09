@@ -3,7 +3,7 @@ package com.jcondotta.infrastructure.adapters.persistence.repository;
 import com.jcondotta.application.ports.output.repository.CreateBankAccountRepository;
 import com.jcondotta.domain.bankaccount.model.BankAccount;
 import com.jcondotta.infrastructure.adapters.persistence.entity.BankingEntity;
-import com.jcondotta.infrastructure.adapters.persistence.mapper.BankingEntityAssemblerMapper;
+import com.jcondotta.infrastructure.adapters.persistence.mapper.BankAccountEntityMapper;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +20,7 @@ public class CreateBankAccountDynamoDBRepository implements CreateBankAccountRep
 
     private final DynamoDbEnhancedClient dynamoDbEnhancedClient;
     private final DynamoDbTable<BankingEntity> bankingEntityDynamoDbTable;
-    private final BankingEntityAssemblerMapper bankingEntityAssemblerMapper;
+    private final BankAccountEntityMapper bankAccountEntityMapper;
 
     @Override
     public void save(BankAccount bankAccount) {
@@ -29,7 +29,7 @@ public class CreateBankAccountDynamoDBRepository implements CreateBankAccountRep
             .log();
 
         TransactWriteItemsEnhancedRequest.Builder builder = TransactWriteItemsEnhancedRequest.builder();
-        bankingEntityAssemblerMapper.toEntities(bankAccount)
+        bankAccountEntityMapper.toEntities(bankAccount)
             .forEach(bankingEntity -> builder
                 .addPutItem(bankingEntityDynamoDbTable, bankingEntity)
             );

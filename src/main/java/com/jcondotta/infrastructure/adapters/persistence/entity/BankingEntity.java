@@ -29,16 +29,19 @@ public class BankingEntity {
     private String partitionKey;
     private String sortKey;
     private EntityType entityType;
+
     private UUID bankAccountId;
     private AccountType accountType;
     private Currency currency;
     private String iban;
     private AccountStatus status;
+
     private UUID accountHolderId;
     private String accountHolderName;
     private String passportNumber;
     private LocalDate dateOfBirth;
     private AccountHolderType accountHolderType;
+
     private Instant createdAt;
     private ZoneId createdAtZoneId;
 

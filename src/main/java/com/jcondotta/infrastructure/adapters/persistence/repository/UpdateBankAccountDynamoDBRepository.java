@@ -2,10 +2,9 @@ package com.jcondotta.infrastructure.adapters.persistence.repository;
 
 import com.jcondotta.application.ports.output.repository.UpdateBankAccountRepository;
 import com.jcondotta.domain.bankaccount.model.BankAccount;
-import com.jcondotta.infrastructure.adapters.persistence.entity.BankAccountKey;
+import com.jcondotta.infrastructure.adapters.persistence.entity.BankAccountEntityKey;
 import com.jcondotta.infrastructure.adapters.persistence.entity.BankingEntity;
 import com.jcondotta.infrastructure.adapters.persistence.mapper.BankAccountEntityMapper;
-import com.jcondotta.infrastructure.adapters.persistence.mapper.BankingEntityAssemblerMapper;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,15 +27,14 @@ public class UpdateBankAccountDynamoDBRepository implements UpdateBankAccountRep
 
     private final DynamoDbEnhancedClient dynamoDbEnhancedClient;
     private final DynamoDbTable<BankingEntity> bankingEntityDynamoDbTable;
-    private final BankAccountEntityMapper mapper;
-    private final BankingEntityAssemblerMapper bankingEntityAssemblerMapper;
+    private final BankAccountEntityMapper bankAccountEntityMapper;
 
     @Override
     public void update(BankAccount bankAccount) {
         LOGGER.info("Updating bank account and holders for ID: {}", bankAccount.bankAccountId());
 
         // Novas entidades geradas a partir do estado atual no domínio
-        var newEntities = bankingEntityAssemblerMapper.toEntities(bankAccount);
+        var newEntities = bankAccountEntityMapper.toEntities(bankAccount);
 
         // Obtem os SKs das novas entidades (normalmente: BANK_ACCOUNT, ACCOUNT_HOLDER#xxx, etc.)
         Set<String> currentSkSet = newEntities.stream()
@@ -46,7 +44,7 @@ public class UpdateBankAccountDynamoDBRepository implements UpdateBankAccountRep
         // Consulta todos os registros atuais no DynamoDB para a PK da conta
         List<BankingEntity> existingEntities = bankingEntityDynamoDbTable
             .query(r -> r.queryConditional(QueryConditional.keyEqualTo(
-                Key.builder().partitionValue(BankAccountKey.partitionKey(bankAccount.bankAccountId())).build()
+                Key.builder().partitionValue(BankAccountEntityKey.partitionKey(bankAccount.bankAccountId())).build()
             )))
             .items()
             .stream()

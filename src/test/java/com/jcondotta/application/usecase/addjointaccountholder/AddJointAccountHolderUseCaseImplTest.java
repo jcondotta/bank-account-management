@@ -1,22 +1,21 @@
 package com.jcondotta.application.usecase.addjointaccountholder;
 
 import com.jcondotta.application.ports.output.cache.CacheStore;
-import com.jcondotta.application.ports.output.repository.BankAccountLookupRepository;
+import com.jcondotta.application.ports.output.repository.LookupBankAccountRepository;
 import com.jcondotta.application.ports.output.repository.UpdateBankAccountRepository;
 import com.jcondotta.application.usecase.addjointaccountholder.mapper.AddJointAccountHolderResultMapper;
 import com.jcondotta.application.usecase.addjointaccountholder.model.AddJointAccountHolderCommand;
 import com.jcondotta.application.usecase.addjointaccountholder.model.AddJointAccountHolderResult;
-import com.jcondotta.application.usecase.shared.model.CreateAccountHolderData;
+import com.jcondotta.application.usecase.shared.helper.TestCreateAccountHolderData;
 import com.jcondotta.argument_provider.AccountTypeAndCurrencyArgumentsProvider;
 import com.jcondotta.config.TestBankAccountFactory;
 import com.jcondotta.config.TestClockConfig;
 import com.jcondotta.domain.bankaccount.enums.AccountType;
+import com.jcondotta.domain.bankaccount.enums.Currency;
 import com.jcondotta.domain.bankaccount.exceptions.BankAccountNotFoundException;
 import com.jcondotta.domain.bankaccount.model.BankAccount;
 import com.jcondotta.domain.bankaccount.valueobjects.BankAccountId;
 import com.jcondotta.domain.shared.DomainErrorMessages;
-import com.jcondotta.domain.bankaccount.enums.Currency;
-import com.jcondotta.helper.TestAccountHolderRequest;
 import com.jcondotta.infrastructure.adapters.cache.BankAccountCacheKey;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,7 +27,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Clock;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,10 +36,6 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class AddJointAccountHolderUseCaseImplTest {
 
-    private static final String ACCOUNT_HOLDER_NAME = TestAccountHolderRequest.JEFFERSON.getAccountHolderName();
-    private static final String PASSPORT_NUMBER = TestAccountHolderRequest.JEFFERSON.getPassportNumber();
-    private static final LocalDate DATE_OF_BIRTH = TestAccountHolderRequest.JEFFERSON.getDateOfBirth();
-
     private static final Clock FIXED_CLOCK = TestClockConfig.FIXED_CLOCK;
     private static final BankAccountId BANK_ACCOUNT_ID = BankAccountId.newId();
 
@@ -49,7 +43,7 @@ class AddJointAccountHolderUseCaseImplTest {
     private UpdateBankAccountRepository updateRepository;
 
     @Mock
-    private BankAccountLookupRepository lookupRepository;
+    private LookupBankAccountRepository lookupRepository;
 
     @Mock
     private CacheStore<BankAccount> cacheStore;
@@ -70,7 +64,7 @@ class AddJointAccountHolderUseCaseImplTest {
     @ParameterizedTest
     @ArgumentsSource(AccountTypeAndCurrencyArgumentsProvider.class)
     void shouldAddJointAccountHolder_whenBankAccountExists(AccountType accountType, Currency currency) {
-        var accountHolderData = CreateAccountHolderData.of(ACCOUNT_HOLDER_NAME, DATE_OF_BIRTH, PASSPORT_NUMBER);
+        var accountHolderData = TestCreateAccountHolderData.JEFFERSON.toCreateAccountHolderData();
         var command = AddJointAccountHolderCommand.of(BANK_ACCOUNT_ID, accountHolderData);
 
         var primaryAccountHolderName = "Primary Account Holder";
@@ -88,9 +82,9 @@ class AddJointAccountHolderUseCaseImplTest {
             .first()
                 .satisfies(accountHolder -> {
                     assertThat(accountHolder.accountHolderId().value()).isNotNull();
-                    assertThat(accountHolder.accountHolderName().value()).isEqualTo(ACCOUNT_HOLDER_NAME);
-                    assertThat(accountHolder.dateOfBirth().value()).isEqualTo(DATE_OF_BIRTH);
-                    assertThat(accountHolder.passportNumber().value()).isEqualTo(PASSPORT_NUMBER);
+                    assertThat(accountHolder.accountHolderName()).isEqualTo(accountHolderData.accountHolderName());
+                    assertThat(accountHolder.dateOfBirth()).isEqualTo(accountHolderData.dateOfBirth());
+                    assertThat(accountHolder.passportNumber()).isEqualTo(accountHolderData.passportNumber());
                     assertThat(accountHolder.createdAt().value()).isEqualTo(Instant.now(FIXED_CLOCK));
                     assertThat(accountHolder.createdAt().zoneId()).isEqualTo(FIXED_CLOCK.getZone());
                 });
@@ -102,7 +96,7 @@ class AddJointAccountHolderUseCaseImplTest {
 
     @Test
     void shouldThrowBankAccountNotFoundException_whenBankAccountDoesNotExist() {
-        var accountHolderData = CreateAccountHolderData.of(ACCOUNT_HOLDER_NAME, DATE_OF_BIRTH, PASSPORT_NUMBER);
+        var accountHolderData = TestCreateAccountHolderData.JEFFERSON.toCreateAccountHolderData();
         var command = AddJointAccountHolderCommand.of(BANK_ACCOUNT_ID, accountHolderData);
 
         when(lookupRepository.lookup(BANK_ACCOUNT_ID)).thenReturn(Optional.empty());
@@ -116,7 +110,7 @@ class AddJointAccountHolderUseCaseImplTest {
 
     @Test
     void shouldStillReturnResult_whenCacheFails() {
-        var accountHolderData = CreateAccountHolderData.of(ACCOUNT_HOLDER_NAME, DATE_OF_BIRTH, PASSPORT_NUMBER);
+        var accountHolderData = TestCreateAccountHolderData.JEFFERSON.toCreateAccountHolderData();
         var command = AddJointAccountHolderCommand.of(BANK_ACCOUNT_ID, accountHolderData);
 
         var primaryAccountHolderName = "Primary Account Holder";
@@ -135,7 +129,7 @@ class AddJointAccountHolderUseCaseImplTest {
 
     @Test
     void shouldThrow_whenResultMapperFails() {
-        var accountHolderData = CreateAccountHolderData.of(ACCOUNT_HOLDER_NAME, DATE_OF_BIRTH, PASSPORT_NUMBER);
+        var accountHolderData = TestCreateAccountHolderData.JEFFERSON.toCreateAccountHolderData();
         var command = AddJointAccountHolderCommand.of(BANK_ACCOUNT_ID, accountHolderData);
 
         var primaryAccountHolderName = "Primary Account Holder";

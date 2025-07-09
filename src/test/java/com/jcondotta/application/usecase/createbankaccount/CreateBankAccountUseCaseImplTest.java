@@ -11,7 +11,7 @@ import com.jcondotta.config.TestClockConfig;
 import com.jcondotta.domain.bankaccount.enums.AccountType;
 import com.jcondotta.domain.bankaccount.model.BankAccount;
 import com.jcondotta.domain.bankaccount.enums.Currency;
-import com.jcondotta.helper.TestAccountHolderRequest;
+import com.jcondotta.application.usecase.shared.helper.TestCreateAccountHolderData;
 import com.jcondotta.infrastructure.adapters.cache.BankAccountCacheKey;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,10 +33,6 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class CreateBankAccountUseCaseImplTest {
-
-    private static final String ACCOUNT_HOLDER_NAME = TestAccountHolderRequest.JEFFERSON.getAccountHolderName();
-    private static final String PASSPORT_NUMBER = TestAccountHolderRequest.JEFFERSON.getPassportNumber();
-    private static final LocalDate DATE_OF_BIRTH = TestAccountHolderRequest.JEFFERSON.getDateOfBirth();
 
     private static final Clock FIXED_CLOCK = TestClockConfig.FIXED_CLOCK;
 
@@ -62,7 +58,7 @@ class CreateBankAccountUseCaseImplTest {
     @ParameterizedTest
     @ArgumentsSource(AccountTypeAndCurrencyArgumentsProvider.class)
     void shouldCreateBankAccountAndCacheIt_whenCommandIsValid(AccountType accountType, Currency currency) {
-        var accountHolderData = CreateAccountHolderData.of(ACCOUNT_HOLDER_NAME, DATE_OF_BIRTH, PASSPORT_NUMBER);
+        var accountHolderData = TestCreateAccountHolderData.JEFFERSON.toCreateAccountHolderData();
         var createBankAccountCommand = CreateBankAccountCommand.of(accountType, currency, accountHolderData);
 
         useCase.execute(createBankAccountCommand);
@@ -81,23 +77,23 @@ class CreateBankAccountUseCaseImplTest {
                     assertThat(bankAccount.accountHolders()).hasSize(1);
                     assertThat(bankAccount.getPrimaryAccountHolder())
                             .satisfies(accountHolder -> {
-                                assertThat(accountHolder.accountHolderName().value()).isEqualTo(ACCOUNT_HOLDER_NAME);
-                                assertThat(accountHolder.passportNumber().value()).isEqualTo(PASSPORT_NUMBER);
-                                assertThat(accountHolder.dateOfBirth().value()).isEqualTo(DATE_OF_BIRTH);
+                                assertThat(accountHolder.accountHolderName()).isEqualTo(accountHolderData.accountHolderName());
+                                assertThat(accountHolder.passportNumber()).isEqualTo(accountHolderData.passportNumber());
+                                assertThat(accountHolder.dateOfBirth()).isEqualTo(accountHolderData.dateOfBirth());
                                 assertThat(accountHolder.createdAt().value()).isEqualTo(Instant.now(FIXED_CLOCK));
                                 assertThat(accountHolder.createdAt().zoneId()).isEqualTo(FIXED_CLOCK.getZone());
                             });;
                 });
 
-        verify(cacheStore).put(BankAccountCacheKey.bankAccountIdKey(savedBankAccount.bankAccountId()), savedBankAccount);
+        verify(cacheStore).put(BankAccountCacheKey.of(savedBankAccount.bankAccountId()), savedBankAccount);
         verify(resultMapper).toResult(savedBankAccount);
     }
 
     @ParameterizedTest
     @ArgumentsSource(AccountTypeAndCurrencyArgumentsProvider.class)
     void shouldThrow_whenRepositoryFails(AccountType accountType, Currency currency) {
-        var command = CreateBankAccountCommand.of(accountType, currency,
-            CreateAccountHolderData.of(ACCOUNT_HOLDER_NAME, DATE_OF_BIRTH, PASSPORT_NUMBER));
+        var accountHolderData = TestCreateAccountHolderData.JEFFERSON.toCreateAccountHolderData();
+        var command = CreateBankAccountCommand.of(accountType, currency, accountHolderData);
 
         doThrow(new RuntimeException("DB error")).when(repository).save(any());
 
@@ -112,8 +108,8 @@ class CreateBankAccountUseCaseImplTest {
     @ParameterizedTest
     @ArgumentsSource(AccountTypeAndCurrencyArgumentsProvider.class)
     void shouldStillReturnResult_whenCacheFails(AccountType accountType, Currency currency) {
-        var command = CreateBankAccountCommand.of(accountType, currency,
-            CreateAccountHolderData.of(ACCOUNT_HOLDER_NAME, DATE_OF_BIRTH, PASSPORT_NUMBER));
+        var accountHolderData = TestCreateAccountHolderData.JEFFERSON.toCreateAccountHolderData();
+        var command = CreateBankAccountCommand.of(accountType, currency, accountHolderData);
 
         var expectedResult = mock(CreateBankAccountResult.class);
         when(resultMapper.toResult(any())).thenReturn(expectedResult);
@@ -129,8 +125,8 @@ class CreateBankAccountUseCaseImplTest {
     @ParameterizedTest
     @ArgumentsSource(AccountTypeAndCurrencyArgumentsProvider.class)
     void shouldThrow_whenResultMapperFails(AccountType accountType, Currency currency) {
-        var command = CreateBankAccountCommand.of(accountType, currency,
-            CreateAccountHolderData.of(ACCOUNT_HOLDER_NAME, DATE_OF_BIRTH, PASSPORT_NUMBER));
+        var accountHolderData = TestCreateAccountHolderData.JEFFERSON.toCreateAccountHolderData();
+        var command = CreateBankAccountCommand.of(accountType, currency, accountHolderData);
 
         when(resultMapper.toResult(any())).thenThrow(new IllegalStateException("mapping failed"));
 

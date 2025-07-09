@@ -1,11 +1,11 @@
 package com.jcondotta.infrastructure.adapters.persistence.repository;
 
-import com.jcondotta.application.ports.output.repository.BankAccountLookupRepository;
+import com.jcondotta.application.ports.output.repository.LookupBankAccountRepository;
 import com.jcondotta.domain.bankaccount.model.BankAccount;
 import com.jcondotta.domain.bankaccount.valueobjects.BankAccountId;
-import com.jcondotta.infrastructure.adapters.persistence.entity.BankAccountKey;
+import com.jcondotta.infrastructure.adapters.persistence.entity.BankAccountEntityKey;
 import com.jcondotta.infrastructure.adapters.persistence.entity.BankingEntity;
-import com.jcondotta.infrastructure.adapters.persistence.mapper.BankingEntityAssemblerMapper;
+import com.jcondotta.infrastructure.adapters.persistence.mapper.BankAccountEntityMapper;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,16 +19,16 @@ import java.util.Optional;
 
 @Repository
 @AllArgsConstructor
-public class BankAccountLookupDynamoDBRepository implements BankAccountLookupRepository {
+public class LookupDynamoDBBankAccountRepository implements LookupBankAccountRepository {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(BankAccountLookupDynamoDBRepository.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LookupDynamoDBBankAccountRepository.class);
 
     private final DynamoDbTable<BankingEntity> bankingEntityDynamoDbTable;
-    private final BankingEntityAssemblerMapper bankingEntityAssemblerMapper;
+    private final BankAccountEntityMapper bankAccountEntityMapper;
 
     @Override
     public Optional<BankAccount> lookup(BankAccountId bankAccountId) {
-        var partitionKey = BankAccountKey.partitionKey(bankAccountId);
+        var partitionKey = BankAccountEntityKey.partitionKey(bankAccountId);
         var queryConditional = QueryConditional.keyEqualTo(Key.builder()
             .partitionValue(partitionKey)
             .build());
@@ -45,7 +45,7 @@ public class BankAccountLookupDynamoDBRepository implements BankAccountLookupRep
         return Optional.ofNullable(findBankAccountEntity(bankingEntities))
             .map(bankAccountEntity -> {
                 var accountHolderEntities = findAccountHolderEntities(bankingEntities);
-                return bankingEntityAssemblerMapper.toBankAccount(bankAccountEntity, accountHolderEntities);
+                return bankAccountEntityMapper.toDomain(bankAccountEntity, accountHolderEntities);
             });
     }
 

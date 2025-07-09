@@ -7,7 +7,7 @@ import com.jcondotta.domain.accountholder.valueobjects.DateOfBirth;
 import com.jcondotta.domain.accountholder.valueobjects.PassportNumber;
 import com.jcondotta.domain.bankaccount.valueobjects.BankAccountId;
 import com.jcondotta.domain.shared.valueobjects.CreatedAt;
-import com.jcondotta.infrastructure.adapters.persistence.entity.AccountHolderKey;
+import com.jcondotta.infrastructure.adapters.persistence.entity.AccountHolderEntityKey;
 import com.jcondotta.infrastructure.adapters.persistence.entity.BankingEntity;
 import com.jcondotta.infrastructure.adapters.persistence.enums.EntityType;
 import org.mapstruct.Mapper;
@@ -17,8 +17,8 @@ public interface AccountHolderEntityMapper {
 
     default BankingEntity toEntity(BankAccountId bankAccountId, AccountHolder accountHolder){
         return BankingEntity.builder()
-            .partitionKey(AccountHolderKey.partitionKey(bankAccountId))
-            .sortKey(AccountHolderKey.sortKey(accountHolder.accountHolderId()))
+            .partitionKey(AccountHolderEntityKey.partitionKey(bankAccountId))
+            .sortKey(AccountHolderEntityKey.sortKey(accountHolder.accountHolderId()))
             .entityType(EntityType.ACCOUNT_HOLDER)
             .bankAccountId(bankAccountId.value())
             .accountHolderId(accountHolder.accountHolderId().value())

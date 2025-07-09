@@ -8,7 +8,7 @@ import java.util.Optional;
 /** * Repository interface for looking up bank accounts.
  * This interface defines a method to look up a bank account based on a BankAccountId.
  */
-public interface BankAccountLookupRepository {
+public interface LookupBankAccountRepository {
 
     /**
      * Looks up a bank account based on the provided BankAccountId.

@@ -6,7 +6,7 @@ import com.jcondotta.config.TestBankAccountFactory;
 import com.jcondotta.config.TestClockConfig;
 import com.jcondotta.domain.bankaccount.enums.AccountType;
 import com.jcondotta.domain.bankaccount.enums.Currency;
-import com.jcondotta.helper.TestAccountHolderRequest;
+import com.jcondotta.application.usecase.shared.helper.TestCreateAccountHolderData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 class BankAccountDetailsMapperImplTest {
 
-    private static final String ACCOUNT_HOLDER_NAME = TestAccountHolderRequest.JEFFERSON.getAccountHolderName();
+    private static final String ACCOUNT_HOLDER_NAME = TestCreateAccountHolderData.JEFFERSON.getAccountHolderName().value();
     private static final Clock FIXED_CLOCK = TestClockConfig.FIXED_CLOCK;
 
     private BankAccountDetailsMapper mapper;

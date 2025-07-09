@@ -1,5 +1,6 @@
 package com.jcondotta.domain.accountholder.model;
 
+import com.jcondotta.application.usecase.shared.helper.TestCreateAccountHolderData;
 import com.jcondotta.config.TestClockConfig;
 import com.jcondotta.domain.accountholder.enums.AccountHolderType;
 import com.jcondotta.domain.accountholder.valueobjects.AccountHolderId;
@@ -8,7 +9,6 @@ import com.jcondotta.domain.accountholder.valueobjects.DateOfBirth;
 import com.jcondotta.domain.accountholder.valueobjects.PassportNumber;
 import com.jcondotta.domain.shared.ValidationErrors;
 import com.jcondotta.domain.shared.valueobjects.CreatedAt;
-import com.jcondotta.helper.TestAccountHolderRequest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -25,9 +25,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @ExtendWith(MockitoExtension.class)
 class AccountHolderTest {
 
-    private static final String ACCOUNT_HOLDER_NAME_JEFFERSON = TestAccountHolderRequest.JEFFERSON.getAccountHolderName();
-    private static final String PASSPORT_NUMBER_JEFFERSON = TestAccountHolderRequest.JEFFERSON.getPassportNumber();
-    private static final LocalDate DATE_OF_BIRTH_JEFFERSON = TestAccountHolderRequest.JEFFERSON.getDateOfBirth();
+    private static final String ACCOUNT_HOLDER_NAME_JEFFERSON = TestCreateAccountHolderData.JEFFERSON.getAccountHolderName().value();
+    private static final String PASSPORT_NUMBER_JEFFERSON = TestCreateAccountHolderData.JEFFERSON.getPassportNumber().value();
+    private static final LocalDate DATE_OF_BIRTH_JEFFERSON = TestCreateAccountHolderData.JEFFERSON.getDateOfBirth().value();
 
     private static final Clock FIXED_CLOCK = TestClockConfig.FIXED_CLOCK;
 

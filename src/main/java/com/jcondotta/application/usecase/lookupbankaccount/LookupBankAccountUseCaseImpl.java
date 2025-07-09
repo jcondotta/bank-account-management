@@ -1,7 +1,7 @@
 package com.jcondotta.application.usecase.lookupbankaccount;
 
 import com.jcondotta.application.ports.output.cache.CacheStore;
-import com.jcondotta.application.ports.output.repository.BankAccountLookupRepository;
+import com.jcondotta.application.ports.output.repository.LookupBankAccountRepository;
 import com.jcondotta.application.usecase.lookupbankaccount.mapper.LookupBankAccountResultMapper;
 import com.jcondotta.application.usecase.lookupbankaccount.model.LookupBankAccountResult;
 import com.jcondotta.domain.bankaccount.exceptions.BankAccountNotFoundException;
@@ -15,15 +15,15 @@ import org.springframework.stereotype.Component;
 @AllArgsConstructor
 public class LookupBankAccountUseCaseImpl implements LookupBankAccountUseCase {
 
-    private final BankAccountLookupRepository bankAccountLookupRepository;
+    private final LookupBankAccountRepository lookupBankAccountRepository;
     private final LookupBankAccountResultMapper resultMapper;
     private final CacheStore<BankAccount> cacheStore;
 
     @Override
     public LookupBankAccountResult lookup(BankAccountId bankAccountId) {
-        var bankAccountIdCacheKey = BankAccountCacheKey.bankAccountIdKey(bankAccountId);
+        var bankAccountIdCacheKey = BankAccountCacheKey.of(bankAccountId);
 
-        return cacheStore.getOrFetch(bankAccountIdCacheKey, () -> bankAccountLookupRepository.lookup(bankAccountId))
+        return cacheStore.getOrFetch(bankAccountIdCacheKey, () -> lookupBankAccountRepository.lookup(bankAccountId))
             .map(resultMapper::toResult)
             .orElseThrow(() -> new BankAccountNotFoundException(bankAccountId));
     }

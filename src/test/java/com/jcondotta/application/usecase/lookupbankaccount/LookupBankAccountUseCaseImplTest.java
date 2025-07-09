@@ -1,19 +1,16 @@
 package com.jcondotta.application.usecase.lookupbankaccount;
 
 import com.jcondotta.application.ports.output.cache.CacheStore;
-import com.jcondotta.application.ports.output.repository.BankAccountLookupRepository;
+import com.jcondotta.application.ports.output.repository.LookupBankAccountRepository;
 import com.jcondotta.application.usecase.lookupbankaccount.mapper.LookupBankAccountResultMapper;
-import com.jcondotta.application.usecase.lookupbankaccount.mapper.LookupBankAccountResultMapperImpl;
 import com.jcondotta.application.usecase.lookupbankaccount.model.LookupBankAccountResult;
-import com.jcondotta.application.usecase.shared.mapper.AccountHolderDetailsMapperImpl;
-import com.jcondotta.application.usecase.shared.mapper.BankAccountDetailsMapperImpl;
 import com.jcondotta.config.TestBankAccountFactory;
 import com.jcondotta.config.TestClockConfig;
 import com.jcondotta.domain.bankaccount.exceptions.BankAccountNotFoundException;
 import com.jcondotta.domain.bankaccount.model.BankAccount;
 import com.jcondotta.domain.bankaccount.valueobjects.BankAccountId;
 import com.jcondotta.domain.shared.DomainErrorMessages;
-import com.jcondotta.helper.TestAccountHolderRequest;
+import com.jcondotta.application.usecase.shared.helper.TestCreateAccountHolderData;
 import com.jcondotta.infrastructure.adapters.cache.BankAccountCacheKey;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,7 +30,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class LookupBankAccountUseCaseImplTest {
 
-    private static final String ACCOUNT_HOLDER_NAME = TestAccountHolderRequest.JEFFERSON.getAccountHolderName();
+    private static final String ACCOUNT_HOLDER_NAME = TestCreateAccountHolderData.JEFFERSON.getAccountHolderName().value();
 
     private static final Clock FIXED_CLOCK = TestClockConfig.FIXED_CLOCK;
 
@@ -41,7 +38,7 @@ class LookupBankAccountUseCaseImplTest {
     private LookupBankAccountResult lookupBankAccountResultMock;
 
     @Mock
-    private BankAccountLookupRepository lookupRepository;
+    private LookupBankAccountRepository lookupRepository;
 
     @Mock
     private LookupBankAccountResultMapper resultMapper;
@@ -103,7 +100,7 @@ class LookupBankAccountUseCaseImplTest {
             .isInstanceOf(BankAccountNotFoundException.class)
             .hasMessage(DomainErrorMessages.BANK_ACCOUNT_NOT_FOUND_MESSAGE);
 
-        verify(cacheStore).getOrFetch(eq(BankAccountCacheKey.bankAccountIdKey(nonExistentBankAccountId)), any());
+        verify(cacheStore).getOrFetch(eq(BankAccountCacheKey.of(nonExistentBankAccountId)), any());
         verifyNoInteractions(resultMapper);
     }
 }

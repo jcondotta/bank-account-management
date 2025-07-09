@@ -1,23 +1,18 @@
 package com.jcondotta.domain.bankaccount.model;
 
+import com.jcondotta.application.usecase.shared.helper.TestCreateAccountHolderData;
 import com.jcondotta.argument_provider.AccountTypeAndCurrencyArgumentsProvider;
 import com.jcondotta.config.TestAccountHolderFactory;
 import com.jcondotta.config.TestBankAccountFactory;
 import com.jcondotta.config.TestClockConfig;
-import com.jcondotta.domain.accountholder.exceptions.AccountHolderNotFoundException;
 import com.jcondotta.domain.accountholder.model.AccountHolder;
 import com.jcondotta.domain.accountholder.valueobjects.AccountHolderId;
-import com.jcondotta.domain.accountholder.valueobjects.AccountHolderName;
-import com.jcondotta.domain.accountholder.valueobjects.DateOfBirth;
-import com.jcondotta.domain.accountholder.valueobjects.PassportNumber;
 import com.jcondotta.domain.bankaccount.enums.AccountType;
+import com.jcondotta.domain.bankaccount.enums.Currency;
 import com.jcondotta.domain.bankaccount.exceptions.MaxJointAccountHoldersExceededException;
-import com.jcondotta.domain.bankaccount.exceptions.PrimaryAccountHolderRemovalNotAllowedException;
 import com.jcondotta.domain.bankaccount.valueobjects.Iban;
 import com.jcondotta.domain.shared.DomainErrorMessages;
-import com.jcondotta.domain.bankaccount.enums.Currency;
 import com.jcondotta.domain.shared.valueobjects.CreatedAt;
-import com.jcondotta.helper.TestAccountHolderRequest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -25,7 +20,6 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Clock;
-import java.time.LocalDate;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,21 +28,17 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @ExtendWith(MockitoExtension.class)
 class BankAccountTest {
 
-    private static final String ACCOUNT_HOLDER_NAME = TestAccountHolderRequest.JEFFERSON.getAccountHolderName();
-    private static final String PASSPORT_NUMBER = TestAccountHolderRequest.JEFFERSON.getPassportNumber();
-    private static final LocalDate DATE_OF_BIRTH = TestAccountHolderRequest.JEFFERSON.getDateOfBirth();
+    private static final String ACCOUNT_HOLDER_NAME = TestCreateAccountHolderData.JEFFERSON.getAccountHolderName().value();
 
     private static final Clock FIXED_CLOCK = TestClockConfig.FIXED_CLOCK;
 
-    private static final AccountHolderName ACCOUNT_HOLDER_NAME_VO = AccountHolderName.of(ACCOUNT_HOLDER_NAME);
-    private static final PassportNumber PASSPORT_NUMBER_VO = PassportNumber.of(PASSPORT_NUMBER);
-    private static final DateOfBirth DATE_OF_BIRTH_VO = DateOfBirth.of(DATE_OF_BIRTH);
     private static final Iban IBAN_VO = Iban.generate();
 
     @ParameterizedTest
     @ArgumentsSource(AccountTypeAndCurrencyArgumentsProvider.class)
     void shouldOpenBankAccountWithPrimaryHolder(AccountType accountType, Currency currency) {
-        var primaryAccountHolder = AccountHolder.createPrimary(ACCOUNT_HOLDER_NAME_VO, PASSPORT_NUMBER_VO, DATE_OF_BIRTH_VO, FIXED_CLOCK);
+        var accountHolderData = TestCreateAccountHolderData.JEFFERSON.toCreateAccountHolderData();
+        var primaryAccountHolder = AccountHolder.createPrimary(accountHolderData, FIXED_CLOCK);
         var bankAccount = BankAccount.openBankAccount(accountType, currency, IBAN_VO, primaryAccountHolder, FIXED_CLOCK);
 
         assertThat(bankAccount)
@@ -86,47 +76,6 @@ class BankAccountTest {
     void shouldReturnEmpty_whenAccountHolderIdIsNull() {
         var bankAccount = TestBankAccountFactory.createWithPrimaryAccountHolder(ACCOUNT_HOLDER_NAME);
         assertThat(bankAccount.findAccountHolder(null)).isEmpty();
-    }
-
-    @Test
-    void shouldRemoveAccountHolder_whenAccountHolderIsPresent() {
-        var bankAccount = TestBankAccountFactory.createWithPrimaryAccountHolder(ACCOUNT_HOLDER_NAME);
-
-        var jointAccountHolder = TestAccountHolderFactory.createJointWithName("Joint Account Holder #1");
-        bankAccount.addJointAccountHolder(jointAccountHolder);
-
-        bankAccount.removeJointAccountHolder(jointAccountHolder.accountHolderId());
-        assertThat(bankAccount.jointAccountHolders()).isEmpty();
-    }
-
-    @Test
-    void shouldThrowAccountHolderNotFoundException_whenAccountHolderIsNotPresent() {
-        var bankAccount = TestBankAccountFactory.createWithPrimaryAccountHolder(ACCOUNT_HOLDER_NAME);
-
-        var jointAccountHolder = TestAccountHolderFactory.createJointWithName("Joint Account Holder #1");
-        bankAccount.addJointAccountHolder(jointAccountHolder);
-
-        assertThatThrownBy(() -> bankAccount.removeJointAccountHolder(AccountHolderId.newId()))
-            .isInstanceOf(AccountHolderNotFoundException.class);
-
-        assertThat(bankAccount.jointAccountHolders())
-            .isNotEmpty()
-            .hasSize(1)
-            .containsExactly(jointAccountHolder);
-    }
-
-    @ParameterizedTest
-    @ArgumentsSource(AccountTypeAndCurrencyArgumentsProvider.class)
-    void shouldThrowPrimaryAccountHolderRemovalNotAllowedException_whenAccountHolderIsPrimary(AccountType accountType, Currency currency) {
-        var bankAccount = TestBankAccountFactory.createWithPrimaryAccountHolder(accountType, currency, ACCOUNT_HOLDER_NAME);
-        var primaryAccountHolder = bankAccount.getPrimaryAccountHolder();
-
-        assertThatThrownBy(() -> bankAccount.removeJointAccountHolder(primaryAccountHolder.accountHolderId()))
-            .isInstanceOf(PrimaryAccountHolderRemovalNotAllowedException.class)
-            .satisfies(throwable -> {
-                var exception = (PrimaryAccountHolderRemovalNotAllowedException) throwable;
-                assertThat(exception.getMessage()).isEqualTo("Only joint account holders can be added");
-            });
     }
 
     @ParameterizedTest

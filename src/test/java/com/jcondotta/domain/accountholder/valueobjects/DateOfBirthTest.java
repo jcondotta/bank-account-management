@@ -1,7 +1,7 @@
 package com.jcondotta.domain.accountholder.valueobjects;
 
 import com.jcondotta.domain.shared.ValidationErrors;
-import com.jcondotta.helper.TestAccountHolderRequest;
+import com.jcondotta.application.usecase.shared.helper.TestCreateAccountHolderData;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -14,7 +14,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @ExtendWith(MockitoExtension.class)
 class DateOfBirthTest {
 
-    private static final LocalDate DATE_OF_BIRTH_JEFFERSON = TestAccountHolderRequest.JEFFERSON.getDateOfBirth();
+    private static final LocalDate DATE_OF_BIRTH_JEFFERSON = TestCreateAccountHolderData.JEFFERSON.getDateOfBirth().value();
 
     @Test
     void shouldCreateDateOfBirth_whenValueIsValid() {

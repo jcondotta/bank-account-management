@@ -13,8 +13,6 @@ spring:
       host: localhost
       port: 6379
 
-
-
 aws:
   region: ${AWS_DEFAULT_REGION}
   dynamodb:

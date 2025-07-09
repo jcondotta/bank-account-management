@@ -1,14 +1,16 @@
 package com.jcondotta.domain.accountholder.valueobjects;
 
+import java.util.Objects;
+
 public record PassportNumber(String value) {
 
     public static final int LENGTH = 8;
 
-//    public PassportNumber {
-//        String normalized = normalize(value);
-//        validate(normalized);
-//        this.value = normalized;
-//    }
+    public PassportNumber {
+        String normalized = normalize(value);
+        validate(normalized);
+        value = normalized;
+    }
 
     public static PassportNumber of(String value) {
         return new PassportNumber(value);
@@ -19,7 +21,9 @@ public record PassportNumber(String value) {
     }
 
     private static void validate(String value) {
-        if (value == null || value.isBlank()) {
+        Objects.requireNonNull(value, "Passport number must not be null.");
+
+        if (value.isBlank()) {
             throw new IllegalArgumentException("Passport number must not be blank.");
         }
 

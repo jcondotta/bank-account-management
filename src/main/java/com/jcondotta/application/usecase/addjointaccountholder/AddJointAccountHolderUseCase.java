@@ -3,7 +3,8 @@ package com.jcondotta.application.usecase.addjointaccountholder;
 import com.jcondotta.application.usecase.addjointaccountholder.model.AddJointAccountHolderCommand;
 import com.jcondotta.application.usecase.addjointaccountholder.model.AddJointAccountHolderResult;
 
-/** * Use case interface for adding a joint account holder to a bank account.
+/**
+ * Use case interface for adding a joint account holder to a bank account.
  * This interface defines the contract for the use case that handles the addition of a joint account holder.
  */
 public interface AddJointAccountHolderUseCase {

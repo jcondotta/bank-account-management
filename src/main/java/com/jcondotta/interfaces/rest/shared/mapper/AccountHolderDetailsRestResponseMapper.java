@@ -13,8 +13,8 @@ public interface AccountHolderDetailsRestResponseMapper {
             .accountHolderName(holder.accountHolderName().value())
             .passportNumber(holder.passportNumber().value())
             .dateOfBirth(holder.dateOfBirth().value())
-            .accountHolderType(holder.accountHolderType().value())
-            .createdAt(holder.createdAt().value())
+            .accountHolderType(holder.accountHolderType())
+            .createdAt(holder.createdAt().asZonedDateTime())
             .build();
     }
 }

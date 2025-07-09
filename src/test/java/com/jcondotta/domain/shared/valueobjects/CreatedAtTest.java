@@ -1,81 +1,128 @@
 package com.jcondotta.domain.shared.valueobjects;
 
-import com.jcondotta.domain.shared.ValidationErrors;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Clock;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@ExtendWith(MockitoExtension.class)
 class CreatedAtTest {
 
-//    private static final Clock FIXED_CLOCK = Clock.fixed(
-//        LocalDateTime.of(2024, 6, 30, 12, 0).toInstant(ZoneOffset.UTC),
-//        ZoneId.of("UTC")
-//    );
-//
-//    private static final LocalDateTime VALID_CREATED_AT = LocalDateTime.of(2024, 6, 30, 11, 59);
-//
-//    @Test
-//    void shouldCreateCreatedAt_whenValueIsValid() {
-//        var createdAt = CreatedAt.of(VALID_CREATED_AT, FIXED_CLOCK);
-//
-//        assertThat(createdAt)
-//            .isNotNull()
-//            .isInstanceOf(CreatedAt.class)
-//            .extracting(CreatedAt::value)
-//            .isEqualTo(VALID_CREATED_AT);
-//    }
-//
-//    @Test
-//    void shouldThrowNullPointerException_whenCreatedAtIsNull() {
-//        assertThatThrownBy(() -> CreatedAt.of(null, FIXED_CLOCK))
-//            .isInstanceOf(NullPointerException.class)
-//            .hasMessage(ValidationErrors.CREATED_AT_NOT_NULL);
-//    }
-//
-//    @Test
-//    void shouldThrowIllegalArgumentException_whenCreatedAtIsInFuture() {
-//        var futureTime = LocalDateTime.of(2024, 6, 30, 12, 1);
-//
-//        assertThatThrownBy(() -> CreatedAt.of(futureTime, FIXED_CLOCK))
-//            .isInstanceOf(IllegalArgumentException.class)
-//            .hasMessage(ValidationErrors.CREATED_AT_IN_FUTURE);
-//    }
-//
-//    @Test
-//    void shouldCreateNow_whenClockIsProvided() {
-//        var createdAt = CreatedAt.now(FIXED_CLOCK);
-//
-//        assertThat(createdAt.value())
-//            .isEqualTo(LocalDateTime.of(2024, 6, 30, 12, 0));
-//    }
-//
-//    @Test
-//    void shouldBeEqual_whenCreatedAtValuesAreSame() {
-//        var dateTime = LocalDateTime.of(2024, 6, 30, 11, 0);
-//
-//        var createdAt1 = CreatedAt.of(dateTime, FIXED_CLOCK);
-//        var createdAt2 = CreatedAt.of(dateTime, FIXED_CLOCK);
-//
-//        assertThat(createdAt1)
-//            .isEqualTo(createdAt2)
-//            .hasSameHashCodeAs(createdAt2);
-//    }
-//
-//    @Test
-//    void shouldNotBeEqual_whenCreatedAtValuesAreDifferent() {
-//        var createdAt1 = CreatedAt.of(LocalDateTime.of(2024, 6, 30, 10, 0), FIXED_CLOCK);
-//        var createdAt2 = CreatedAt.of(LocalDateTime.of(2024, 6, 30, 11, 0), FIXED_CLOCK);
-//
-//        assertThat(createdAt1)
-//            .isNotEqualTo(createdAt2);
-//    }
+    private static final ZoneId MADRID_ZONE = ZoneId.of("Europe/Madrid");
+    private static final ZoneId UTC = ZoneId.of("UTC");
+    private static final Instant FIXED_INSTANT = Instant.parse("2025-07-05T12:00:00Z");
+    private static final Clock FIXED_CLOCK = Clock.fixed(FIXED_INSTANT, MADRID_ZONE);
+
+    @Test
+    void shouldCreateNowWithZoneId() {
+        var before = Instant.now();
+        var createdAt = CreatedAt.now(MADRID_ZONE);
+        var after = Instant.now();
+
+        assertThat(createdAt.zoneId()).isEqualTo(MADRID_ZONE);
+        assertThat(createdAt.value()).isBetween(before.minusSeconds(1), after.plusSeconds(1));
+    }
+
+    @Test
+    void shouldCreateNowWithClock() {
+        var createdAt = CreatedAt.now(FIXED_CLOCK);
+
+        assertThat(createdAt.value()).isEqualTo(FIXED_INSTANT);
+        assertThat(createdAt.zoneId()).isEqualTo(MADRID_ZONE);
+        assertThat(createdAt.asZonedDateTime().getZone()).isEqualTo(MADRID_ZONE);
+    }
+
+    @Test
+    void shouldCreateFromInstantAndZone() {
+        var createdAt = CreatedAt.of(FIXED_INSTANT, MADRID_ZONE);
+
+        assertThat(createdAt.value()).isEqualTo(FIXED_INSTANT);
+        assertThat(createdAt.zoneId()).isEqualTo(MADRID_ZONE);
+    }
+
+    @Test
+    void shouldCreateFromZonedDateTime() {
+        var zonedDateTime = ZonedDateTime.ofInstant(FIXED_INSTANT, MADRID_ZONE);
+        var createdAt = CreatedAt.of(zonedDateTime);
+
+        assertThat(createdAt.value()).isEqualTo(FIXED_INSTANT);
+        assertThat(createdAt.zoneId()).isEqualTo(MADRID_ZONE);
+    }
+
+    @Test
+    void shouldConvertToZonedDateTime() {
+        var createdAt = CreatedAt.of(FIXED_INSTANT, MADRID_ZONE);
+
+        var zoned = createdAt.asZonedDateTime();
+        assertThat(zoned.getZone()).isEqualTo(MADRID_ZONE);
+        assertThat(zoned.toInstant()).isEqualTo(FIXED_INSTANT);
+    }
+
+    @Test
+    void shouldConvertToUTCZonedDateTime() {
+        var createdAt = CreatedAt.of(FIXED_INSTANT, MADRID_ZONE);
+
+        var utcZoned = createdAt.asUTCZonedDateTime();
+        assertThat(utcZoned.getZone()).isEqualTo(UTC);
+        assertThat(utcZoned.toInstant()).isEqualTo(FIXED_INSTANT);
+    }
+
+    @Test
+    void shouldFormatValueAndZoneAsStrings() {
+        var createdAt = CreatedAt.of(FIXED_INSTANT, MADRID_ZONE);
+
+        assertThat(createdAt.valueAsString()).isEqualTo("2025-07-05T12:00:00Z");
+        assertThat(createdAt.zoneIdAsString()).isEqualTo("Europe/Madrid");
+    }
+
+    @Test
+    void shouldToStringAsZonedDateTimeFormat() {
+        var createdAt = CreatedAt.of(FIXED_INSTANT, MADRID_ZONE);
+
+        var expected = ZonedDateTime.ofInstant(FIXED_INSTANT, MADRID_ZONE).toString();
+        assertThat(createdAt.toString()).isEqualTo(expected);
+    }
+
+    @Test
+    void shouldThrowExceptionIfInstantIsNull() {
+        assertThatThrownBy(() -> new CreatedAt(null, MADRID_ZONE))
+            .isInstanceOf(NullPointerException.class)
+            .hasMessage("value must not be null");
+    }
+
+    @Test
+    void shouldThrowExceptionIfZoneIdIsNull() {
+        assertThatThrownBy(() -> new CreatedAt(FIXED_INSTANT, null))
+            .isInstanceOf(NullPointerException.class)
+            .hasMessage("zoneId must not be null");
+    }
+
+    @Test
+    void shouldBeEqualWhenSameInstantAndZone() {
+        var a = CreatedAt.of(FIXED_INSTANT, MADRID_ZONE);
+        var b = CreatedAt.of(FIXED_INSTANT, MADRID_ZONE);
+
+        assertThat(a).isEqualTo(b);
+        assertThat(a.hashCode()).isEqualTo(b.hashCode());
+    }
+
+    @Test
+    void shouldNotBeEqualWhenDifferentZoneId() {
+        var a = CreatedAt.of(FIXED_INSTANT, MADRID_ZONE);
+        var b = CreatedAt.of(FIXED_INSTANT, UTC);
+
+        assertThat(a).isNotEqualTo(b);
+    }
+
+    @Test
+    void shouldNotBeEqualWhenDifferentInstant() {
+        var a = CreatedAt.of(FIXED_INSTANT, MADRID_ZONE);
+        var b = CreatedAt.of(FIXED_INSTANT.plusSeconds(1), MADRID_ZONE);
+
+        assertThat(a).isNotEqualTo(b);
+    }
 }

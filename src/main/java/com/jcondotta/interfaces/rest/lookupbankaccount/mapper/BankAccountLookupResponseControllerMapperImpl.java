@@ -1,6 +1,6 @@
 package com.jcondotta.interfaces.rest.lookupbankaccount.mapper;
 
-import com.jcondotta.application.usecase.lookupbankaccount.model.BankAccountLookupResult;
+import com.jcondotta.application.usecase.lookupbankaccount.model.LookupBankAccountResult;
 import com.jcondotta.interfaces.rest.lookupbankaccount.model.BankAccountLookupRestResponse;
 import com.jcondotta.interfaces.rest.shared.mapper.BankAccountDetailsRestResponseMapper;
 import lombok.AllArgsConstructor;
@@ -12,7 +12,7 @@ public class BankAccountLookupResponseControllerMapperImpl implements BankAccoun
 
     private final BankAccountDetailsRestResponseMapper bankAccountDetailsRestResponseMapper;
 
-    public BankAccountLookupRestResponse toResponse(BankAccountLookupResult result) {
+    public BankAccountLookupRestResponse toResponse(LookupBankAccountResult result) {
         return new BankAccountLookupRestResponse(
             bankAccountDetailsRestResponseMapper.toResponse(result.bankAccountDetails())
         );

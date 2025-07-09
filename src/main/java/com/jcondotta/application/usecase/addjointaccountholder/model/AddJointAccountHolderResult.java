@@ -2,4 +2,11 @@ package com.jcondotta.application.usecase.addjointaccountholder.model;
 
 import com.jcondotta.application.usecase.shared.model.AccountHolderDetails;
 
-public record AddJointAccountHolderResult(AccountHolderDetails accountHolder) { }
+/**
+ * Result of adding a joint account holder.
+ * Contains the details of the newly added account holder.
+ *
+ * @param accountHolder the details of the added joint account holder
+ */
+public record AddJointAccountHolderResult(AccountHolderDetails accountHolder) {
+}

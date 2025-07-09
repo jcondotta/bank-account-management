@@ -22,10 +22,6 @@ public record DateOfBirth(LocalDate value) {
         return new DateOfBirth(value);
     }
 
-    public int age(Clock clock) {
-        return value.until(LocalDate.now(clock)).getYears();
-    }
-
     @Override
     public String toString() {
         return value.toString();

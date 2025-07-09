@@ -4,15 +4,14 @@ import com.jcondotta.application.usecase.addjointaccountholder.model.AddJointAcc
 import com.jcondotta.application.usecase.shared.model.CreateAccountHolderData;
 import com.jcondotta.domain.accountholder.valueobjects.AccountHolderName;
 import com.jcondotta.domain.accountholder.valueobjects.DateOfBirth;
-import com.jcondotta.domain.bankaccount.valueobjects.BankAccountId;
 import com.jcondotta.domain.accountholder.valueobjects.PassportNumber;
+import com.jcondotta.domain.bankaccount.valueobjects.BankAccountId;
 import com.jcondotta.interfaces.rest.addjointaccountholder.model.AddJointAccountHolderRestRequest;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.Clock;
 import java.util.UUID;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)

@@ -3,7 +3,7 @@ package com.jcondotta.interfaces.rest.shared;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.jcondotta.domain.bankaccount.enums.AccountStatus;
 import com.jcondotta.domain.bankaccount.enums.AccountType;
-import com.jcondotta.domain.shared.enums.Currency;
+import com.jcondotta.domain.bankaccount.enums.Currency;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -12,7 +12,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -49,10 +49,10 @@ public class BankAccountDetailsRestResponse {
 
     @NotNull
     @Schema(description = "Date and time when the bank account was opened.",
-        example = "2023-08-23T14:55:00Z",
+        example = "2023-08-23T14:55:00+02:00",
         requiredMode = RequiredMode.REQUIRED)
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
-    LocalDateTime dateOfOpening;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
+    ZonedDateTime dateOfOpening;
 
     @NotNull
     @Schema(description = "Current status of the bank account", allowableValues = {"PENDING", "ACTIVE", "CANCELLED"})

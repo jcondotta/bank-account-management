@@ -5,8 +5,6 @@ import com.jcondotta.application.usecase.shared.model.CreateAccountHolderData;
 import com.jcondotta.domain.accountholder.valueobjects.AccountHolderName;
 import com.jcondotta.domain.accountholder.valueobjects.DateOfBirth;
 import com.jcondotta.domain.accountholder.valueobjects.PassportNumber;
-import com.jcondotta.domain.bankaccount.valueobjects.AccountTypeValue;
-import com.jcondotta.domain.shared.valueobjects.CurrencyValue;
 import com.jcondotta.interfaces.rest.createbankaccount.model.CreateBankAccountRestRequest;
 import com.jcondotta.interfaces.rest.shared.CreateAccountHolderRestRequest;
 import org.mapstruct.Mapper;
@@ -17,8 +15,8 @@ public interface CreateBankAccountRequestControllerMapper {
 
     default CreateBankAccountCommand toUseCaseCommand(CreateBankAccountRestRequest restRequest) {
         return new CreateBankAccountCommand(
-            AccountTypeValue.of(restRequest.accountType()),
-            CurrencyValue.of(restRequest.currency()),
+            restRequest.accountType(),
+            restRequest.currency(),
             toCreateAccountHolderRequest(restRequest.accountHolder())
         );
     }

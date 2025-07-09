@@ -11,7 +11,7 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
@@ -56,8 +56,8 @@ public class AccountHolderDetailsRestResponse {
 
     @NotNull
     @Schema(description = "Date and time when the account holder was created.",
-            example = "2023-08-23T14:55:00Z",
+            example = "2023-08-23T14:55:00+02:00",
             requiredMode = RequiredMode.REQUIRED)
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "UTC")
-    private LocalDateTime createdAt;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
+    private ZonedDateTime createdAt;
 }

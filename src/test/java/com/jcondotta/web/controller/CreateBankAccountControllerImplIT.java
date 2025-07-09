@@ -1,9 +1,9 @@
 package com.jcondotta.web.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jcondotta.infrastructure.properties.BankAccountURIConfiguration;
 import com.jcondotta.container.LocalStackTestContainer;
 import com.jcondotta.helper.TestAccountHolderRequest;
+import com.jcondotta.infrastructure.properties.BankAccountURIConfiguration;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;

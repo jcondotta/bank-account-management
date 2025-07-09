@@ -2,7 +2,7 @@ package com.jcondotta.web.controller;
 
 import com.jcondotta.container.LocalStackTestContainer;
 import com.jcondotta.domain.bankaccount.enums.AccountType;
-import com.jcondotta.domain.shared.enums.Currency;
+import com.jcondotta.domain.bankaccount.enums.Currency;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;

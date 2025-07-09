@@ -3,18 +3,14 @@ package com.jcondotta.infrastructure.adapters.persistence.mapper;
 import com.jcondotta.domain.accountholder.model.AccountHolder;
 import com.jcondotta.domain.accountholder.valueobjects.AccountHolderId;
 import com.jcondotta.domain.accountholder.valueobjects.AccountHolderName;
-import com.jcondotta.domain.accountholder.valueobjects.AccountHolderTypeValue;
 import com.jcondotta.domain.accountholder.valueobjects.DateOfBirth;
-import com.jcondotta.domain.bankaccount.valueobjects.BankAccountId;
 import com.jcondotta.domain.accountholder.valueobjects.PassportNumber;
-import com.jcondotta.domain.shared.enums.EntityType;
+import com.jcondotta.domain.bankaccount.valueobjects.BankAccountId;
 import com.jcondotta.domain.shared.valueobjects.CreatedAt;
 import com.jcondotta.infrastructure.adapters.persistence.entity.AccountHolderKey;
 import com.jcondotta.infrastructure.adapters.persistence.entity.BankingEntity;
-import org.mapstruct.Context;
+import com.jcondotta.infrastructure.adapters.persistence.enums.EntityType;
 import org.mapstruct.Mapper;
-
-import java.time.Clock;
 
 @Mapper(componentModel = "spring")
 public interface AccountHolderEntityMapper {
@@ -29,8 +25,9 @@ public interface AccountHolderEntityMapper {
             .accountHolderName(accountHolder.accountHolderName().value())
             .passportNumber(accountHolder.passportNumber().value())
             .dateOfBirth(accountHolder.dateOfBirth().value())
-            .accountHolderType(accountHolder.accountHolderType().value())
+            .accountHolderType(accountHolder.accountHolderType())
             .createdAt(accountHolder.createdAt().value())
+            .createdAtZoneId(accountHolder.createdAt().zoneId())
             .build();
     }
 
@@ -40,8 +37,8 @@ public interface AccountHolderEntityMapper {
             AccountHolderName.of(accountHolderEntity.getAccountHolderName()),
             PassportNumber.of(accountHolderEntity.getPassportNumber()),
             DateOfBirth.of(accountHolderEntity.getDateOfBirth()),
-            AccountHolderTypeValue.of(accountHolderEntity.getAccountHolderType()),
-            CreatedAt.of(accountHolderEntity.getCreatedAt())
+            accountHolderEntity.getAccountHolderType(),
+            CreatedAt.of(accountHolderEntity.getCreatedAt(), accountHolderEntity.getCreatedAtZoneId())
         );
     }
 }

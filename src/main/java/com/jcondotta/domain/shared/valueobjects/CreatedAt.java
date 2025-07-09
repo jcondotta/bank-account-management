@@ -1,45 +1,52 @@
 package com.jcondotta.domain.shared.valueobjects;
 
-import com.jcondotta.domain.shared.ValidationErrors;
-
 import java.time.Clock;
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Objects;
 
-public record CreatedAt(LocalDateTime value) {
-
-    private static final Clock SYSTEM_UTC_CLOCK = Clock.systemUTC();
+public record CreatedAt(Instant value, ZoneId zoneId) {
 
     public CreatedAt {
-        Objects.requireNonNull(value, ValidationErrors.CREATED_AT_NOT_NULL);
-
-        if (value.isAfter(LocalDateTime.now(SYSTEM_UTC_CLOCK))) {
-            throw new IllegalArgumentException(ValidationErrors.CREATED_AT_IN_FUTURE);
-        }
+        Objects.requireNonNull(value, "value must not be null");
+        Objects.requireNonNull(zoneId, "zoneId must not be null");
     }
 
-    public static CreatedAt of(LocalDateTime value) {
-        return new CreatedAt(value);
-    }
-
-    public static CreatedAt now() {
-        return new CreatedAt(LocalDateTime.now(SYSTEM_UTC_CLOCK));
+    public static CreatedAt now(ZoneId zoneId) {
+        return new CreatedAt(Instant.now(), zoneId);
     }
 
     public static CreatedAt now(Clock clock) {
-        return new CreatedAt(LocalDateTime.now(clock));
+        return new CreatedAt(clock.instant(), clock.getZone());
     }
 
-    public boolean isBefore(CreatedAt other) {
-        return value.isBefore(other.value);
+    public static CreatedAt of(Instant instant, ZoneId zoneId) {
+        return new CreatedAt(instant, zoneId);
     }
 
-    public boolean isAfter(CreatedAt other) {
-        return value.isAfter(other.value);
+    public static CreatedAt of(ZonedDateTime zonedDateTime) {
+        return new CreatedAt(zonedDateTime.toInstant(), zonedDateTime.getZone());
+    }
+
+    public ZonedDateTime asZonedDateTime() {
+        return value.atZone(zoneId);
+    }
+
+    public ZonedDateTime asUTCZonedDateTime() {
+        return value.atZone(ZoneId.of("UTC"));
+    }
+
+    public String valueAsString() {
+        return value.toString(); // ex: "2025-07-05T12:00:00Z"
+    }
+
+    public String zoneIdAsString() {
+        return zoneId.getId(); // ex: "Europe/Madrid"
     }
 
     @Override
     public String toString() {
-        return value.toString();
+        return asZonedDateTime().toString(); // ex: "2025-07-05T14:00+02:00[Europe/Madrid]"
     }
 }

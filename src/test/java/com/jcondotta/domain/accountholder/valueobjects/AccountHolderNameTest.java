@@ -25,6 +25,13 @@ class AccountHolderNameTest {
             .isEqualTo(ACCOUNT_HOLDER_NAME_JEFFERSON);
     }
 
+    @Test
+    void shouldThrowIllegalArgumentException_whenNameIsNull() {
+        assertThatThrownBy(() -> AccountHolderName.of(null))
+            .isInstanceOf(NullPointerException.class)
+            .hasMessage(ValidationErrors.AccountHolder.NAME_NOT_NULL);
+    }
+
     @ParameterizedTest
     @ArgumentsSource(BlankValuesArgumentProvider.class)
     void shouldThrowIllegalArgumentException_whenNameIsBlank(String blankValue) {

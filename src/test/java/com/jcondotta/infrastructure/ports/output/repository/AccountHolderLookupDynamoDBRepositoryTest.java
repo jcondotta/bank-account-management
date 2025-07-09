@@ -1,13 +1,8 @@
 package com.jcondotta.infrastructure.ports.output.repository;
 
 import com.jcondotta.helper.TestBankAccountId;
-import com.jcondotta.infrastructure.adapters.persistence.entity.BankingEntity;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import software.amazon.awssdk.core.pagination.sync.SdkIterable;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
-import software.amazon.awssdk.enhanced.dynamodb.model.PageIterable;
 
 import java.util.UUID;
 

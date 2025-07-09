@@ -14,7 +14,6 @@ import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 
-import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,7 +25,6 @@ public class BankAccountLookupDynamoDBRepository implements BankAccountLookupRep
 
     private final DynamoDbTable<BankingEntity> bankingEntityDynamoDbTable;
     private final BankingEntityAssemblerMapper bankingEntityAssemblerMapper;
-    private final Clock clock;
 
     @Override
     public Optional<BankAccount> lookup(BankAccountId bankAccountId) {
@@ -47,7 +45,7 @@ public class BankAccountLookupDynamoDBRepository implements BankAccountLookupRep
         return Optional.ofNullable(findBankAccountEntity(bankingEntities))
             .map(bankAccountEntity -> {
                 var accountHolderEntities = findAccountHolderEntities(bankingEntities);
-                return bankingEntityAssemblerMapper.toBankAccount(bankAccountEntity, accountHolderEntities, clock);
+                return bankingEntityAssemblerMapper.toBankAccount(bankAccountEntity, accountHolderEntities);
             });
     }
 

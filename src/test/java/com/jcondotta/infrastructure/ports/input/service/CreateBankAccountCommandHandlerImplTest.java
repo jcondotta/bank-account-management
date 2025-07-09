@@ -21,7 +21,7 @@ class CreateBankAccountCommandHandlerImplTest {
     private static final String PASSPORT_NUMBER_JEFFERSON = TestAccountHolderRequest.JEFFERSON.getPassportNumber();
     private static final LocalDate DATE_OF_BIRTH_JEFFERSON = TestAccountHolderRequest.JEFFERSON.getDateOfBirth();
 
-    private static final Clock TEST_CLOCK_FIXED_INSTANT = TestClockConfig.testClockFixedInstant;
+    private static final Clock TEST_CLOCK_FIXED_INSTANT = TestClockConfig.FIXED_CLOCK;
     private static final Validator VALIDATOR = ValidatorTestFactory.getValidator();
 //    private static final BankingEntityMapper BANKING_ENTITY_MAPPER = BankingEntityMapper.INSTANCE;
 

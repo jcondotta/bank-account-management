@@ -2,9 +2,9 @@ package com.jcondotta.interfaces.rest.createbankaccount.model;
 
 import com.jcondotta.domain.bankaccount.enums.AccountType;
 import com.jcondotta.domain.shared.ValidationErrors;
-import com.jcondotta.domain.shared.enums.Currency;
-import com.jcondotta.interfaces.rest.shared.ValidatableRequest;
+import com.jcondotta.domain.bankaccount.enums.Currency;
 import com.jcondotta.interfaces.rest.shared.CreateAccountHolderRestRequest;
+import com.jcondotta.interfaces.rest.shared.ValidatableRequest;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;

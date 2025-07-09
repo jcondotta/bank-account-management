@@ -1,7 +1,7 @@
 package com.jcondotta.interfaces.rest.lookupbankaccount.controller;
 
 import com.jcondotta.application.ports.input.controller.BankAccountLookupController;
-import com.jcondotta.application.usecase.lookupbankaccount.BankAccountLookupUseCase;
+import com.jcondotta.application.usecase.lookupbankaccount.LookupBankAccountUseCase;
 import com.jcondotta.domain.bankaccount.valueobjects.BankAccountId;
 import com.jcondotta.interfaces.rest.lookupbankaccount.mapper.BankAccountLookupResponseControllerMapper;
 import com.jcondotta.interfaces.rest.lookupbankaccount.model.BankAccountLookupRestResponse;
@@ -23,7 +23,7 @@ public class BankAccountLookupControllerImpl implements BankAccountLookupControl
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BankAccountLookupControllerImpl.class);
 
-    private final BankAccountLookupUseCase bankAccountLookupUseCase;
+    private final LookupBankAccountUseCase lookupBankAccountUseCase;
     private final BankAccountLookupResponseControllerMapper responseControllerMapper;
 
     public ResponseEntity<BankAccountLookupRestResponse> findBankAccount(UUID bankAccountId) {
@@ -33,7 +33,7 @@ public class BankAccountLookupControllerImpl implements BankAccountLookupControl
                 .addKeyValue("bankAccountId", bankAccountId)
                 .log();
 
-        var bankAccountLookupResult = bankAccountLookupUseCase.lookup(BankAccountId.of(bankAccountId));
+        var bankAccountLookupResult = lookupBankAccountUseCase.lookup(BankAccountId.of(bankAccountId));
         return ResponseEntity.ok(responseControllerMapper.toResponse(bankAccountLookupResult));
     }
 }

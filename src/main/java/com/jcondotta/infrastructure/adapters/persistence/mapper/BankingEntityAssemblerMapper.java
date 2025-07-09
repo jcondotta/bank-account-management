@@ -5,7 +5,6 @@ import com.jcondotta.infrastructure.adapters.persistence.entity.BankingEntity;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.time.Clock;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -25,7 +24,7 @@ public class BankingEntityAssemblerMapper {
         return Stream.concat(Stream.of(root), holders.stream()).toList();
     }
 
-    public BankAccount toBankAccount(BankingEntity bankAccountEntity, List<BankingEntity> accountHolderEntities, Clock clock) {
-        return bankAccountEntityMapper.toDomain(bankAccountEntity, accountHolderEntities, accountHolderEntityMapper, clock);
+    public BankAccount toBankAccount(BankingEntity bankAccountEntity, List<BankingEntity> accountHolderEntities) {
+        return bankAccountEntityMapper.toDomain(bankAccountEntity, accountHolderEntities, accountHolderEntityMapper);
     }
 }

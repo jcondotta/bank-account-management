@@ -10,7 +10,7 @@ public record AccountHolderName(String value) {
     public static final int MAX_LENGTH = 255;
 
     public AccountHolderName {
-        Objects.requireNonNull(value, ValidationErrors.AccountHolder.NAME_NOT_BLANK);
+        Objects.requireNonNull(value, ValidationErrors.AccountHolder.NAME_NOT_NULL);
 
         var normalized = StringUtils.normalizeSpace(value).trim();
 

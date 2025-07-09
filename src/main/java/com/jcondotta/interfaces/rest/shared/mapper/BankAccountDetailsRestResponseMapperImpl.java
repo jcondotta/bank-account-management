@@ -2,7 +2,6 @@ package com.jcondotta.interfaces.rest.shared.mapper;
 
 import com.jcondotta.application.usecase.shared.model.AccountHolderDetails;
 import com.jcondotta.application.usecase.shared.model.BankAccountDetails;
-import com.jcondotta.interfaces.rest.createbankaccount.model.CreateBankAccountRestResponse;
 import com.jcondotta.interfaces.rest.shared.AccountHolderDetailsRestResponse;
 import com.jcondotta.interfaces.rest.shared.BankAccountDetailsRestResponse;
 import lombok.AllArgsConstructor;
@@ -21,11 +20,11 @@ public class BankAccountDetailsRestResponseMapperImpl implements BankAccountDeta
     public BankAccountDetailsRestResponse toResponse(BankAccountDetails bankAccount) {
         return BankAccountDetailsRestResponse.builder()
             .bankAccountId(bankAccount.bankAccountId().value())
-            .accountType(bankAccount.accountType().value())
-            .currency(bankAccount.currency().value())
+            .accountType(bankAccount.accountType())
+            .currency(bankAccount.currency())
             .iban(bankAccount.iban().value())
-            .dateOfOpening(bankAccount.dateOfOpening().value())
-            .status(bankAccount.accountStatus().value())
+            .dateOfOpening(bankAccount.dateOfOpening().asZonedDateTime())
+            .status(bankAccount.accountStatus())
             .accountHolders(toAccountHolderResponses(bankAccount.accountHolders()))
             .build();
     }

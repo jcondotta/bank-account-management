@@ -1,7 +1,7 @@
 package com.jcondotta.infrastructure.config.aws.dynamodb;
 
-import com.jcondotta.infrastructure.properties.BankingEntitiesDynamoDBTableConfig;
 import com.jcondotta.infrastructure.adapters.persistence.entity.BankingEntity;
+import com.jcondotta.infrastructure.properties.BankingEntitiesDynamoDBTableConfig;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;

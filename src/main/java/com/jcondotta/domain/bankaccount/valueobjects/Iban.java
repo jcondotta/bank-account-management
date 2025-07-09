@@ -1,10 +1,14 @@
 package com.jcondotta.domain.bankaccount.valueobjects;
 
 import com.jcondotta.domain.shared.ValidationErrors;
+import net.datafaker.Faker;
+import net.datafaker.providers.base.Finance;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.checkdigit.IBANCheckDigit;
 
 public record Iban(String value) {
+
+    private static final Finance fakerFinance = new Faker().finance();
 
     public Iban {
         if (StringUtils.isBlank(value)) {
@@ -18,6 +22,10 @@ public record Iban(String value) {
 
     public static Iban of(String value) {
         return new Iban(value);
+    }
+
+    public static Iban generate() {
+        return new Iban(fakerFinance.iban());
     }
 
     @Override

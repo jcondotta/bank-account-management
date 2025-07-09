@@ -3,8 +3,8 @@ package com.jcondotta.infrastructure.adapters.persistence.entity;
 import com.jcondotta.domain.accountholder.enums.AccountHolderType;
 import com.jcondotta.domain.bankaccount.enums.AccountStatus;
 import com.jcondotta.domain.bankaccount.enums.AccountType;
-import com.jcondotta.domain.shared.enums.Currency;
-import com.jcondotta.domain.shared.enums.EntityType;
+import com.jcondotta.domain.bankaccount.enums.Currency;
+import com.jcondotta.infrastructure.adapters.persistence.enums.EntityType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
@@ -14,8 +14,9 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSortKey;
 
+import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.UUID;
 
 @Setter
@@ -38,7 +39,8 @@ public class BankingEntity {
     private String passportNumber;
     private LocalDate dateOfBirth;
     private AccountHolderType accountHolderType;
-    private LocalDateTime createdAt;
+    private Instant createdAt;
+    private ZoneId createdAtZoneId;
 
     @DynamoDbPartitionKey
     @DynamoDbAttribute("partitionKey")
@@ -108,8 +110,13 @@ public class BankingEntity {
     }
 
     @DynamoDbAttribute("createdAt")
-    public LocalDateTime getCreatedAt() {
+    public Instant getCreatedAt() {
         return createdAt;
+    }
+
+    @DynamoDbAttribute("createdAtZoneId")
+    public ZoneId getCreatedAtZoneId() {
+        return createdAtZoneId;
     }
 
     public boolean isEntityTypeBankAccount(){

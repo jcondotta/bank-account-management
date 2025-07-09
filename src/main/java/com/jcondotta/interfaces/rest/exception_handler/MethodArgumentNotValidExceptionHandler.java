@@ -44,8 +44,8 @@ public class MethodArgumentNotValidExceptionHandler {
 
         ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
         problemDetail.setTitle(HttpStatus.BAD_REQUEST.getReasonPhrase());
-        problemDetail.setDetail("One or more fields are invalid.");
-        problemDetail.setType(URI.create("https://api.jcondotta.com/problems/validation-error"));
+//        problemDetail.setDetail("One or more fields are invalid.");
+//        problemDetail.setType(URI.create("https://api.jcondotta.com/problems/validation-error"));
         problemDetail.setInstance(URI.create(request.getRequestURI()));
         problemDetail.setProperty("timestamp", Instant.now(clock));
         problemDetail.setProperty("errors", errors);

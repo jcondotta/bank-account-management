@@ -22,8 +22,8 @@ public interface AddJointAccountHolderResponseControllerMapper {
             .accountHolderName(accountHolderDetails.accountHolderName().value())
             .passportNumber(accountHolderDetails.passportNumber().value())
             .dateOfBirth(accountHolderDetails.dateOfBirth().value())
-            .accountHolderType(accountHolderDetails.accountHolderType().value())
-            .createdAt(accountHolderDetails.createdAt().value())
+            .accountHolderType(accountHolderDetails.accountHolderType())
+            .createdAt(accountHolderDetails.createdAt().asZonedDateTime())
             .build();
     }
 }

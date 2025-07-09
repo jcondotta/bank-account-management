@@ -1,6 +1,13 @@
 package com.jcondotta.domain.bankaccount.enums;
 
 public enum AccountType {
-    SAVINGS,
-    CHECKING
+    SAVINGS, CHECKING;
+
+    public boolean isSavings() {
+        return this == SAVINGS;
+    }
+
+    public boolean isChecking() {
+        return this == CHECKING;
+    }
 }
